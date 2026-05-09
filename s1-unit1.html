@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>1단원 과학과 인류의 지속가능한 삶 - 과학 1</title>
+  <style>
+    body {
+      font-family: 'Pretendard', sans-serif;
+      max-width: 820px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.7;
+      background: #f9fafb;
+      color: #1f2937;
+    }
+    h1 { color: #2563eb; border-bottom: 3px solid #2563eb; padding-bottom: 8px; }
+    h2 { color: #1e40af; margin-top: 36px; }
+    h3 { color: #374151; margin-top: 24px; }
+
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 18px 0;
+      background: white;
+    }
+    .intro-card { background: #eff6ff; border-color: #bfdbfe; }
+
+    /* 상단/하단 네비게이션 */
+    .nav-btn {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #eff6ff;
+      color: #1e40af;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .nav-btn:hover { background: #2563eb; color: white; }
+
+    /* 학습 목표 박스 */
+    .goals {
+      background: #fef3c7;
+      border-left: 5px solid #f59e0b;
+      padding: 14px 18px;
+      border-radius: 6px;
+      margin: 14px 0;
+    }
+    .goals ul { margin: 6px 0; padding-left: 20px; }
+
+    /* 탐구 7단계 흐름 */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .step {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 8px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .step-num {
+      display: inline-block;
+      width: 28px; height: 28px; line-height: 28px;
+      background: #10b981; color: white;
+      border-radius: 50%;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .step-name { font-weight: 600; color: #065f46; }
+    .step-desc { font-size: 0.88em; color: #374151; margin-top: 6px; }
+
+    /* STS 관계 */
+    .sts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .sts-item {
+      padding: 16px;
+      border-radius: 10px;
+      color: white;
+    }
+    .sts-s { background: #2563eb; }
+    .sts-t { background: #7c3aed; }
+    .sts-soc { background: #db2777; }
+    .sts-item h4 { margin: 0 0 8px 0; }
+
+    /* 핵심 용어 */
+    .keyword {
+      display: inline-block;
+      padding: 2px 10px;
+      background: #fef3c7;
+      border-radius: 4px;
+      font-weight: 600;
+      color: #92400e;
+      margin: 2px;
+    }
+
+    /* 확인학습 */
+    details {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 10px 0;
+    }
+    details summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #1e40af;
+    }
+    details[open] summary { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <!-- 상단 네비게이션 -->
+  <div>
+    <a class="nav-btn" href="index.html">🏠 홈</a>
+    <a class="nav-btn" href="science1.html">← 과학 1</a>
+  </div>
+
+  <h1>1단원. 과학과 인류의 지속가능한 삶</h1>
+
+  <!-- 단원 소개 -->
+  <div class="card intro-card">
+    <p>이 단원에서는 <strong>과학적 탐구 방법</strong>의 7단계를 배우고,
+    과학(Science)·기술(Technology)·사회(Society)가 서로 어떻게 영향을 주고받는지를 이해합니다.
+    또한 <strong>안전하고 지속 가능한 발전</strong>을 위해 우리가 어떤 자세를 가져야 하는지 생각해 봅니다.</p>
+
+    <div class="goals">
+      <strong>🎯 학습 목표</strong>
+      <ul>
+        <li>과학적 탐구 방법의 단계를 순서대로 설명할 수 있다.</li>
+        <li>실험 보고서의 구성 요소를 알고 작성할 수 있다.</li>
+        <li>과학·기술·사회(STS)의 상호 관계를 사례를 들어 설명할 수 있다.</li>
+        <li>지속 가능한 발전을 위한 과학의 역할을 토의할 수 있다.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 1. 과학적 탐구 방법 -->
+  <h2>① 과학적 탐구 방법의 7단계</h2>
+  <p>과학자들은 다음과 같은 단계를 거쳐 새로운 사실을 밝혀냅니다.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-name">문제 인식</div>
+      <div class="step-desc">자연 현상에서 의문을 발견</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-name">가설 설정</div>
+      <div class="step-desc">예상되는 답을 세움</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-name">탐구 설계</div>
+      <div class="step-desc">변인 통제, 실험 계획</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-name">탐구 수행</div>
+      <div class="step-desc">실험·관찰·측정</div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-name">자료 해석</div>
+      <div class="step-desc">결과를 표·그래프로 정리</div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-name">결론 도출</div>
+      <div class="step-desc">가설 검증 및 결론</div>
+    </div>
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-name">보고서 작성</div>
+      <div class="step-desc">탐구 과정을 문서화</div>
+    </div>
+  </div>
+
+  <h3>🔑 핵심 용어</h3>
+  <p>
+    <span class="keyword">가설</span>
+    <span class="keyword">변인 통제</span>
+    <span class="keyword">조작 변인</span>
+    <span class="keyword">종속 변인</span>
+    <span class="keyword">통제 변인</span>
+  </p>
+
+  <!-- 2. 실험 보고서 -->
+  <h2>② 실험 보고서 작성하기</h2>
+  <div class="card">
+    <p>실험 보고서는 다음 항목을 포함합니다.</p>
+    <ol>
+      <li><strong>제목</strong> — 무엇을 알아보려 했는지 한 줄로</li>
+      <li><strong>목적/가설</strong> — 왜 이 실험을 했고, 무엇을 예상했는가</li>
+      <li><strong>준비물 및 방법</strong> — 다른 사람이 그대로 따라 할 수 있도록</li>
+      <li><strong>결과</strong> — 표·그래프·사진</li>
+      <li><strong>해석 및 결론</strong> — 결과가 가설과 일치하는가</li>
+      <li><strong>느낀 점·개선할 점</strong></li>
+    </ol>
+    <p>💡 <em>(여기에 보고서 양식 PDF 다운로드 링크를 추가하면 좋아요)</em></p>
+  </div>
+
+  <!-- 3. STS 관계 -->
+  <h2>③ 과학·기술·사회(STS)의 관계</h2>
+  <p>과학(S), 기술(T), 사회(Society)는 서로 영향을 주고받습니다.</p>
+
+  <div class="sts">
+    <div class="sts-item sts-s">
+      <h4>🔬 Science (과학)</h4>
+      <p>자연 현상의 원리와 법칙을 탐구</p>
+    </div>
+    <div class="sts-item sts-t">
+      <h4>⚙️ Technology (기술)</h4>
+      <p>과학 지식을 응용해 도구·제품 개발</p>
+    </div>
+    <div class="sts-item sts-soc">
+      <h4>🏘️ Society (사회)</h4>
+      <p>과학·기술이 사회·환경·윤리에 미치는 영향</p>
+    </div>
+  </div>
+
+  <h3>📌 사례로 살펴보기</h3>
+  <ul>
+    <li><strong>스마트폰</strong> — 반도체 과학 → 통신 기술 → 일상·문화 변화</li>
+    <li><strong>백신</strong> — 바이러스 연구 → 백신 제조 기술 → 공중보건 개선</li>
+    <li><strong>인공지능</strong> — 데이터 과학 → AI 기술 → 일자리·윤리 문제</li>
+  </ul>
+
+  <!-- 4. 지속 가능한 발전 -->
+  <h2>④ 안전하고 지속 가능한 발전</h2>
+  <div class="card">
+    <p><strong>지속 가능한 발전(Sustainable Development)</strong>이란
+    "미래 세대가 자신들의 필요를 충족할 수 있는 능력을 해치지 않으면서
+    현재 세대의 필요를 충족시키는 발전"을 말합니다.</p>
+
+    <h3>🌍 우리가 고민해야 할 문제</h3>
+    <ul>
+      <li>기후 변화와 탄소 중립</li>
+      <li>에너지 자원의 고갈</li>
+      <li>플라스틱 폐기물·미세플라스틱</li>
+      <li>생물 다양성 감소</li>
+    </ul>
+
+    <h3>🛡️ 과학 실험에서의 안전</h3>
+    <ul>
+      <li>실험 전 안전 수칙 숙지 (보안경·실험복·환기)</li>
+      <li>유해 물질 취급 시 주의사항</li>
+      <li>사고 발생 시 대처 요령</li>
+    </ul>
+  </div>
+
+  <!-- 5. 확인 학습 -->
+  <h2>⑤ 스스로 확인하기</h2>
+
+  <details>
+    <summary>Q1. 과학적 탐구의 7단계를 순서대로 적어보세요.</summary>
+    <p>문제 인식 → 가설 설정 → 탐구 설계 → 탐구 수행 → 자료 해석 → 결론 도출 → 보고서 작성</p>
+  </details>
+
+  <details>
+    <summary>Q2. STS는 무엇의 줄임말인가요?</summary>
+    <p>Science(과학), Technology(기술), Society(사회)</p>
+  </details>
+
+  <details>
+    <summary>Q3. 지속 가능한 발전이란 무엇인가요?</summary>
+    <p>미래 세대의 필요를 해치지 않으면서 현재 세대의 필요를 충족시키는 발전.</p>
+  </details>
+
+  <!-- 하단 네비게이션 -->
+  <div style="margin-top: 40px; text-align: center;">
+    <a class="nav-btn" href="science1.html">← 과학 1 단원 목록</a>
+    <a class="nav-btn" href="s1-unit2.html">2단원 →</a>
+  </div>
+</body>
+</html>
