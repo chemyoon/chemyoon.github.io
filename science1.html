@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>중1 - 과학 1</title>
+  <title>중학교 1학년 - 과학1</title>
   <style>
     body {
       font-family: 'Pretendard', sans-serif;
@@ -20,6 +20,37 @@
       margin: 15px 0;
       background: white;
     }
+    /* 단원 버튼 스타일 */
+    .units {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .unit-btn {
+      display: block;
+      padding: 16px 14px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      color: #1e40af;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .unit-btn:hover {
+      background: #2563eb;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(37,99,235,0.2);
+    }
+    .unit-num {
+      display: block;
+      font-size: 0.85em;
+      opacity: 0.7;
+      margin-bottom: 4px;
+    }
+    /* 홈으로 버튼 */
     .back-btn {
       display: inline-block;
       padding: 8px 16px;
@@ -37,11 +68,40 @@
   <a class="back-btn" href="index.html">← 홈으로</a>
 
   <h1>📘 과학 1</h1>
-  <p>중학교 1학년 과학 학습 자료입니다.</p>
+  <p>중학교 1학년 과학 단원별 학습 자료입니다.</p>
 
   <div class="card">
-    <h2>단원 목록</h2>
-    <p>여기에 단원별 내용을 추가하세요. (준비 중)</p>
+    <h2>📚 단원 목록</h2>
+    <div class="units">
+      <a class="unit-btn" href="s1-unit1.html">
+        <span class="unit-num">1단원</span>
+        과학과 인류의 지속가능한 삶
+      </a>
+      <a class="unit-btn" href="s1-unit2.html">
+        <span class="unit-num">2단원</span>
+        생물의 구성과 다양성
+      </a>
+      <a class="unit-btn" href="s1-unit3.html">
+        <span class="unit-num">3단원</span>
+        열
+      </a>
+      <a class="unit-btn" href="s1-unit4.html">
+        <span class="unit-num">4단원</span>
+        물질의 상태 변화
+      </a>
+      <a class="unit-btn" href="s1-unit5.html">
+        <span class="unit-num">5단원</span>
+        힘의 작용
+      </a>
+      <a class="unit-btn" href="s1-unit6.html">
+        <span class="unit-num">6단원</span>
+        기체의 성질
+      </a>
+      <a class="unit-btn" href="s1-unit7.html">
+        <span class="unit-num">7단원</span>
+        태양계
+      </a>
+    </div>
   </div>
 </body>
 </html>
