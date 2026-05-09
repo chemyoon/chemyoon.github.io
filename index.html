@@ -2,12 +2,49 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>과학 자습 지원 프로그램</title>
+  <title>나의 과학 학습 사이트</title>
   <style>
-    body { font-family: 'Pretendard', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.7; }
+    body {
+      font-family: 'Pretendard', sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.7;
+      background: #f9fafb;
+    }
     h1 { color: #2563eb; }
-    .card { border: 1px solid #ddd; border-radius: 10px; padding: 20px; margin: 15px 0; }
-    a { color: #2563eb; }
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 15px 0;
+      background: white;
+    }
+    /* 과목 버튼 스타일 */
+    .subjects {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .subject-btn {
+      display: block;
+      text-align: center;
+      padding: 14px 10px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      color: #1e40af;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .subject-btn:hover {
+      background: #2563eb;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(37,99,235,0.2);
+    }
   </style>
 </head>
 <body>
@@ -16,24 +53,23 @@
 
   <div class="card">
     <h2>📘 중학교 과학</h2>
-    <p>과학1</p>
-    <p>과학2</p>
-    <p>과학3</p>
+    <div class="subjects">
+      <a class="subject-btn" href="science1.html">과학 1</a>
+      <a class="subject-btn" href="science2.html">과학 2</a>
+      <a class="subject-btn" href="science3.html">과학 3</a>
+    </div>
   </div>
 
   <div class="card">
     <h2>📗 고등학교 과학</h2>
-    <p>통합과학</p>
-    <p>물리학</p>
-    <p>화학</p>
-    <p>생명과학</p>
-    <p>지구과학</p>
-    <p>융합과학</p>
-  </div>
-
-  <div class="card">
-    <h2>🧪 실험실</h2>
-    <p>온라인 시뮬레이션 모음 (준비 중)</p>
+    <div class="subjects">
+      <a class="subject-btn" href="integrated.html">통합과학</a>
+      <a class="subject-btn" href="physics.html">물리학</a>
+      <a class="subject-btn" href="chemistry.html">화학</a>
+      <a class="subject-btn" href="biology.html">생명과학</a>
+      <a class="subject-btn" href="earth.html">지구과학</a>
+      <a class="subject-btn" href="convergence.html">융합과학</a>
+    </div>
   </div>
 </body>
 </html>
