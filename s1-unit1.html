@@ -116,6 +116,75 @@
       color: #1e40af;
     }
     details[open] summary { margin-bottom: 10px; }
+        /* 클릭 가능한 용어 */
+    .keyword {
+      cursor: pointer;
+      user-select: none;
+    }
+    .keyword:hover {
+      background: #fde68a;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* 팝업 배경(어두운 막) */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    /* 팝업 본체 */
+    .modal {
+      background: white;
+      border-radius: 12px;
+      max-width: 480px;
+      width: 100%;
+      padding: 24px 28px;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      animation: modalIn 0.2s ease-out;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .modal h3 {
+      color: #1e40af;
+      margin: 0 0 12px 0;
+      padding-right: 30px;
+    }
+    .modal p {
+      margin: 0;
+      color: #374151;
+    }
+
+    /* X 닫기 버튼 */
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: #f3f4f6;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      color: #6b7280;
+      line-height: 1;
+    }
+    .modal-close:hover {
+      background: #ef4444;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -187,13 +256,27 @@
   </div>
 
   <h3>🔑 핵심 용어</h3>
-  <p>
-    <span class="keyword">가설</span>
-    <span class="keyword">변인 통제</span>
-    <span class="keyword">조작 변인</span>
-    <span class="keyword">종속 변인</span>
-    <span class="keyword">통제 변인</span>
-  </p>
+<p>
+  <span class="keyword"
+        data-term="가설"
+        data-def="어떤 자연 현상이나 문제에 대해 잠정적으로 세운 답. 실험을 통해 참인지 거짓인지 검증할 수 있어야 합니다.">가설</span>
+
+  <span class="keyword"
+        data-term="변인 통제"
+        data-def="실험에서 알아보고 싶은 조건 외의 다른 조건들을 모두 같게 유지하는 것. 결과의 원인을 명확히 하기 위해 반드시 필요합니다.">변인 통제</span>
+
+  <span class="keyword"
+        data-term="조작 변인"
+        data-def="실험에서 의도적으로 변화시키는 변인. 예: 식물 성장 실험에서 '빛의 양'을 다르게 한다면 빛의 양이 조작 변인입니다.">조작 변인</span>
+
+  <span class="keyword"
+        data-term="종속 변인"
+        data-def="조작 변인의 변화에 따라 달라지는 변인. 즉, 실험에서 측정하는 결과 값입니다. 예: 빛의 양에 따른 식물의 키.">종속 변인</span>
+
+  <span class="keyword"
+        data-term="통제 변인"
+        data-def="실험 동안 일정하게 유지하는 변인. 예: 식물 실험에서 물의 양·온도·흙의 종류 등을 똑같이 해야 합니다.">통제 변인</span>
+</p>
 
   <!-- 2. 실험 보고서 -->
   <h2>② 실험 보고서 작성하기</h2>
@@ -282,5 +365,44 @@
     <a class="nav-btn" href="science1.html">← 과학 1 단원 목록</a>
     <a class="nav-btn" href="s1-unit2.html">2단원 →</a>
   </div>
+    <!-- 용어 설명 팝업 -->
+  <div class="modal-overlay" id="termModal">
+    <div class="modal">
+      <button class="modal-close" id="modalCloseBtn" aria-label="닫기">✕</button>
+      <h3 id="modalTerm"></h3>
+      <p id="modalDef"></p>
+    </div>
+  </div>
+
+  <script>
+    const overlay = document.getElementById('termModal');
+    const termEl  = document.getElementById('modalTerm');
+    const defEl   = document.getElementById('modalDef');
+    const closeBtn = document.getElementById('modalCloseBtn');
+
+    // 모든 .keyword 요소에 클릭 이벤트 연결
+    document.querySelectorAll('.keyword').forEach(el => {
+      el.addEventListener('click', () => {
+        termEl.textContent = el.dataset.term;
+        defEl.textContent  = el.dataset.def;
+        overlay.classList.add('active');
+      });
+    });
+
+    // 닫기: X 버튼
+    closeBtn.addEventListener('click', () => {
+      overlay.classList.remove('active');
+    });
+
+    // 닫기: 배경(어두운 부분) 클릭
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.remove('active');
+    });
+
+    // 닫기: ESC 키
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') overlay.classList.remove('active');
+    });
+  </script>
 </body>
 </html>
