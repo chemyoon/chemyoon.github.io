@@ -12,6 +12,7 @@ h3 { color: #374151; margin-top: 20px; }
 .nav-btn { display: inline-block; padding: 8px 16px; background: #eff6ff; color: #1e40af; text-decoration: none; border-radius: 6px; font-weight: 600; margin-right: 6px; }
 .nav-btn:hover { background: #2563eb; color: white; }
 
+/* 토글 */
 .toggle-group { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
 .toggle-btn { padding: 10px 20px; background: #f3f4f6; border: 2px solid #d1d5db; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1em; color: #374151; transition: all 0.2s; }
 .toggle-btn:hover { background: #e5e7eb; }
@@ -20,17 +21,20 @@ h3 { color: #374151; margin-top: 20px; }
 .toggle-content.active { display: block; animation: fadeIn 0.3s; }
 @keyframes fadeIn { from{opacity:0}to{opacity:1} }
 
+/* 세포 캔버스 */
 .cell-scene { position: relative; width: 100%; max-width: 480px; margin: 12px auto 0; border-radius: 16px; background: #0f172a; }
 .cell-scene canvas { display: block; width: 100%; border-radius: 16px; }
 .cell-tooltip { position: absolute; background: rgba(15,23,42,0.92); color: #e2e8f0; font-size: 0.82em; padding: 8px 12px; border-radius: 8px; max-width: 170px; line-height: 1.5; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 20; border: 1px solid rgba(255,255,255,0.12); white-space: normal; }
 .cell-tooltip.show { opacity: 1; }
 .cell-tooltip strong { color: #7dd3fc; display: block; margin-bottom: 2px; }
 
+/* 구성 단계 */
 .stages { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: 16px 0; }
 .stage { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 10px 18px; border-radius: 8px; font-weight: 600; }
 .arrow { color: #10b981; font-weight: bold; font-size: 1.3em; }
 .stage-desc { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 8px 14px; margin: 4px 0; border-radius: 4px; font-size: 0.95em; }
 
+/* 생물 다양성 */
 .diversity-section { margin: 24px 0; }
 .diversity-root { display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg,#1e40af,#2563eb); color: white; padding: 18px 24px; border-radius: 14px; font-weight: 700; font-size: 1.15em; box-shadow: 0 4px 16px rgba(37,99,235,0.25); }
 .diversity-tree { display: flex; flex-direction: column; align-items: center; }
@@ -54,6 +58,14 @@ h3 { color: #374151; margin-top: 20px; }
 .variation-keyword { cursor: pointer; background: #fce7f3; color: #9d174d; font-weight: 700; padding: 1px 8px; border-radius: 4px; border-bottom: 2px solid #f9a8d4; }
 .variation-keyword:hover { background: #fbcfe8; }
 
+/* 피라미드 */
+.pyramid-scene { position: relative; width: 100%; max-width: 480px; margin: 12px auto 0; }
+.pyramid-scene canvas { display: block; width: 100%; }
+.pyr-tip { position: absolute; background: rgba(15,23,42,0.93); color: #e2e8f0; font-size: 0.82em; padding: 9px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.13); pointer-events: none; opacity: 0; transition: opacity 0.18s; max-width: 220px; line-height: 1.6; white-space: normal; z-index: 10; }
+.pyr-tip strong { color: #7dd3fc; display: block; margin-bottom: 3px; }
+.pyr-tip.show { opacity: 1; }
+
+/* 팝업 */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
 .modal-overlay.active { display: flex; }
 .modal { background: white; border-radius: 12px; max-width: 480px; width: 100%; padding: 24px 28px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3); animation: modalIn 0.2s; }
@@ -73,6 +85,7 @@ h3 { color: #374151; margin-top: 20px; }
 
 <h1>2단원. 생물의 구성과 다양성</h1>
 
+<!-- ① 세포의 구조 -->
 <h2>① 세포의 구조</h2>
 <div class="card">
   <p>동물 세포와 식물 세포의 구조적 차이를 살펴봅시다. 아래 버튼을 클릭하고, 소기관에 마우스를 올려보세요.</p>
@@ -82,20 +95,21 @@ h3 { color: #374151; margin-top: 20px; }
   </div>
   <div class="toggle-content" id="cell-animal">
     <h3>🐭 동물 세포</h3>
-    <div class="cell-scene" id="scene-animal">
+    <div class="cell-scene">
       <canvas id="canvas-animal"></canvas>
       <div class="cell-tooltip" id="tip-animal"></div>
     </div>
   </div>
   <div class="toggle-content" id="cell-plant">
     <h3>🌱 식물 세포</h3>
-    <div class="cell-scene" id="scene-plant">
+    <div class="cell-scene">
       <canvas id="canvas-plant"></canvas>
       <div class="cell-tooltip" id="tip-plant"></div>
     </div>
   </div>
 </div>
 
+<!-- ② 생물의 구성 단계 -->
 <h2>② 생물의 구성 단계</h2>
 <div class="card">
   <p>생물은 세포에서 시작해 점점 복잡한 단계로 구성됩니다.</p>
@@ -142,6 +156,7 @@ h3 { color: #374151; margin-top: 20px; }
   </div>
 </div>
 
+<!-- ③ 생물 다양성 -->
 <h2>③ 생물 다양성</h2>
 <div class="card">
   <p>카드에 마우스를 올리면 자세한 설명을 볼 수 있어요.</p>
@@ -183,12 +198,24 @@ h3 { color: #374151; margin-top: 20px; }
   </div>
 </div>
 
+<!-- ④ 생물의 분류 -->
+<h2>④ 생물의 분류</h2>
+<div class="card">
+  <p>생물은 공통된 특징에 따라 단계적으로 분류됩니다. 각 단계에 마우스를 올려보세요.</p>
+  <div class="pyramid-scene">
+    <canvas id="canvas-pyramid"></canvas>
+    <div class="pyr-tip" id="pyr-tip"></div>
+  </div>
+</div>
+
+<!-- 하단 네비게이션 -->
 <div style="margin-top:40px;text-align:center;">
   <a class="nav-btn" href="science1.html">← 과학 1 단원 목록</a>
   <a class="nav-btn" href="s1-unit1.html">← 1단원</a>
   <a class="nav-btn" href="s1-unit3.html">3단원 →</a>
 </div>
 
+<!-- 팝업 -->
 <div class="modal-overlay" id="termModal">
   <div class="modal">
     <button class="modal-close" id="modalCloseBtn">✕</button>
@@ -198,370 +225,356 @@ h3 { color: #374151; margin-top: 20px; }
 </div>
 
 <script>
-// ── DPR 고해상도 캔버스 설정 ──────────────────────────────
+// ── 공통 유틸 ──────────────────────────────────────────────
 function setupHiDPI(canvas, w, h) {
   const dpr = window.devicePixelRatio || 1;
-  canvas.width  = w * dpr;
-  canvas.height = h * dpr;
-  canvas.style.width  = w + 'px';
-  canvas.style.height = h + 'px';
+  canvas.width  = w * dpr; canvas.height = h * dpr;
+  canvas.style.width = w+'px'; canvas.style.height = h+'px';
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
   return ctx;
 }
 
-// ── 레이블 태그 ──────────────────────────────────────────
 function labelTag(ctx, x, y, text, color) {
-  const fsize = 13, pad = 6;
+  const fsize=13, pad=6;
   ctx.save();
   ctx.font = `bold ${fsize}px sans-serif`;
   const tw = ctx.measureText(text).width;
   ctx.fillStyle = 'rgba(15,23,42,0.78)';
   ctx.beginPath();
-  ctx.roundRect(x - tw/2 - pad, y - fsize/2 - pad + 2, tw + pad*2, fsize + pad*2 - 2, 6);
+  ctx.roundRect(x-tw/2-pad, y-fsize/2-pad+2, tw+pad*2, fsize+pad*2-2, 6);
   ctx.fill();
   ctx.strokeStyle = color.replace(/[\d.]+\)$/, '0.4)');
-  ctx.lineWidth = 1;
-  ctx.stroke();
+  ctx.lineWidth = 1; ctx.stroke();
   ctx.fillStyle = color;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(text, x, y + 1);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, y+1);
   ctx.restore();
 }
 
-// ── 호버 이벤트 ──────────────────────────────────────────
 function setupHover(canvas, tip, organelles, LW, LH) {
   canvas.addEventListener('mousemove', e => {
     const rect = canvas.getBoundingClientRect();
-    const mx = (e.clientX - rect.left) * (LW / rect.width);
-    const my = (e.clientY - rect.top)  * (LH / rect.height);
+    const mx = (e.clientX-rect.left)*(LW/rect.width);
+    const my = (e.clientY-rect.top)*(LH/rect.height);
     let found = null;
     for (const o of organelles) {
-      if (o.label && o.desc && o.hitTest(mx, my)) { found = o; break; }
+      if (o.label && o.desc && o.hitTest(mx,my)) { found=o; break; }
     }
     if (found) {
       tip.innerHTML = `<strong>${found.label}</strong>${found.desc}`;
-      let tx = (e.clientX - rect.left) + 12;
-      let ty = (e.clientY - rect.top)  - 65;
-      if (tx + 175 > rect.width) tx -= 190;
-      if (ty < 0) ty = (e.clientY - rect.top) + 14;
-      tip.style.left = tx + 'px';
-      tip.style.top  = ty + 'px';
-      tip.classList.add('show');
-      canvas.style.cursor = 'pointer';
+      let tx=(e.clientX-rect.left)+12, ty=(e.clientY-rect.top)-65;
+      if (tx+175>rect.width) tx-=190;
+      if (ty<0) ty=(e.clientY-rect.top)+14;
+      tip.style.left=tx+'px'; tip.style.top=ty+'px';
+      tip.classList.add('show'); canvas.style.cursor='pointer';
     } else {
-      tip.classList.remove('show');
-      canvas.style.cursor = 'default';
+      tip.classList.remove('show'); canvas.style.cursor='default';
     }
   });
-  canvas.addEventListener('mouseleave', () => tip.classList.remove('show'));
+  canvas.addEventListener('mouseleave', ()=>tip.classList.remove('show'));
 }
 
-// ══════════════════════════════════════════════════════════
-// 동물 세포
-// ══════════════════════════════════════════════════════════
-(function() {
-  const LW = 480, LH = 340; // 논리 크기 (세포막 레이블 잘림 방지 위해 높이 확보)
-  const canvas = document.getElementById('canvas-animal');
-  const tip    = document.getElementById('tip-animal');
-  const ctx    = setupHiDPI(canvas, LW, LH);
-  const CX = LW/2, CY = LH/2 + 10;
-  const RX = 168, RY = 128;
-  const organelles = [];
+// ── 동물 세포 ──────────────────────────────────────────────
+(function(){
+  const LW=480, LH=340;
+  const canvas=document.getElementById('canvas-animal');
+  const tip=document.getElementById('tip-animal');
+  const ctx=setupHiDPI(canvas,LW,LH);
+  const CX=LW/2, CY=LH/2+10, RX=168, RY=128;
+  const orgs=[];
 
-  function draw() {
-    ctx.clearRect(0, 0, LW, LH);
-    // 배경
-    const bg = ctx.createRadialGradient(CX, CY, 10, CX, CY, 220);
-    bg.addColorStop(0, '#1e293b'); bg.addColorStop(1, '#0f172a');
-    ctx.fillStyle = bg; ctx.fillRect(0, 0, LW, LH);
-    // 세포질 fill
-    const cf = ctx.createRadialGradient(CX-20, CY-25, 30, CX, CY, RX);
-    cf.addColorStop(0, 'rgba(125,211,252,0.07)'); cf.addColorStop(1, 'rgba(14,165,233,0)');
-    ctx.fillStyle = cf;
-    ctx.beginPath(); ctx.ellipse(CX, CY, RX, RY, 0, 0, Math.PI*2); ctx.fill();
-    // 세포막 글로우
-    ctx.save();
-    ctx.shadowColor = '#38bdf8'; ctx.shadowBlur = 18;
-    ctx.strokeStyle = 'rgba(125,211,252,0.55)'; ctx.lineWidth = 5;
-    ctx.beginPath(); ctx.ellipse(CX, CY, RX, RY, 0, 0, Math.PI*2); ctx.stroke();
-    ctx.restore();
-    organelles.forEach(o => o.draw());
-  }
+  const bg=ctx.createRadialGradient(CX,CY,10,CX,CY,220);
+  bg.addColorStop(0,'#1e293b'); bg.addColorStop(1,'#0f172a');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,LW,LH);
+
+  const cf=ctx.createRadialGradient(CX-20,CY-25,30,CX,CY,RX);
+  cf.addColorStop(0,'rgba(125,211,252,0.07)'); cf.addColorStop(1,'rgba(14,165,233,0)');
+  ctx.fillStyle=cf; ctx.beginPath(); ctx.ellipse(CX,CY,RX,RY,0,0,Math.PI*2); ctx.fill();
+
+  ctx.save(); ctx.shadowColor='#38bdf8'; ctx.shadowBlur=18;
+  ctx.strokeStyle='rgba(125,211,252,0.55)'; ctx.lineWidth=5;
+  ctx.beginPath(); ctx.ellipse(CX,CY,RX,RY,0,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
 
   // 핵
-  organelles.push({
+  orgs.push({
     label:'핵', desc:'유전물질(DNA)를 포함하고, 세포의 생명활동을 조절한다.',
-    rx:50, ry:42,
+    rx:50,ry:42,
     get x(){return CX;}, get y(){return CY;},
     hitTest(mx,my){return ((mx-this.x)/this.rx)**2+((my-this.y)/this.ry)**2<1;},
     draw(){
-      const x=this.x, y=this.y;
-      ctx.save();
-      ctx.shadowColor='#a78bfa'; ctx.shadowBlur=22;
+      const x=this.x,y=this.y;
+      ctx.save(); ctx.shadowColor='#a78bfa'; ctx.shadowBlur=22;
       const ng=ctx.createRadialGradient(x-14,y-14,5,x,y,50);
       ng.addColorStop(0,'#c4b5fd'); ng.addColorStop(0.55,'#7c3aed'); ng.addColorStop(1,'#4c1d95');
-      ctx.fillStyle=ng;
-      ctx.beginPath(); ctx.ellipse(x,y,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
-      ctx.shadowBlur=0;
-      ctx.strokeStyle='rgba(196,181,253,0.5)'; ctx.lineWidth=1.8;
+      ctx.fillStyle=ng; ctx.beginPath(); ctx.ellipse(x,y,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0; ctx.strokeStyle='rgba(196,181,253,0.5)'; ctx.lineWidth=1.8;
       ctx.beginPath(); ctx.ellipse(x,y,this.rx,this.ry,0,0,Math.PI*2); ctx.stroke();
-      ctx.fillStyle='rgba(76,29,149,0.6)';
-      ctx.beginPath(); ctx.ellipse(x-9,y-8,10,8,-0.4,0,Math.PI*2); ctx.fill();
-      ctx.restore();
-      labelTag(ctx, x, y+2, '핵', 'rgba(237,233,254,0.95)');
+      ctx.fillStyle='rgba(76,29,149,0.6)'; ctx.beginPath(); ctx.ellipse(x-9,y-8,10,8,-0.4,0,Math.PI*2); ctx.fill();
+      ctx.restore(); labelTag(ctx,x,y+2,'핵','rgba(237,233,254,0.95)');
     }
   });
 
-  // 마이토콘드리아 ×2
-  [{x:CX-108, y:CY-52, a:-0.4}, {x:CX+100, y:CY+52, a:0.3}].forEach(cfg => {
-    organelles.push({
+  // 마이토콘드리아 x2
+  [{x:CX-108,y:CY-52,a:-0.4},{x:CX+100,y:CY+52,a:0.3}].forEach(cfg=>{
+    orgs.push({
       label:'마이토콘드리아', desc:'세포 내 양분을 분해하여 에너지를 생산한다.',
-      x:cfg.x, y:cfg.y, angle:cfg.a, rx:33, ry:14,
+      x:cfg.x,y:cfg.y,angle:cfg.a,rx:33,ry:14,
       hitTest(mx,my){
-        const c=Math.cos(-this.angle), s=Math.sin(-this.angle);
-        const dx=mx-this.x, dy=my-this.y;
+        const c=Math.cos(-this.angle),s=Math.sin(-this.angle),dx=mx-this.x,dy=my-this.y;
         return ((c*dx-s*dy)/this.rx)**2+((s*dx+c*dy)/this.ry)**2<1;
       },
       draw(){
-        ctx.save();
-        ctx.translate(this.x,this.y); ctx.rotate(this.angle);
+        ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.angle);
         ctx.shadowColor='#fb923c'; ctx.shadowBlur=12;
         const mg=ctx.createRadialGradient(-9,-4,2,0,0,33);
         mg.addColorStop(0,'#fed7aa'); mg.addColorStop(0.5,'#f97316'); mg.addColorStop(1,'#7c2d12');
-        ctx.fillStyle=mg;
-        ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
-        ctx.shadowBlur=0;
-        ctx.strokeStyle='rgba(254,215,170,0.35)'; ctx.lineWidth=1;
-        [-10,0,10].forEach(ox=>{
-          ctx.beginPath(); ctx.moveTo(ox,-this.ry+3);
-          ctx.bezierCurveTo(ox+4,0,ox-4,0,ox,this.ry-3); ctx.stroke();
-        });
+        ctx.fillStyle=mg; ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur=0; ctx.strokeStyle='rgba(254,215,170,0.35)'; ctx.lineWidth=1;
+        [-10,0,10].forEach(ox=>{ctx.beginPath();ctx.moveTo(ox,-this.ry+3);ctx.bezierCurveTo(ox+4,0,ox-4,0,ox,this.ry-3);ctx.stroke();});
         ctx.strokeStyle='rgba(253,186,116,0.45)'; ctx.lineWidth=1.5;
         ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.stroke();
-        ctx.restore();
-        labelTag(ctx, this.x, this.y - this.ry - 14, '마이토콘드리아', 'rgba(253,186,116,0.95)');
+        ctx.restore(); labelTag(ctx,this.x,this.y-this.ry-14,'마이토콘드리아','rgba(253,186,116,0.95)');
       }
     });
   });
 
-  // 세포막 레이블 (상단 중앙, 잘리지 않도록 y 여유)
-  organelles.push({
+  // 세포막
+  orgs.push({
     label:'세포막', desc:'세포 내부를 보호하며, 세포 안과 밖의 물질 이동에 관여한다.',
-    hitTest(mx,my){
-      const dx=mx-CX, dy=my-CY, d=(dx/RX)**2+(dy/RY)**2;
-      return d>0.78&&d<1.28;
-    },
-    draw(){ labelTag(ctx, CX, CY - RY - 22, '세포막', 'rgba(125,211,252,0.95)'); }
+    hitTest(mx,my){const dx=mx-CX,dy=my-CY,d=(dx/RX)**2+(dy/RY)**2;return d>0.78&&d<1.28;},
+    draw(){labelTag(ctx,CX,CY-RY-22,'세포막','rgba(125,211,252,0.95)');}
   });
 
-  draw();
-  setupHover(canvas, tip, organelles, LW, LH);
+  orgs.forEach(o=>o.draw());
+  setupHover(canvas,tip,orgs,LW,LH);
 })();
 
-// ══════════════════════════════════════════════════════════
-// 식물 세포
-// ══════════════════════════════════════════════════════════
-(function() {
-  const LW = 480, LH = 360;
-  const canvas = document.getElementById('canvas-plant');
-  const tip    = document.getElementById('tip-plant');
-  const ctx    = setupHiDPI(canvas, LW, LH);
-  const CX = LW/2, CY = LH/2 + 10;
+// ── 식물 세포 ──────────────────────────────────────────────
+(function(){
+  const LW=480, LH=360;
+  const canvas=document.getElementById('canvas-plant');
+  const tip=document.getElementById('tip-plant');
+  const ctx=setupHiDPI(canvas,LW,LH);
+  const CX=LW/2, CY=LH/2+10;
+  const WALL_W=356,WALL_H=288,WALL_R=10,WALL_T=8;
+  const MEM_T=5,MEM_W=WALL_W-WALL_T*2,MEM_H=WALL_H-WALL_T*2,MEM_R=Math.max(WALL_R-WALL_T,4);
+  const orgs=[];
 
-  // 세포벽/세포막: 직사각형 두 겹, 맞닿은 구조
-  // 세포벽(바깥) 두께 8px, 세포막(안) 두께 5px → 맞닿게 배치
-  const WALL_W = 356, WALL_H = 288; // 세포벽 사각형 크기
-  const WALL_R = 10;                 // 모서리 반경
-  const WALL_T = 8;                  // 세포벽 두께
-  const MEM_T  = 5;                  // 세포막 두께
-  // 세포막은 세포벽 바로 안쪽에 맞닿음
-  const MEM_W  = WALL_W - WALL_T*2;
-  const MEM_H  = WALL_H - WALL_T*2;
-  const MEM_R  = Math.max(WALL_R - WALL_T, 4);
-  const organelles = [];
+  const bg=ctx.createRadialGradient(CX,CY,10,CX,CY,240);
+  bg.addColorStop(0,'#1e293b'); bg.addColorStop(1,'#0f172a');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,LW,LH);
 
-  function draw() {
-    ctx.clearRect(0, 0, LW, LH);
-    const bg = ctx.createRadialGradient(CX, CY, 10, CX, CY, 240);
-    bg.addColorStop(0, '#1e293b'); bg.addColorStop(1, '#0f172a');
-    ctx.fillStyle = bg; ctx.fillRect(0, 0, LW, LH);
+  const cf=ctx.createRadialGradient(CX-20,CY-25,30,CX,CY,MEM_W/2);
+  cf.addColorStop(0,'rgba(134,239,172,0.07)'); cf.addColorStop(1,'rgba(22,163,74,0)');
+  ctx.fillStyle=cf; ctx.beginPath(); ctx.roundRect(CX-MEM_W/2,CY-MEM_H/2,MEM_W,MEM_H,MEM_R); ctx.fill();
 
-    // 세포질 fill
-    const cf = ctx.createRadialGradient(CX-20, CY-25, 30, CX, CY, MEM_W/2);
-    cf.addColorStop(0, 'rgba(134,239,172,0.07)'); cf.addColorStop(1, 'rgba(22,163,74,0)');
-    ctx.fillStyle = cf;
-    ctx.beginPath();
-    ctx.roundRect(CX - MEM_W/2, CY - MEM_H/2, MEM_W, MEM_H, MEM_R);
-    ctx.fill();
+  ctx.save(); ctx.shadowColor='#fbbf24'; ctx.shadowBlur=16;
+  ctx.strokeStyle='rgba(251,191,36,0.85)'; ctx.lineWidth=WALL_T;
+  ctx.beginPath(); ctx.roundRect(CX-WALL_W/2,CY-WALL_H/2,WALL_W,WALL_H,WALL_R); ctx.stroke(); ctx.restore();
 
-    // 세포벽 (바깥 사각형, 노란 글로우)
-    ctx.save();
-    ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 16;
-    ctx.strokeStyle = 'rgba(251,191,36,0.85)'; ctx.lineWidth = WALL_T;
-    ctx.beginPath();
-    ctx.roundRect(CX - WALL_W/2, CY - WALL_H/2, WALL_W, WALL_H, WALL_R);
-    ctx.stroke();
-    ctx.restore();
-
-    // 세포막 (세포벽 바로 안쪽, 초록 글로우, 맞닿음)
-    ctx.save();
-    ctx.shadowColor = '#4ade80'; ctx.shadowBlur = 12;
-    ctx.strokeStyle = 'rgba(134,239,172,0.85)'; ctx.lineWidth = MEM_T;
-    ctx.beginPath();
-    ctx.roundRect(CX - MEM_W/2, CY - MEM_H/2, MEM_W, MEM_H, MEM_R);
-    ctx.stroke();
-    ctx.restore();
-
-    organelles.forEach(o => o.draw());
-  }
+  ctx.save(); ctx.shadowColor='#4ade80'; ctx.shadowBlur=12;
+  ctx.strokeStyle='rgba(134,239,172,0.85)'; ctx.lineWidth=MEM_T;
+  ctx.beginPath(); ctx.roundRect(CX-MEM_W/2,CY-MEM_H/2,MEM_W,MEM_H,MEM_R); ctx.stroke(); ctx.restore();
 
   // 핵
-  organelles.push({
+  orgs.push({
     label:'핵', desc:'유전물질(DNA)를 포함하고, 세포의 생명활동을 조절한다.',
-    rx:50, ry:42,
+    rx:50,ry:42,
     get x(){return CX;}, get y(){return CY+8;},
     hitTest(mx,my){return ((mx-this.x)/this.rx)**2+((my-this.y)/this.ry)**2<1;},
     draw(){
-      const x=this.x, y=this.y;
-      ctx.save();
-      ctx.shadowColor='#a78bfa'; ctx.shadowBlur=22;
+      const x=this.x,y=this.y;
+      ctx.save(); ctx.shadowColor='#a78bfa'; ctx.shadowBlur=22;
       const ng=ctx.createRadialGradient(x-14,y-14,5,x,y,50);
       ng.addColorStop(0,'#c4b5fd'); ng.addColorStop(0.55,'#7c3aed'); ng.addColorStop(1,'#4c1d95');
-      ctx.fillStyle=ng;
-      ctx.beginPath(); ctx.ellipse(x,y,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
-      ctx.shadowBlur=0;
-      ctx.strokeStyle='rgba(196,181,253,0.5)'; ctx.lineWidth=1.8;
+      ctx.fillStyle=ng; ctx.beginPath(); ctx.ellipse(x,y,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0; ctx.strokeStyle='rgba(196,181,253,0.5)'; ctx.lineWidth=1.8;
       ctx.beginPath(); ctx.ellipse(x,y,this.rx,this.ry,0,0,Math.PI*2); ctx.stroke();
-      ctx.fillStyle='rgba(76,29,149,0.6)';
-      ctx.beginPath(); ctx.ellipse(x-9,y-8,10,8,-0.4,0,Math.PI*2); ctx.fill();
-      ctx.restore();
-      labelTag(ctx, x, y+2, '핵', 'rgba(237,233,254,0.95)');
+      ctx.fillStyle='rgba(76,29,149,0.6)'; ctx.beginPath(); ctx.ellipse(x-9,y-8,10,8,-0.4,0,Math.PI*2); ctx.fill();
+      ctx.restore(); labelTag(ctx,x,y+2,'핵','rgba(237,233,254,0.95)');
     }
   });
 
   // 마이토콘드리아
-  organelles.push({
+  orgs.push({
     label:'마이토콘드리아', desc:'세포 내 양분을 분해하여 에너지를 생산한다.',
-    x:CX-108, y:CY+64, angle:-0.3, rx:30, ry:13,
+    x:CX-108,y:CY+64,angle:-0.3,rx:30,ry:13,
     hitTest(mx,my){
-      const c=Math.cos(-this.angle),s=Math.sin(-this.angle);
-      const dx=mx-this.x,dy=my-this.y;
+      const c=Math.cos(-this.angle),s=Math.sin(-this.angle),dx=mx-this.x,dy=my-this.y;
       return ((c*dx-s*dy)/this.rx)**2+((s*dx+c*dy)/this.ry)**2<1;
     },
     draw(){
-      ctx.save();
-      ctx.translate(this.x,this.y); ctx.rotate(this.angle);
+      ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.angle);
       ctx.shadowColor='#fb923c'; ctx.shadowBlur=10;
       const mg=ctx.createRadialGradient(-7,-3,2,0,0,30);
       mg.addColorStop(0,'#fed7aa'); mg.addColorStop(0.5,'#f97316'); mg.addColorStop(1,'#7c2d12');
-      ctx.fillStyle=mg;
-      ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
-      ctx.shadowBlur=0;
-      ctx.strokeStyle='rgba(254,215,170,0.35)'; ctx.lineWidth=1;
-      [-9,0,9].forEach(ox=>{
-        ctx.beginPath(); ctx.moveTo(ox,-this.ry+3);
-        ctx.bezierCurveTo(ox+4,0,ox-4,0,ox,this.ry-3); ctx.stroke();
-      });
+      ctx.fillStyle=mg; ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0; ctx.strokeStyle='rgba(254,215,170,0.35)'; ctx.lineWidth=1;
+      [-9,0,9].forEach(ox=>{ctx.beginPath();ctx.moveTo(ox,-this.ry+3);ctx.bezierCurveTo(ox+4,0,ox-4,0,ox,this.ry-3);ctx.stroke();});
       ctx.strokeStyle='rgba(253,186,116,0.45)'; ctx.lineWidth=1.3;
       ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.stroke();
-      ctx.restore();
-      labelTag(ctx, this.x, this.y+this.ry+16, '마이토콘드리아', 'rgba(253,186,116,0.95)');
+      ctx.restore(); labelTag(ctx,this.x,this.y+this.ry+16,'마이토콘드리아','rgba(253,186,116,0.95)');
     }
   });
 
-  // 엽록체 ×2
-  [{x:CX+96, y:CY-66, a:0.3}, {x:CX-88, y:CY-68, a:-0.2}].forEach(cfg => {
-    organelles.push({
+  // 엽록체 x2
+  [{x:CX+96,y:CY-66,a:0.3},{x:CX-88,y:CY-68,a:-0.2}].forEach(cfg=>{
+    orgs.push({
       label:'엽록체', desc:'햇빛을 받아 광합성을 하며, 양분을 합성하여 에너지를 저장한다.',
-      x:cfg.x, y:cfg.y, angle:cfg.a, rx:34, ry:16,
+      x:cfg.x,y:cfg.y,angle:cfg.a,rx:34,ry:16,
       hitTest(mx,my){
-        const c=Math.cos(-this.angle),s=Math.sin(-this.angle);
-        const dx=mx-this.x,dy=my-this.y;
+        const c=Math.cos(-this.angle),s=Math.sin(-this.angle),dx=mx-this.x,dy=my-this.y;
         return ((c*dx-s*dy)/this.rx)**2+((s*dx+c*dy)/this.ry)**2<1;
       },
       draw(){
-        ctx.save();
-        ctx.translate(this.x,this.y); ctx.rotate(this.angle);
+        ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.angle);
         ctx.shadowColor='#4ade80'; ctx.shadowBlur=14;
         const cg=ctx.createRadialGradient(-10,-5,2,0,0,34);
         cg.addColorStop(0,'#86efac'); cg.addColorStop(0.5,'#16a34a'); cg.addColorStop(1,'#14532d');
-        ctx.fillStyle=cg;
-        ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
-        ctx.shadowBlur=0;
-        ctx.strokeStyle='rgba(187,247,208,0.4)'; ctx.lineWidth=1.2;
-        [-18,-6,6,18].forEach(ox=>{
-          ctx.beginPath(); ctx.moveTo(ox,-this.ry+4); ctx.lineTo(ox,this.ry-4); ctx.stroke();
-        });
+        ctx.fillStyle=cg; ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur=0; ctx.strokeStyle='rgba(187,247,208,0.4)'; ctx.lineWidth=1.2;
+        [-18,-6,6,18].forEach(ox=>{ctx.beginPath();ctx.moveTo(ox,-this.ry+4);ctx.lineTo(ox,this.ry-4);ctx.stroke();});
         ctx.strokeStyle='rgba(134,239,172,0.45)'; ctx.lineWidth=1.4;
         ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.stroke();
-        ctx.restore();
-        labelTag(ctx, this.x, this.y-this.ry-14, '엽록체', 'rgba(134,239,172,0.95)');
+        ctx.restore(); labelTag(ctx,this.x,this.y-this.ry-14,'엽록체','rgba(134,239,172,0.95)');
       }
     });
   });
 
-  // 세포막 히트 영역 (안쪽 사각형 테두리 근처)
-  organelles.push({
+  // 세포막
+  orgs.push({
     label:'세포막', desc:'세포 내부를 보호하며, 세포 안과 밖의 물질 이동에 관여한다.',
     hitTest(mx,my){
-      const hw=MEM_W/2, hh=MEM_H/2;
-      const ax=Math.abs(mx-CX), ay=Math.abs(my-CY);
-      const inside = ax<hw && ay<hh;
-      const innerHW = hw - MEM_T*2, innerHH = hh - MEM_T*2;
-      const deepInside = ax<innerHW && ay<innerHH;
-      return inside && !deepInside;
+      const hw=MEM_W/2,hh=MEM_H/2,ax=Math.abs(mx-CX),ay=Math.abs(my-CY);
+      return ax<hw&&ay<hh&&!(ax<hw-MEM_T*2&&ay<hh-MEM_T*2);
     },
-    draw(){ labelTag(ctx, CX+50, CY - MEM_H/2 - 20, '세포막', 'rgba(134,239,172,0.95)'); }
+    draw(){labelTag(ctx,CX+60,CY-MEM_H/2-20,'세포막','rgba(134,239,172,0.95)');}
   });
 
-  // 세포벽 히트 영역 (바깥 사각형 테두리 근처)
-  organelles.push({
+  // 세포벽
+  orgs.push({
     label:'세포벽', desc:'세포막 밖에 존재하며, 셀룰로스로 구성되어 딱딱하고 세포를 보호한다.',
     hitTest(mx,my){
-      const hw=WALL_W/2, hh=WALL_H/2;
-      const ax=Math.abs(mx-CX), ay=Math.abs(my-CY);
-      const inside = ax<hw && ay<hh;
-      const innerHW = hw - WALL_T*2, innerHH = hh - WALL_T*2;
-      const deepInside = ax<innerHW && ay<innerHH;
-      return inside && !deepInside;
+      const hw=WALL_W/2,hh=WALL_H/2,ax=Math.abs(mx-CX),ay=Math.abs(my-CY);
+      return ax<hw&&ay<hh&&!(ax<hw-WALL_T*2&&ay<hh-WALL_T*2);
     },
-    draw(){ labelTag(ctx, CX-50, CY - WALL_H/2 - 20, '세포벽', 'rgba(251,191,36,0.95)'); }
+    draw(){labelTag(ctx,CX-60,CY-WALL_H/2-20,'세포벽','rgba(251,191,36,0.95)');}
   });
 
-  draw();
-  setupHover(canvas, tip, organelles, LW, LH);
+  orgs.forEach(o=>o.draw());
+  setupHover(canvas,tip,orgs,LW,LH);
+})();
+
+// ── 분류 피라미드 ──────────────────────────────────────────
+(function(){
+  const LW=480, LH=440;
+  const canvas=document.getElementById('canvas-pyramid');
+  const tip=document.getElementById('pyr-tip');
+  const ctx=setupHiDPI(canvas,LW,LH);
+
+  const levels=[
+    {label:'종', emojis:['🐱'], color:'#7c3aed',
+     tip:'<strong>종 (Species)</strong>두 생물의 자손이 번식 능력이 있을 경우, 같은 종에 해당한다.'},
+    {label:'속', emojis:['🐱','🐈'], color:'#4f46e5',
+     tip:'<strong>속 (Genus)</strong>'},
+    {label:'과', emojis:['🐱','🐈','🐯','🦁'], color:'#1d4ed8',
+     tip:'<strong>과 (Family)</strong>'},
+    {label:'목', emojis:['🐱','🐈','🐯','🦁','🦝','🐻'], color:'#0369a1',
+     tip:'<strong>목 (Order)</strong>'},
+    {label:'강', emojis:['🐱','🐈','🐯','🦁','🦝','🐻','🐒','🧑'], color:'#047857',
+     tip:'<strong>강 (Class)</strong>'},
+    {label:'문', emojis:['🐱','🐈','🐯','🦁','🦝','🐻','🐒','🧑','🦎','🦆'], color:'#b45309',
+     tip:'<strong>문 (Phylum)</strong>'},
+    {label:'계', emojis:['🐱','🐈','🐯','🦁','🦝','🐻','🐒','🧑','🦎','🦆','🐌','⭐'], color:'#b91c1c',
+     tip:'<strong>계 (Kingdom)</strong>'},
+  ];
+
+  const N=levels.length,TOP_Y=20,BOT_Y=LH-20,BOT_X0=20,BOT_X1=LW-20,TIP_X=LW/2,TOTAL_H=BOT_Y-TOP_Y;
+  const rowY = i => TOP_Y+(TOTAL_H/N)*i;
+  const triX = y => { const t=(y-TOP_Y)/TOTAL_H; return [TIP_X+(BOT_X0-TIP_X)*t, TIP_X+(BOT_X1-TIP_X)*t]; };
+  const rowTrap = i => { const y0=rowY(i),y1=rowY(i+1),[l0,r0]=triX(y0),[l1,r1]=triX(y1); return {y0,y1,l0,r0,l1,r1}; };
+
+  // 배경
+  ctx.fillStyle='#f9fafb'; ctx.fillRect(0,0,LW,LH);
+
+  levels.forEach((lv,i)=>{
+    const {y0,y1,l0,r0,l1,r1}=rowTrap(i);
+    const midY=(y0+y1)/2, rowH=y1-y0;
+    const grad=ctx.createLinearGradient(0,y0,0,y1);
+    grad.addColorStop(0,lv.color+'dd'); grad.addColorStop(1,lv.color+'aa');
+    ctx.fillStyle=grad;
+    ctx.beginPath();
+    if(i===0){ctx.moveTo(TIP_X,TOP_Y);ctx.lineTo(r1,y1);ctx.lineTo(l1,y1);}
+    else{ctx.moveTo(l0,y0);ctx.lineTo(r0,y0);ctx.lineTo(r1,y1);ctx.lineTo(l1,y1);}
+    ctx.closePath(); ctx.fill();
+    if(i>0){
+      ctx.save(); ctx.strokeStyle='#f9fafb'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(l0,y0); ctx.lineTo(r0,y0); ctx.stroke(); ctx.restore();
+    }
+    const gap=Math.min(28,(r1-l1-12)/lv.emojis.length);
+    const fontSize=Math.max(14,Math.min(26,gap*0.82,rowH*0.62));
+    ctx.font=`${fontSize}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    const totalW=gap*(lv.emojis.length-1), startX=(l1+r1)/2-totalW/2;
+    lv.emojis.forEach((em,j)=>ctx.fillText(em,startX+j*gap,midY));
+  });
+
+  ctx.save(); ctx.strokeStyle='#1e293b'; ctx.lineWidth=3.5; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(TIP_X,TOP_Y); ctx.lineTo(BOT_X1,BOT_Y); ctx.lineTo(BOT_X0,BOT_Y);
+  ctx.closePath(); ctx.stroke(); ctx.restore();
+
+  // 호버
+  canvas.addEventListener('mousemove', e=>{
+    const rect=canvas.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)*(LW/rect.width);
+    const my=(e.clientY-rect.top)*(LH/rect.height);
+    let found=-1;
+    for(let i=0;i<N;i++){
+      const {y0,y1}=rowTrap(i);
+      if(my<y0||my>y1) continue;
+      const [lx,rx]=triX(my);
+      if(mx>=lx&&mx<=rx){found=i;break;}
+    }
+    if(found!==-1){
+      tip.innerHTML=levels[found].tip;
+      let tx=e.clientX-rect.left+14, ty=e.clientY-rect.top-56;
+      if(tx+225>rect.width) tx=e.clientX-rect.left-235;
+      if(ty<0) ty=e.clientY-rect.top+14;
+      tip.style.left=tx+'px'; tip.style.top=ty+'px';
+      tip.classList.add('show'); canvas.style.cursor='pointer';
+    } else {
+      tip.classList.remove('show'); canvas.style.cursor='default';
+    }
+  });
+  canvas.addEventListener('mouseleave',()=>tip.classList.remove('show'));
 })();
 
 // ── 토글 ──────────────────────────────────────────────────
-document.querySelectorAll('.toggle-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const target = document.getElementById(btn.dataset.target);
-    const group  = btn.parentElement;
-    const card   = group.parentElement;
-    group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-    card.querySelectorAll('.toggle-content').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    target.classList.add('active');
+document.querySelectorAll('.toggle-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const target=document.getElementById(btn.dataset.target);
+    const group=btn.parentElement, card=group.parentElement;
+    group.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+    card.querySelectorAll('.toggle-content').forEach(c=>c.classList.remove('active'));
+    btn.classList.add('active'); target.classList.add('active');
   });
 });
 
 // ── 팝업 ──────────────────────────────────────────────────
-const overlay  = document.getElementById('termModal');
-const termEl   = document.getElementById('modalTerm');
-const defEl    = document.getElementById('modalDef');
-const closeBtn = document.getElementById('modalCloseBtn');
-document.querySelectorAll('[data-term]').forEach(el => {
-  el.addEventListener('click', () => {
-    termEl.textContent = el.dataset.term;
-    defEl.textContent  = el.dataset.def;
+const overlay=document.getElementById('termModal');
+const termEl=document.getElementById('modalTerm');
+const defEl=document.getElementById('modalDef');
+const closeBtn=document.getElementById('modalCloseBtn');
+document.querySelectorAll('[data-term]').forEach(el=>{
+  el.addEventListener('click',()=>{
+    termEl.textContent=el.dataset.term; defEl.textContent=el.dataset.def;
     overlay.classList.add('active');
   });
 });
-closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
-overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('active'); });
-document.addEventListener('keydown', e => { if(e.key==='Escape') overlay.classList.remove('active'); });
+closeBtn.addEventListener('click',()=>overlay.classList.remove('active'));
+overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('active');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.classList.remove('active');});
 </script>
 </body>
 </html>
