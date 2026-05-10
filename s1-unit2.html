@@ -12,7 +12,7 @@
     .nav-btn { display: inline-block; padding: 8px 16px; background: #eff6ff; color: #1e40af; text-decoration: none; border-radius: 6px; font-weight: 600; margin-right: 6px; }
     .nav-btn:hover { background: #2563eb; color: white; }
 
-    /* 토글 버튼 그룹 */
+    /* 토글 버튼 */
     .toggle-group { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
     .toggle-btn {
       padding: 10px 20px; background: #f3f4f6; border: 2px solid #d1d5db;
@@ -22,42 +22,29 @@
     .toggle-btn:hover { background: #e5e7eb; }
     .toggle-btn.active { background: #2563eb; border-color: #2563eb; color: white; }
 
-    /* 토글 컨텐츠 */
     .toggle-content { display: none; padding: 16px; background: #f9fafb; border-radius: 8px; margin-top: 10px; border: 1px solid #e5e7eb; }
     .toggle-content.active { display: block; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
 
-    /* 소기관 리스트 */
     .organelle-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 10px; }
     .organelle {
       background: white; border: 1px solid #d1d5db; border-radius: 6px;
       padding: 10px 12px; text-align: center; font-weight: 600; color: #1e40af;
     }
 
-    /* 생물 구성 단계 */
-    .stages { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 12px 0; }
-    .stage { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 10px 16px; border-radius: 8px; font-weight: 600; }
-    .arrow { color: #10b981; font-weight: bold; font-size: 1.2em; }
+    /* 생물 구성 단계 (중앙 정렬) */
+    .stages { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: 16px 0; }
+    .stage { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 10px 18px; border-radius: 8px; font-weight: 600; }
+    .arrow { color: #10b981; font-weight: bold; font-size: 1.3em; }
     .stage-desc { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 8px 14px; margin: 4px 0; border-radius: 4px; font-size: 0.95em; }
 
-    /* 생물 다양성 다이어그램 */
-    .diversity-diagram { margin: 20px 0; }
-    .diversity-top {
-      max-width: 280px; margin: 0 auto 0;
-      background: #1e40af; color: white; padding: 16px;
-      border-radius: 10px; text-align: center; font-weight: 700; font-size: 1.15em;
-    }
-    .diversity-arrows {
-      display: grid; grid-template-columns: 1fr 1fr 1fr;
-      max-width: 280px; margin: 0 auto;
-    }
-    .diversity-arrows span {
-      text-align: center; color: #1e40af; font-size: 1.5em; font-weight: bold;
-    }
-    .diversity-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px; }
+    /* 생물 다양성 */
+    .diversity-diagram { margin: 24px 0; }
+    .diversity-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 0; }
     .div-card {
-      padding: 20px; border-radius: 10px; cursor: pointer; color: white;
+      padding: 18px 10px; border-radius: 10px; cursor: pointer; color: white;
       text-align: center; font-weight: 600; transition: transform 0.2s;
+      font-size: 0.95em;
     }
     .div-card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
     .div-eco { background: #059669; }
@@ -107,15 +94,48 @@
 
     <div class="toggle-content" id="cell-animal">
       <h3>🐭 동물 세포의 구조</h3>
-      <svg viewBox="0 0 320 220" style="width:100%; max-width:360px; display:block; margin:10px auto;">
-        <ellipse cx="160" cy="110" rx="140" ry="95" fill="#fef2f2" stroke="#dc2626" stroke-width="3"/>
-        <circle cx="160" cy="110" r="35" fill="#a78bfa" stroke="#5b21b6" stroke-width="2"/>
-        <text x="160" y="115" text-anchor="middle" font-size="13" fill="white" font-weight="bold">핵</text>
-        <ellipse cx="80" cy="80" rx="22" ry="12" fill="#fb923c" stroke="#9a3412" stroke-width="1.5"/>
-        <ellipse cx="240" cy="150" rx="22" ry="12" fill="#fb923c" stroke="#9a3412" stroke-width="1.5"/>
-        <text x="80" y="60" text-anchor="middle" font-size="11" fill="#9a3412" font-weight="bold">마이토콘드리아</text>
-        <text x="285" y="25" text-anchor="middle" font-size="11" fill="#dc2626" font-weight="bold">세포막</text>
-        <line x1="285" y1="30" x2="295" y2="55" stroke="#dc2626" stroke-width="1"/>
+      <svg viewBox="0 0 360 260" style="width:100%; max-width:420px; display:block; margin:10px auto;">
+        <defs>
+          <radialGradient id="animalCyto" cx="50%" cy="45%" r="60%">
+            <stop offset="0%" stop-color="#fef9f9"/>
+            <stop offset="100%" stop-color="#fde2e2"/>
+          </radialGradient>
+          <radialGradient id="nucGrad" cx="40%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#c4b5fd"/>
+            <stop offset="100%" stop-color="#6d28d9"/>
+          </radialGradient>
+          <radialGradient id="mitoGrad" cx="50%" cy="50%" r="60%">
+            <stop offset="0%" stop-color="#fdba74"/>
+            <stop offset="100%" stop-color="#c2410c"/>
+          </radialGradient>
+          <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+            <feOffset dx="0" dy="2" result="offsetblur"/>
+            <feComponentTransfer><feFuncA type="linear" slope="0.3"/></feComponentTransfer>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <ellipse cx="180" cy="130" rx="155" ry="105" fill="url(#animalCyto)" stroke="#dc2626" stroke-width="3.5" filter="url(#softShadow)"/>
+
+        <circle cx="180" cy="130" r="42" fill="url(#nucGrad)" stroke="#4c1d95" stroke-width="1.5"/>
+        <circle cx="170" cy="120" r="6" fill="#4c1d95" opacity="0.5"/>
+        <text x="180" y="135" text-anchor="middle" font-size="14" fill="white" font-weight="bold">핵</text>
+
+        <g transform="translate(85,85) rotate(-25)">
+          <ellipse cx="0" cy="0" rx="26" ry="13" fill="url(#mitoGrad)" stroke="#7c2d12" stroke-width="1.5"/>
+          <path d="M -18,-3 Q -10,5 -2,-3 Q 6,5 14,-3" stroke="#7c2d12" stroke-width="1" fill="none" opacity="0.6"/>
+        </g>
+        <g transform="translate(270,180) rotate(20)">
+          <ellipse cx="0" cy="0" rx="26" ry="13" fill="url(#mitoGrad)" stroke="#7c2d12" stroke-width="1.5"/>
+          <path d="M -18,-3 Q -10,5 -2,-3 Q 6,5 14,-3" stroke="#7c2d12" stroke-width="1" fill="none" opacity="0.6"/>
+        </g>
+
+        <line x1="85" y1="60" x2="85" y2="78" stroke="#7c2d12" stroke-width="1"/>
+        <text x="85" y="52" text-anchor="middle" font-size="12" fill="#7c2d12" font-weight="bold">마이토콘드리아</text>
+
+        <line x1="320" y1="50" x2="305" y2="78" stroke="#dc2626" stroke-width="1"/>
+        <text x="325" y="44" text-anchor="middle" font-size="12" fill="#dc2626" font-weight="bold">세포막</text>
       </svg>
       <div class="organelle-list">
         <div class="organelle">핵</div>
@@ -126,18 +146,74 @@
 
     <div class="toggle-content" id="cell-plant">
       <h3>🌱 식물 세포의 구조</h3>
-      <svg viewBox="0 0 320 220" style="width:100%; max-width:360px; display:block; margin:10px auto;">
-        <rect x="10" y="15" width="300" height="190" fill="#fef3c7" stroke="#92400e" stroke-width="4" rx="8"/>
-        <rect x="22" y="27" width="276" height="166" fill="#f0fdf4" stroke="#dc2626" stroke-width="2" rx="4"/>
-        <circle cx="160" cy="110" r="32" fill="#a78bfa" stroke="#5b21b6" stroke-width="2"/>
-        <text x="160" y="115" text-anchor="middle" font-size="13" fill="white" font-weight="bold">핵</text>
-        <ellipse cx="70" cy="70" rx="20" ry="11" fill="#fb923c" stroke="#9a3412" stroke-width="1.5"/>
-        <ellipse cx="240" cy="60" rx="24" ry="13" fill="#22c55e" stroke="#14532d" stroke-width="1.5"/>
-        <ellipse cx="80" cy="160" rx="24" ry="13" fill="#22c55e" stroke="#14532d" stroke-width="1.5"/>
-        <ellipse cx="245" cy="160" rx="24" ry="13" fill="#22c55e" stroke="#14532d" stroke-width="1.5"/>
-        <text x="70" y="50" text-anchor="middle" font-size="10" fill="#9a3412" font-weight="bold">마이토콘드리아</text>
-        <text x="240" y="40" text-anchor="middle" font-size="11" fill="#14532d" font-weight="bold">엽록체</text>
-        <text x="160" y="11" text-anchor="middle" font-size="11" fill="#92400e" font-weight="bold">세포벽</text>
+      <svg viewBox="0 0 360 260" style="width:100%; max-width:420px; display:block; margin:10px auto;">
+        <defs>
+          <linearGradient id="wallGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#fde68a"/>
+            <stop offset="100%" stop-color="#d97706"/>
+          </linearGradient>
+          <radialGradient id="plantCyto" cx="50%" cy="45%" r="65%">
+            <stop offset="0%" stop-color="#f7fef9"/>
+            <stop offset="100%" stop-color="#d1fae5"/>
+          </radialGradient>
+          <radialGradient id="chloroGrad" cx="40%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#86efac"/>
+            <stop offset="100%" stop-color="#15803d"/>
+          </radialGradient>
+          <radialGradient id="nucGrad2" cx="40%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#c4b5fd"/>
+            <stop offset="100%" stop-color="#6d28d9"/>
+          </radialGradient>
+          <radialGradient id="mitoGrad2" cx="50%" cy="50%" r="60%">
+            <stop offset="0%" stop-color="#fdba74"/>
+            <stop offset="100%" stop-color="#c2410c"/>
+          </radialGradient>
+          <filter id="softShadow2" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+            <feOffset dx="0" dy="2" result="offsetblur"/>
+            <feComponentTransfer><feFuncA type="linear" slope="0.25"/></feComponentTransfer>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <rect x="20" y="25" width="320" height="210" rx="14" fill="url(#wallGrad)" stroke="#78350f" stroke-width="2" filter="url(#softShadow2)"/>
+        <rect x="34" y="39" width="292" height="182" rx="6" fill="url(#plantCyto)" stroke="#dc2626" stroke-width="2.2"/>
+
+        <circle cx="180" cy="130" r="38" fill="url(#nucGrad2)" stroke="#4c1d95" stroke-width="1.5"/>
+        <circle cx="170" cy="120" r="5" fill="#4c1d95" opacity="0.5"/>
+        <text x="180" y="135" text-anchor="middle" font-size="14" fill="white" font-weight="bold">핵</text>
+
+        <g transform="translate(78,78) rotate(-20)">
+          <ellipse cx="0" cy="0" rx="24" ry="12" fill="url(#mitoGrad2)" stroke="#7c2d12" stroke-width="1.3"/>
+          <path d="M -16,-2 Q -8,4 0,-2 Q 8,4 14,-2" stroke="#7c2d12" stroke-width="1" fill="none" opacity="0.6"/>
+        </g>
+
+        <g transform="translate(275,80) rotate(15)">
+          <ellipse cx="0" cy="0" rx="28" ry="14" fill="url(#chloroGrad)" stroke="#14532d" stroke-width="1.3"/>
+          <ellipse cx="-10" cy="-2" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
+          <ellipse cx="2" cy="2" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
+          <ellipse cx="12" cy="-2" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
+        </g>
+        <g transform="translate(85,185) rotate(-10)">
+          <ellipse cx="0" cy="0" rx="26" ry="13" fill="url(#chloroGrad)" stroke="#14532d" stroke-width="1.3"/>
+          <ellipse cx="-9" cy="-1" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
+          <ellipse cx="2" cy="2" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
+          <ellipse cx="11" cy="-1" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
+        </g>
+        <g transform="translate(280,185) rotate(10)">
+          <ellipse cx="0" cy="0" rx="26" ry="13" fill="url(#chloroGrad)" stroke="#14532d" stroke-width="1.3"/>
+          <ellipse cx="-9" cy="-1" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
+          <ellipse cx="2" cy="2" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
+          <ellipse cx="11" cy="-1" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
+        </g>
+
+        <text x="180" y="18" text-anchor="middle" font-size="12" fill="#78350f" font-weight="bold">세포벽</text>
+        <line x1="180" y1="22" x2="180" y2="32" stroke="#78350f" stroke-width="1"/>
+
+        <text x="78" y="50" text-anchor="middle" font-size="11" fill="#7c2d12" font-weight="bold">마이토콘드리아</text>
+        <text x="275" y="48" text-anchor="middle" font-size="12" fill="#14532d" font-weight="bold">엽록체</text>
+
+        <text x="20" y="248" text-anchor="start" font-size="11" fill="#dc2626" font-weight="bold">세포막 (안쪽 빨간 선)</text>
       </svg>
       <div class="organelle-list">
         <div class="organelle">핵</div>
@@ -205,25 +281,34 @@
     <p>아래 카드를 클릭하면 자세한 설명을 볼 수 있어요.</p>
 
     <div class="diversity-diagram">
-      <div class="diversity-top">🌍 생물 다양성</div>
-      <div class="diversity-arrows">
-        <span>↑</span><span>↑</span><span>↑</span>
+      <div style="max-width:280px; margin:0 auto; background:#1e40af; color:white; padding:16px; border-radius:10px; text-align:center; font-weight:700; font-size:1.15em;">
+        🌍 생물 다양성
       </div>
+
+      <svg viewBox="0 0 300 100" style="width:100%; max-width:520px; display:block; margin:0 auto;">
+        <line x1="150" y1="50" x2="150" y2="8" stroke="#1e40af" stroke-width="3"/>
+        <polygon points="150,0 144,12 156,12" fill="#1e40af"/>
+        <line x1="50" y1="50" x2="250" y2="50" stroke="#1e40af" stroke-width="3"/>
+        <line x1="50" y1="50" x2="50" y2="95" stroke="#1e40af" stroke-width="3"/>
+        <line x1="150" y1="50" x2="150" y2="95" stroke="#1e40af" stroke-width="3"/>
+        <line x1="250" y1="50" x2="250" y2="95" stroke="#1e40af" stroke-width="3"/>
+      </svg>
+
       <div class="diversity-cards">
         <div class="div-card div-eco"
              data-term="🌳 생태계 다양성"
              data-def="생물이 살아가는 환경의 다양성. 숲·바다·사막·강·습지 등 서로 다른 환경이 다양하게 존재할수록 생태계 다양성이 높습니다.">
-          🌳 생태계 다양성
+          🌳 생태계<br>다양성
         </div>
         <div class="div-card div-species"
              data-term="🦋 종 다양성"
              data-def="생태계 속에서 살아가는 생물 종류의 다양성. 한 지역에 얼마나 많은 종류의 생물이 살고 있는지를 의미합니다.">
-          🦋 종 다양성
+          🦋 종<br>다양성
         </div>
         <div class="div-card div-gene"
              data-term="🧬 유전적 다양성"
              data-def="같은 종이지만 유전적인 차이를 보이는 생물들의 다양성. 예를 들어 같은 사람이라도 머리색·키·생김새가 모두 다릅니다.">
-          🧬 유전적 다양성
+          🧬 유전적<br>다양성
         </div>
       </div>
     </div>
@@ -253,7 +338,6 @@
   </div>
 
   <script>
-    // 토글 버튼
     document.querySelectorAll('.toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const target = document.getElementById(btn.dataset.target);
@@ -266,7 +350,6 @@
       });
     });
 
-    // 팝업
     const overlay = document.getElementById('termModal');
     const termEl = document.getElementById('modalTerm');
     const defEl = document.getElementById('modalDef');
