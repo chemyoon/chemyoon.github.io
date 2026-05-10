@@ -12,230 +12,55 @@ h3 { color: #374151; margin-top: 20px; }
 .nav-btn { display: inline-block; padding: 8px 16px; background: #eff6ff; color: #1e40af; text-decoration: none; border-radius: 6px; font-weight: 600; margin-right: 6px; }
 .nav-btn:hover { background: #2563eb; color: white; }
 
-/* 토글 버튼 */
 .toggle-group { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
-.toggle-btn {
-  padding: 10px 20px; background: #f3f4f6; border: 2px solid #d1d5db;
-  border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1em;
-  color: #374151; transition: all 0.2s;
-}
+.toggle-btn { padding: 10px 20px; background: #f3f4f6; border: 2px solid #d1d5db; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1em; color: #374151; transition: all 0.2s; }
 .toggle-btn:hover { background: #e5e7eb; }
 .toggle-btn.active { background: #2563eb; border-color: #2563eb; color: white; }
 .toggle-content { display: none; padding: 16px; background: #f9fafb; border-radius: 8px; margin-top: 10px; border: 1px solid #e5e7eb; }
 .toggle-content.active { display: block; animation: fadeIn 0.3s; }
-@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-.organelle-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 10px; }
-.organelle {
-  background: white; border: 1px solid #d1d5db; border-radius: 6px;
-  padding: 10px 12px; text-align: center; font-weight: 600; color: #1e40af;
-  cursor: default; position: relative; transition: all 0.2s;
-}
-.organelle:hover {
-  background: #eff6ff; border-color: #93c5fd;
-  transform: translateY(-3px); box-shadow: 0 4px 12px rgba(37,99,235,0.15);
-}
-.organelle .org-tooltip {
-  display: none;
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%; transform: translateX(-50%);
-  background: #1e40af; color: white;
-  font-size: 0.82em; font-weight: 400;
-  padding: 8px 12px; border-radius: 8px;
-  width: 180px; line-height: 1.5;
-  text-align: left; z-index: 10;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-  white-space: normal;
-  pointer-events: none;
-}
-.organelle .org-tooltip::after {
-  content: '';
-  position: absolute;
-  top: 100%; left: 50%; transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: #1e40af;
-}
-.organelle:hover .org-tooltip { display: block; }
+@keyframes fadeIn { from{opacity:0}to{opacity:1} }
 
-/* 생물 구성 단계 */
+.cell-scene { position: relative; width: 100%; max-width: 480px; margin: 12px auto 0; border-radius: 16px; background: #0f172a; }
+.cell-scene canvas { display: block; width: 100%; border-radius: 16px; }
+.cell-tooltip { position: absolute; background: rgba(15,23,42,0.92); color: #e2e8f0; font-size: 0.82em; padding: 8px 12px; border-radius: 8px; max-width: 170px; line-height: 1.5; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 20; border: 1px solid rgba(255,255,255,0.12); white-space: normal; }
+.cell-tooltip.show { opacity: 1; }
+.cell-tooltip strong { color: #7dd3fc; display: block; margin-bottom: 2px; }
+
 .stages { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: 16px 0; }
 .stage { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 10px 18px; border-radius: 8px; font-weight: 600; }
 .arrow { color: #10b981; font-weight: bold; font-size: 1.3em; }
 .stage-desc { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 8px 14px; margin: 4px 0; border-radius: 4px; font-size: 0.95em; }
 
-/* ========== 생물 다양성 (개선) ========== */
 .diversity-section { margin: 24px 0; }
-
-/* 최상단 뱃지 */
-.diversity-root {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  background: linear-gradient(135deg, #1e40af, #2563eb);
-  color: white; padding: 18px 24px; border-radius: 14px;
-  font-weight: 700; font-size: 1.15em;
-  box-shadow: 0 4px 16px rgba(37,99,235,0.25);
-  margin-bottom: 0;
-}
-
-/* 트리 연결선 컨테이너 */
-.diversity-tree {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 0;
-}
-
-/* 세로선 */
-.tree-vline {
-  width: 2px; height: 28px;
-  background: #93c5fd;
-}
-
-/* 가로선 + 세 개 세로선 묶음 */
-.tree-branch {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-.tree-hline-wrap {
-  display: flex;
-  align-items: flex-start;
-  width: 90%;
-  position: relative;
-}
-.tree-hline {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: #93c5fd;
-}
-.tree-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.tree-col-vline {
-  width: 2px; height: 22px;
-  background: #93c5fd;
-}
-
-/* 카드 3개 */
-.diversity-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  width: 90%;
-}
-
-.div-card {
-  border-radius: 14px;
-  cursor: pointer;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  transition: transform 0.22s, box-shadow 0.22s;
-  border: 2px solid transparent;
-}
-.div-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 24px rgba(0,0,0,0.13);
-}
-
-.div-card-header {
-  padding: 20px 14px 14px;
-  text-align: center;
-  color: white;
-  font-weight: 700;
-  font-size: 1em;
-  line-height: 1.4;
-}
-.div-eco .div-card-header   { background: linear-gradient(135deg, #059669, #10b981); }
-.div-species .div-card-header { background: linear-gradient(135deg, #6d28d9, #7c3aed); }
-.div-gene .div-card-header    { background: linear-gradient(135deg, #be185d, #db2777); }
-
+.diversity-root { display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg,#1e40af,#2563eb); color: white; padding: 18px 24px; border-radius: 14px; font-weight: 700; font-size: 1.15em; box-shadow: 0 4px 16px rgba(37,99,235,0.25); }
+.diversity-tree { display: flex; flex-direction: column; align-items: center; }
+.tree-vline { width: 2px; height: 28px; background: #93c5fd; }
+.diversity-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; width: 90%; }
+.div-card { border-radius: 14px; cursor: pointer; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.22s,box-shadow 0.22s; }
+.div-card:hover { transform: translateY(-5px); box-shadow: 0 10px 24px rgba(0,0,0,0.13); }
+.div-card-header { padding: 20px 14px 14px; text-align: center; color: white; font-weight: 700; }
+.div-eco .div-card-header { background: linear-gradient(135deg,#059669,#10b981); }
+.div-species .div-card-header { background: linear-gradient(135deg,#6d28d9,#7c3aed); }
+.div-gene .div-card-header { background: linear-gradient(135deg,#be185d,#db2777); }
 .div-card-icon { font-size: 2em; display: block; margin-bottom: 6px; }
-.div-card-title { font-size: 1em; }
-
-/* 호버 시 펼쳐지는 설명 */
-.div-card-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.35s ease, padding 0.3s;
-  background: white;
-  font-size: 0.9em;
-  color: #374151;
-  padding: 0 14px;
-  line-height: 1.6;
-}
-.div-card:hover .div-card-body {
-  max-height: 120px;
-  padding: 12px 14px;
-}
-
-/* 변이 인포박스 */
-.variation-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-.variation-vline {
-  width: 2px; height: 24px;
-  background: #f9a8d4;
-}
-.variation-info {
-  width: 88%;
-  background: linear-gradient(135deg, #fdf2f8, #fce7f3);
-  border: 1.5px solid #f9a8d4;
-  border-radius: 12px;
-  padding: 16px 20px;
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-}
-.variation-icon {
-  font-size: 2em;
-  flex-shrink: 0;
-  line-height: 1.2;
-}
-.variation-text h4 {
-  margin: 0 0 4px 0;
-  color: #9d174d;
-  font-size: 1em;
-}
-.variation-text p {
-  margin: 0;
-  color: #6b7280;
-  font-size: 0.92em;
-}
-.variation-keyword {
-  cursor: pointer;
-  background: #fce7f3;
-  color: #9d174d;
-  font-weight: 700;
-  padding: 1px 8px;
-  border-radius: 4px;
-  border-bottom: 2px solid #f9a8d4;
-  transition: background 0.2s;
-}
+.div-card-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease,padding 0.3s; background: white; font-size: 0.9em; color: #374151; padding: 0 14px; line-height: 1.6; }
+.div-card:hover .div-card-body { max-height: 120px; padding: 12px 14px; }
+.variation-box { display: flex; flex-direction: column; align-items: center; width: 100%; }
+.variation-vline { width: 2px; height: 24px; background: #f9a8d4; }
+.variation-info { width: 88%; background: linear-gradient(135deg,#fdf2f8,#fce7f3); border: 1.5px solid #f9a8d4; border-radius: 12px; padding: 16px 20px; display: flex; align-items: flex-start; gap: 14px; }
+.variation-icon { font-size: 2em; flex-shrink: 0; line-height: 1.2; }
+.variation-text h4 { margin: 0 0 4px 0; color: #9d174d; font-size: 1em; }
+.variation-text p { margin: 0; color: #6b7280; font-size: 0.92em; }
+.variation-keyword { cursor: pointer; background: #fce7f3; color: #9d174d; font-weight: 700; padding: 1px 8px; border-radius: 4px; border-bottom: 2px solid #f9a8d4; }
 .variation-keyword:hover { background: #fbcfe8; }
 
-/* 클릭 가능한 용어 */
-.keyword {
-  cursor: pointer; user-select: none; text-decoration: underline;
-  background: #fef3c7; padding: 2px 8px; border-radius: 4px;
-  color: #92400e; font-weight: 600;
-}
-.keyword:hover { background: #fde68a; }
-
-/* 팝업 */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
 .modal-overlay.active { display: flex; }
 .modal { background: white; border-radius: 12px; max-width: 480px; width: 100%; padding: 24px 28px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3); animation: modalIn 0.2s; }
-@keyframes modalIn { from {opacity:0; transform: translateY(-10px);} to {opacity:1; transform: translateY(0);} }
+@keyframes modalIn { from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)} }
 .modal h3 { color: #1e40af; margin: 0 0 12px 0; padding-right: 30px; }
 .modal p { margin: 0; color: #374151; }
-.modal-close { position: absolute; top: 12px; right: 14px; width: 32px; height: 32px; border: none; background: #f3f4f6; border-radius: 50%; font-size: 18px; cursor: pointer; color: #6b7280; line-height: 1; }
+.modal-close { position: absolute; top: 12px; right: 14px; width: 32px; height: 32px; border: none; background: #f3f4f6; border-radius: 50%; font-size: 18px; cursor: pointer; color: #6b7280; }
 .modal-close:hover { background: #ef4444; color: white; }
 </style>
 </head>
@@ -248,124 +73,32 @@ h3 { color: #374151; margin-top: 20px; }
 
 <h1>2단원. 생물의 구성과 다양성</h1>
 
-<!-- ① 세포의 구조 -->
 <h2>① 세포의 구조</h2>
 <div class="card">
-  <p>동물 세포와 식물 세포의 구조적 차이를 살펴봅시다. 아래 버튼을 클릭하세요.</p>
+  <p>동물 세포와 식물 세포의 구조적 차이를 살펴봅시다. 아래 버튼을 클릭하고, 소기관에 마우스를 올려보세요.</p>
   <div class="toggle-group">
     <button class="toggle-btn" data-target="cell-animal">🐭 동물 세포</button>
     <button class="toggle-btn" data-target="cell-plant">🌱 식물 세포</button>
   </div>
   <div class="toggle-content" id="cell-animal">
-    <h3>🐭 동물 세포의 구조</h3>
-    <svg viewBox="0 0 360 260" style="width:100%; max-width:420px; display:block; margin:10px auto;">
-      <defs>
-        <radialGradient id="animalCyto" cx="50%" cy="45%" r="60%">
-          <stop offset="0%" stop-color="#fef9f9"/><stop offset="100%" stop-color="#fde2e2"/>
-        </radialGradient>
-        <radialGradient id="nucGrad" cx="40%" cy="40%" r="60%">
-          <stop offset="0%" stop-color="#c4b5fd"/><stop offset="100%" stop-color="#6d28d9"/>
-        </radialGradient>
-        <radialGradient id="mitoGrad" cx="50%" cy="50%" r="60%">
-          <stop offset="0%" stop-color="#fdba74"/><stop offset="100%" stop-color="#c2410c"/>
-        </radialGradient>
-        <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-          <feOffset dx="0" dy="2" result="offsetblur"/>
-          <feComponentTransfer><feFuncA type="linear" slope="0.3"/></feComponentTransfer>
-          <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-      <ellipse cx="180" cy="130" rx="155" ry="105" fill="url(#animalCyto)" stroke="#dc2626" stroke-width="3.5" filter="url(#softShadow)"/>
-      <circle cx="180" cy="130" r="42" fill="url(#nucGrad)" stroke="#4c1d95" stroke-width="1.5"/>
-      <circle cx="170" cy="120" r="6" fill="#4c1d95" opacity="0.5"/>
-      <text x="180" y="135" text-anchor="middle" font-size="14" fill="white" font-weight="bold">핵</text>
-      <g transform="translate(85,85) rotate(-25)">
-        <ellipse cx="0" cy="0" rx="26" ry="13" fill="url(#mitoGrad)" stroke="#7c2d12" stroke-width="1.5"/>
-        <path d="M -18,-3 Q -10,5 -2,-3 Q 6,5 14,-3" stroke="#7c2d12" stroke-width="1" fill="none" opacity="0.6"/>
-      </g>
-      <g transform="translate(270,180) rotate(20)">
-        <ellipse cx="0" cy="0" rx="26" ry="13" fill="url(#mitoGrad)" stroke="#7c2d12" stroke-width="1.5"/>
-        <path d="M -18,-3 Q -10,5 -2,-3 Q 6,5 14,-3" stroke="#7c2d12" stroke-width="1" fill="none" opacity="0.6"/>
-      </g>
-      <line x1="85" y1="60" x2="85" y2="78" stroke="#7c2d12" stroke-width="1"/>
-      <text x="85" y="52" text-anchor="middle" font-size="12" fill="#7c2d12" font-weight="bold">마이토콘드리아</text>
-      <line x1="320" y1="50" x2="305" y2="78" stroke="#dc2626" stroke-width="1"/>
-      <text x="325" y="44" text-anchor="middle" font-size="12" fill="#dc2626" font-weight="bold">세포막</text>
-    </svg>
-    <div class="organelle-list">
-      <div class="organelle">핵<span class="org-tooltip">유전물질(DNA)를 포함하고, 세포의 생명활동을 조절한다.</span></div>
-      <div class="organelle">마이토콘드리아<span class="org-tooltip">세포 내 양분을 분해하여 에너지를 생산한다.</span></div>
-      <div class="organelle">세포막<span class="org-tooltip">세포 내부를 보호하며, 세포 안과 밖의 물질 이동에 관여한다.</span></div>
+    <h3>🐭 동물 세포</h3>
+    <div class="cell-scene" id="scene-animal">
+      <canvas id="canvas-animal"></canvas>
+      <div class="cell-tooltip" id="tip-animal"></div>
     </div>
   </div>
   <div class="toggle-content" id="cell-plant">
-    <h3>🌱 식물 세포의 구조</h3>
-    <svg viewBox="0 0 360 260" style="width:100%; max-width:420px; display:block; margin:10px auto;">
-      <defs>
-        <linearGradient id="wallGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#d97706"/>
-        </linearGradient>
-        <radialGradient id="plantCyto" cx="50%" cy="45%" r="65%">
-          <stop offset="0%" stop-color="#f7fef9"/><stop offset="100%" stop-color="#d1fae5"/>
-        </radialGradient>
-        <radialGradient id="chloroGrad" cx="40%" cy="40%" r="60%">
-          <stop offset="0%" stop-color="#86efac"/><stop offset="100%" stop-color="#15803d"/>
-        </radialGradient>
-        <radialGradient id="nucGrad2" cx="40%" cy="40%" r="60%">
-          <stop offset="0%" stop-color="#c4b5fd"/><stop offset="100%" stop-color="#6d28d9"/>
-        </radialGradient>
-        <radialGradient id="mitoGrad2" cx="50%" cy="50%" r="60%">
-          <stop offset="0%" stop-color="#fdba74"/><stop offset="100%" stop-color="#c2410c"/>
-        </radialGradient>
-      </defs>
-      <rect x="20" y="25" width="320" height="210" rx="14" fill="url(#wallGrad)" stroke="#78350f" stroke-width="2"/>
-      <rect x="34" y="39" width="292" height="182" rx="6" fill="url(#plantCyto)" stroke="#dc2626" stroke-width="2.2"/>
-      <circle cx="180" cy="130" r="38" fill="url(#nucGrad2)" stroke="#4c1d95" stroke-width="1.5"/>
-      <circle cx="170" cy="120" r="5" fill="#4c1d95" opacity="0.5"/>
-      <text x="180" y="135" text-anchor="middle" font-size="14" fill="white" font-weight="bold">핵</text>
-      <g transform="translate(78,78) rotate(-20)">
-        <ellipse cx="0" cy="0" rx="24" ry="12" fill="url(#mitoGrad2)" stroke="#7c2d12" stroke-width="1.3"/>
-        <path d="M -16,-2 Q -8,4 0,-2 Q 8,4 14,-2" stroke="#7c2d12" stroke-width="1" fill="none" opacity="0.6"/>
-      </g>
-      <g transform="translate(275,80) rotate(15)">
-        <ellipse cx="0" cy="0" rx="28" ry="14" fill="url(#chloroGrad)" stroke="#14532d" stroke-width="1.3"/>
-        <ellipse cx="-10" cy="-2" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
-        <ellipse cx="2" cy="2" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
-        <ellipse cx="12" cy="-2" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
-      </g>
-      <g transform="translate(85,185) rotate(-10)">
-        <ellipse cx="0" cy="0" rx="26" ry="13" fill="url(#chloroGrad)" stroke="#14532d" stroke-width="1.3"/>
-        <ellipse cx="-9" cy="-1" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
-        <ellipse cx="2" cy="2" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
-        <ellipse cx="11" cy="-1" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
-      </g>
-      <g transform="translate(280,185) rotate(10)">
-        <ellipse cx="0" cy="0" rx="26" ry="13" fill="url(#chloroGrad)" stroke="#14532d" stroke-width="1.3"/>
-        <ellipse cx="-9" cy="-1" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
-        <ellipse cx="2" cy="2" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
-        <ellipse cx="11" cy="-1" rx="4" ry="3" fill="#14532d" opacity="0.4"/>
-      </g>
-      <text x="180" y="18" text-anchor="middle" font-size="12" fill="#78350f" font-weight="bold">세포벽</text>
-      <line x1="180" y1="22" x2="180" y2="32" stroke="#78350f" stroke-width="1"/>
-      <text x="78" y="50" text-anchor="middle" font-size="11" fill="#7c2d12" font-weight="bold">마이토콘드리아</text>
-      <text x="275" y="48" text-anchor="middle" font-size="12" fill="#14532d" font-weight="bold">엽록체</text>
-      <text x="20" y="248" text-anchor="start" font-size="11" fill="#dc2626" font-weight="bold">세포막 (안쪽 빨간 선)</text>
-    </svg>
-    <div class="organelle-list">
-      <div class="organelle">핵<span class="org-tooltip">유전물질(DNA)를 포함하고, 세포의 생명활동을 조절한다.</span></div>
-      <div class="organelle">마이토콘드리아<span class="org-tooltip">세포 내 양분을 분해하여 에너지를 생산한다.</span></div>
-      <div class="organelle">세포막<span class="org-tooltip">세포 내부를 보호하며, 세포 안과 밖의 물질 이동에 관여한다.</span></div>
-      <div class="organelle">엽록체<span class="org-tooltip">햇빛을 받아 광합성을 하며, 양분을 합성하여 에너지를 저장한다.</span></div>
-      <div class="organelle">세포벽<span class="org-tooltip">세포막 밖에 존재하며, 셀룰로스로 구성되어 딱딱하고 세포를 보호한다.</span></div>
+    <h3>🌱 식물 세포</h3>
+    <div class="cell-scene" id="scene-plant">
+      <canvas id="canvas-plant"></canvas>
+      <div class="cell-tooltip" id="tip-plant"></div>
     </div>
   </div>
 </div>
 
-<!-- ② 생물의 구성 단계 -->
 <h2>② 생물의 구성 단계</h2>
 <div class="card">
-  <p>생물은 세포에서 시작해 점점 복잡한 단계로 구성됩니다. 공통 단계와 동·식물의 차이를 확인해 보세요.</p>
+  <p>생물은 세포에서 시작해 점점 복잡한 단계로 구성됩니다.</p>
   <div class="toggle-group">
     <button class="toggle-btn" data-target="stage-common">🔄 공통</button>
     <button class="toggle-btn" data-target="stage-animal">🐭 동물</button>
@@ -389,106 +122,60 @@ h3 { color: #374151; margin-top: 20px; }
       <span class="stage">세포</span><span class="arrow">→</span>
       <span class="stage">조직</span><span class="arrow">→</span>
       <span class="stage">기관</span><span class="arrow">→</span>
-      <span class="stage" style="background:#fce7f3; border-color:#f9a8d4; color:#9d174d;">기관계</span><span class="arrow">→</span>
+      <span class="stage" style="background:#fce7f3;border-color:#f9a8d4;color:#9d174d;">기관계</span><span class="arrow">→</span>
       <span class="stage">개체</span>
     </div>
     <div class="stage-desc"><strong>기관 → 기관계:</strong> 형태가 다르지만 기능이 유사한 기관이 모여 기관계를 구성</div>
-    <p style="margin-top:10px; font-size:0.95em;">예: 소화계, 순환계, 호흡계, 신경계 등</p>
+    <p style="margin-top:10px;font-size:0.95em;">예: 소화계, 순환계, 호흡계, 신경계 등</p>
   </div>
   <div class="toggle-content" id="stage-plant">
     <h3>🌱 식물의 구성 단계</h3>
     <div class="stages">
       <span class="stage">세포</span><span class="arrow">→</span>
       <span class="stage">조직</span><span class="arrow">→</span>
-      <span class="stage" style="background:#dcfce7; border-color:#86efac; color:#14532d;">조직계</span><span class="arrow">→</span>
+      <span class="stage" style="background:#dcfce7;border-color:#86efac;color:#14532d;">조직계</span><span class="arrow">→</span>
       <span class="stage">기관</span><span class="arrow">→</span>
       <span class="stage">개체</span>
     </div>
     <div class="stage-desc"><strong>조직 → 조직계:</strong> 형태가 다르지만 기능이 유사한 조직이 모여 조직계를 구성</div>
-    <p style="margin-top:10px; font-size:0.95em;">예: 표피 조직계, 관다발 조직계, 기본 조직계</p>
+    <p style="margin-top:10px;font-size:0.95em;">예: 표피 조직계, 관다발 조직계, 기본 조직계</p>
   </div>
 </div>
 
-<!-- ③ 생물 다양성 (개선) -->
 <h2>③ 생물 다양성</h2>
 <div class="card">
   <p>카드에 마우스를 올리면 자세한 설명을 볼 수 있어요.</p>
-
   <div class="diversity-section">
-    <!-- 루트 뱃지 -->
-    <div class="diversity-root">
-      🌍 생물 다양성
-    </div>
-
-    <!-- 트리 구조 -->
+    <div class="diversity-root">🌍 생물 다양성</div>
     <div class="diversity-tree">
       <div class="tree-vline"></div>
-
-      <div class="tree-branch">
-        <!-- 가로선 -->
-        <!-- 가로선: 카드 중심 사이만 연결 (양끝 삐침 없음) -->
-        <div style="width:90%; display:flex; position:relative; height:22px;">
-          <!-- 선은 왼쪽 카드 중심(1/6) ~ 오른쪽 카드 중심(5/6) -->
-          <div style="position:absolute; top:0; left:16.67%; right:16.67%; height:2px; background:#93c5fd;"></div>
-          <!-- 세 세로선 -->
-          <div style="flex:1; display:flex; justify-content:center;"><div style="width:2px; height:22px; background:#93c5fd;"></div></div>
-          <div style="flex:1; display:flex; justify-content:center;"><div style="width:2px; height:22px; background:#93c5fd;"></div></div>
-          <div style="flex:1; display:flex; justify-content:center;"><div style="width:2px; height:22px; background:#93c5fd;"></div></div>
+      <div style="width:90%;display:flex;position:relative;height:22px;">
+        <div style="position:absolute;top:0;left:16.67%;right:16.67%;height:2px;background:#93c5fd;"></div>
+        <div style="flex:1;display:flex;justify-content:center;"><div style="width:2px;height:22px;background:#93c5fd;"></div></div>
+        <div style="flex:1;display:flex;justify-content:center;"><div style="width:2px;height:22px;background:#93c5fd;"></div></div>
+        <div style="flex:1;display:flex;justify-content:center;"><div style="width:2px;height:22px;background:#93c5fd;"></div></div>
+      </div>
+      <div class="diversity-cards">
+        <div class="div-card div-eco" data-term="🌳 생태계 다양성" data-def="생물이 살아가는 환경의 다양성. 숲·바다·사막·강·습지 등 서로 다른 환경이 다양하게 존재할수록 생태계 다양성이 높습니다.">
+          <div class="div-card-header"><span class="div-card-icon">🌳</span><span class="div-card-title">생태계 다양성</span></div>
+          <div class="div-card-body">생물이 살아가는 환경의 다양성. 숲·바다·사막·강·습지 등 서로 다른 환경이 다양하게 존재할수록 높아집니다.</div>
         </div>
-
-        <!-- 카드 3개: 유전적 다양성↔종 다양성 위치 교환 -->
-        <div class="diversity-cards">
-          <div class="div-card div-eco"
-               data-term="🌳 생태계 다양성"
-               data-def="생물이 살아가는 환경의 다양성. 숲·바다·사막·강·습지 등 서로 다른 환경이 다양하게 존재할수록 생태계 다양성이 높습니다.">
-            <div class="div-card-header">
-              <span class="div-card-icon">🌳</span>
-              <span class="div-card-title">생태계 다양성</span>
-            </div>
-            <div class="div-card-body">
-              생물이 살아가는 환경의 다양성. 숲·바다·사막·강·습지 등 서로 다른 환경이 다양하게 존재할수록 높아집니다.
-            </div>
-          </div>
-
-          <div class="div-card div-gene"
-               data-term="🧬 유전적 다양성"
-               data-def="같은 종이지만 유전적인 차이를 보이는 생물들의 다양성. 예를 들어 같은 사람이라도 머리색·키·생김새가 모두 다릅니다.">
-            <div class="div-card-header">
-              <span class="div-card-icon">🧬</span>
-              <span class="div-card-title">유전적 다양성</span>
-            </div>
-            <div class="div-card-body">
-              같은 종 안에서 나타나는 유전적 차이. 같은 사람이라도 머리색·키·생김새가 다른 것이 그 예입니다.
-            </div>
-          </div>
-
-          <div class="div-card div-species"
-               data-term="🦋 종 다양성"
-               data-def="생태계 속에서 살아가는 생물 종류의 다양성. 한 지역에 얼마나 많은 종류의 생물이 살고 있는지를 의미합니다.">
-            <div class="div-card-header">
-              <span class="div-card-icon">🦋</span>
-              <span class="div-card-title">종 다양성</span>
-            </div>
-            <div class="div-card-body">
-              한 지역에서 살아가는 생물 종류의 다양성. 종의 수와 각 종의 개체 수 비율로 나타냅니다.
-            </div>
-          </div>
+        <div class="div-card div-gene" data-term="🧬 유전적 다양성" data-def="같은 종이지만 유전적인 차이를 보이는 생물들의 다양성. 예를 들어 같은 사람이라도 머리색·키·생김새가 모두 다릅니다.">
+          <div class="div-card-header"><span class="div-card-icon">🧬</span><span class="div-card-title">유전적 다양성</span></div>
+          <div class="div-card-body">같은 종 안에서 나타나는 유전적 차이. 같은 사람이라도 머리색·키·생김새가 다른 것이 그 예입니다.</div>
+        </div>
+        <div class="div-card div-species" data-term="🦋 종 다양성" data-def="생태계 속에서 살아가는 생물 종류의 다양성. 한 지역에 얼마나 많은 종류의 생물이 살고 있는지를 의미합니다.">
+          <div class="div-card-header"><span class="div-card-icon">🦋</span><span class="div-card-title">종 다양성</span></div>
+          <div class="div-card-body">한 지역에서 살아가는 생물 종류의 다양성. 종의 수와 각 종의 개체 수 비율로 나타냅니다.</div>
         </div>
       </div>
-
-      <!-- 변이 연결 -->
       <div class="variation-box">
         <div class="variation-vline"></div>
         <div class="variation-info">
           <div class="variation-icon">🔀</div>
           <div class="variation-text">
             <h4>변이와 유전적 다양성</h4>
-            <p>
-              <span class="variation-keyword"
-                    data-term="변이"
-                    data-def="같은 종의 생물 사이에서 나타나는 형질의 차이. 유전자의 차이에서 비롯되며, 수많은 세대를 거쳐 유전적 다양성을 만들어 냅니다.">변이</span>란 같은 종 사이에서 나타나는 형질의 차이를 말합니다.
-              변이가 축적되면 <strong>유전적 다양성</strong>이 높아지고, 이는 종의 생존과 진화의 바탕이 됩니다.
-            </p>
+            <p><span class="variation-keyword" data-term="변이" data-def="같은 종의 생물 사이에서 나타나는 형질의 차이. 유전자의 차이에서 비롯되며, 수많은 세대를 거쳐 유전적 다양성을 만들어 냅니다.">변이</span>란 같은 종 사이에서 나타나는 형질의 차이를 말합니다. 변이가 축적되면 <strong>유전적 다양성</strong>이 높아지고, 이는 종의 생존과 진화의 바탕이 됩니다.</p>
           </div>
         </div>
       </div>
@@ -496,53 +183,385 @@ h3 { color: #374151; margin-top: 20px; }
   </div>
 </div>
 
-<!-- 하단 네비게이션 -->
-<div style="margin-top: 40px; text-align: center;">
+<div style="margin-top:40px;text-align:center;">
   <a class="nav-btn" href="science1.html">← 과학 1 단원 목록</a>
   <a class="nav-btn" href="s1-unit1.html">← 1단원</a>
   <a class="nav-btn" href="s1-unit3.html">3단원 →</a>
 </div>
 
-<!-- 팝업 -->
 <div class="modal-overlay" id="termModal">
   <div class="modal">
-    <button class="modal-close" id="modalCloseBtn" aria-label="닫기">✕</button>
+    <button class="modal-close" id="modalCloseBtn">✕</button>
     <h3 id="modalTerm"></h3>
     <p id="modalDef"></p>
   </div>
 </div>
 
 <script>
-  // 토글 버튼
-  document.querySelectorAll('.toggle-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const target = document.getElementById(btn.dataset.target);
-      const group = btn.parentElement;
-      const card = group.parentElement;
-      group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-      card.querySelectorAll('.toggle-content').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
-      target.classList.add('active');
+// ── DPR 고해상도 캔버스 설정 ──────────────────────────────
+function setupHiDPI(canvas, w, h) {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width  = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width  = w + 'px';
+  canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return ctx;
+}
+
+// ── 레이블 태그 ──────────────────────────────────────────
+function labelTag(ctx, x, y, text, color) {
+  const fsize = 13, pad = 6;
+  ctx.save();
+  ctx.font = `bold ${fsize}px sans-serif`;
+  const tw = ctx.measureText(text).width;
+  ctx.fillStyle = 'rgba(15,23,42,0.78)';
+  ctx.beginPath();
+  ctx.roundRect(x - tw/2 - pad, y - fsize/2 - pad + 2, tw + pad*2, fsize + pad*2 - 2, 6);
+  ctx.fill();
+  ctx.strokeStyle = color.replace(/[\d.]+\)$/, '0.4)');
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, y + 1);
+  ctx.restore();
+}
+
+// ── 호버 이벤트 ──────────────────────────────────────────
+function setupHover(canvas, tip, organelles, LW, LH) {
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (LW / rect.width);
+    const my = (e.clientY - rect.top)  * (LH / rect.height);
+    let found = null;
+    for (const o of organelles) {
+      if (o.label && o.desc && o.hitTest(mx, my)) { found = o; break; }
+    }
+    if (found) {
+      tip.innerHTML = `<strong>${found.label}</strong>${found.desc}`;
+      let tx = (e.clientX - rect.left) + 12;
+      let ty = (e.clientY - rect.top)  - 65;
+      if (tx + 175 > rect.width) tx -= 190;
+      if (ty < 0) ty = (e.clientY - rect.top) + 14;
+      tip.style.left = tx + 'px';
+      tip.style.top  = ty + 'px';
+      tip.classList.add('show');
+      canvas.style.cursor = 'pointer';
+    } else {
+      tip.classList.remove('show');
+      canvas.style.cursor = 'default';
+    }
+  });
+  canvas.addEventListener('mouseleave', () => tip.classList.remove('show'));
+}
+
+// ══════════════════════════════════════════════════════════
+// 동물 세포
+// ══════════════════════════════════════════════════════════
+(function() {
+  const LW = 480, LH = 340; // 논리 크기 (세포막 레이블 잘림 방지 위해 높이 확보)
+  const canvas = document.getElementById('canvas-animal');
+  const tip    = document.getElementById('tip-animal');
+  const ctx    = setupHiDPI(canvas, LW, LH);
+  const CX = LW/2, CY = LH/2 + 10;
+  const RX = 168, RY = 128;
+  const organelles = [];
+
+  function draw() {
+    ctx.clearRect(0, 0, LW, LH);
+    // 배경
+    const bg = ctx.createRadialGradient(CX, CY, 10, CX, CY, 220);
+    bg.addColorStop(0, '#1e293b'); bg.addColorStop(1, '#0f172a');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, LW, LH);
+    // 세포질 fill
+    const cf = ctx.createRadialGradient(CX-20, CY-25, 30, CX, CY, RX);
+    cf.addColorStop(0, 'rgba(125,211,252,0.07)'); cf.addColorStop(1, 'rgba(14,165,233,0)');
+    ctx.fillStyle = cf;
+    ctx.beginPath(); ctx.ellipse(CX, CY, RX, RY, 0, 0, Math.PI*2); ctx.fill();
+    // 세포막 글로우
+    ctx.save();
+    ctx.shadowColor = '#38bdf8'; ctx.shadowBlur = 18;
+    ctx.strokeStyle = 'rgba(125,211,252,0.55)'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.ellipse(CX, CY, RX, RY, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.restore();
+    organelles.forEach(o => o.draw());
+  }
+
+  // 핵
+  organelles.push({
+    label:'핵', desc:'유전물질(DNA)를 포함하고, 세포의 생명활동을 조절한다.',
+    rx:50, ry:42,
+    get x(){return CX;}, get y(){return CY;},
+    hitTest(mx,my){return ((mx-this.x)/this.rx)**2+((my-this.y)/this.ry)**2<1;},
+    draw(){
+      const x=this.x, y=this.y;
+      ctx.save();
+      ctx.shadowColor='#a78bfa'; ctx.shadowBlur=22;
+      const ng=ctx.createRadialGradient(x-14,y-14,5,x,y,50);
+      ng.addColorStop(0,'#c4b5fd'); ng.addColorStop(0.55,'#7c3aed'); ng.addColorStop(1,'#4c1d95');
+      ctx.fillStyle=ng;
+      ctx.beginPath(); ctx.ellipse(x,y,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.strokeStyle='rgba(196,181,253,0.5)'; ctx.lineWidth=1.8;
+      ctx.beginPath(); ctx.ellipse(x,y,this.rx,this.ry,0,0,Math.PI*2); ctx.stroke();
+      ctx.fillStyle='rgba(76,29,149,0.6)';
+      ctx.beginPath(); ctx.ellipse(x-9,y-8,10,8,-0.4,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+      labelTag(ctx, x, y+2, '핵', 'rgba(237,233,254,0.95)');
+    }
+  });
+
+  // 마이토콘드리아 ×2
+  [{x:CX-108, y:CY-52, a:-0.4}, {x:CX+100, y:CY+52, a:0.3}].forEach(cfg => {
+    organelles.push({
+      label:'마이토콘드리아', desc:'세포 내 양분을 분해하여 에너지를 생산한다.',
+      x:cfg.x, y:cfg.y, angle:cfg.a, rx:33, ry:14,
+      hitTest(mx,my){
+        const c=Math.cos(-this.angle), s=Math.sin(-this.angle);
+        const dx=mx-this.x, dy=my-this.y;
+        return ((c*dx-s*dy)/this.rx)**2+((s*dx+c*dy)/this.ry)**2<1;
+      },
+      draw(){
+        ctx.save();
+        ctx.translate(this.x,this.y); ctx.rotate(this.angle);
+        ctx.shadowColor='#fb923c'; ctx.shadowBlur=12;
+        const mg=ctx.createRadialGradient(-9,-4,2,0,0,33);
+        mg.addColorStop(0,'#fed7aa'); mg.addColorStop(0.5,'#f97316'); mg.addColorStop(1,'#7c2d12');
+        ctx.fillStyle=mg;
+        ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur=0;
+        ctx.strokeStyle='rgba(254,215,170,0.35)'; ctx.lineWidth=1;
+        [-10,0,10].forEach(ox=>{
+          ctx.beginPath(); ctx.moveTo(ox,-this.ry+3);
+          ctx.bezierCurveTo(ox+4,0,ox-4,0,ox,this.ry-3); ctx.stroke();
+        });
+        ctx.strokeStyle='rgba(253,186,116,0.45)'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.stroke();
+        ctx.restore();
+        labelTag(ctx, this.x, this.y - this.ry - 14, '마이토콘드리아', 'rgba(253,186,116,0.95)');
+      }
     });
   });
 
-  // 팝업 (다양성 카드 클릭 + 변이 키워드)
-  const overlay = document.getElementById('termModal');
-  const termEl  = document.getElementById('modalTerm');
-  const defEl   = document.getElementById('modalDef');
-  const closeBtn = document.getElementById('modalCloseBtn');
+  // 세포막 레이블 (상단 중앙, 잘리지 않도록 y 여유)
+  organelles.push({
+    label:'세포막', desc:'세포 내부를 보호하며, 세포 안과 밖의 물질 이동에 관여한다.',
+    hitTest(mx,my){
+      const dx=mx-CX, dy=my-CY, d=(dx/RX)**2+(dy/RY)**2;
+      return d>0.78&&d<1.28;
+    },
+    draw(){ labelTag(ctx, CX, CY - RY - 22, '세포막', 'rgba(125,211,252,0.95)'); }
+  });
 
-  document.querySelectorAll('[data-term]').forEach(el => {
-    el.addEventListener('click', () => {
-      termEl.textContent = el.dataset.term;
-      defEl.textContent  = el.dataset.def;
-      overlay.classList.add('active');
+  draw();
+  setupHover(canvas, tip, organelles, LW, LH);
+})();
+
+// ══════════════════════════════════════════════════════════
+// 식물 세포
+// ══════════════════════════════════════════════════════════
+(function() {
+  const LW = 480, LH = 360;
+  const canvas = document.getElementById('canvas-plant');
+  const tip    = document.getElementById('tip-plant');
+  const ctx    = setupHiDPI(canvas, LW, LH);
+  const CX = LW/2, CY = LH/2 + 10;
+
+  // 세포벽/세포막: 직사각형 두 겹, 맞닿은 구조
+  // 세포벽(바깥) 두께 8px, 세포막(안) 두께 5px → 맞닿게 배치
+  const WALL_W = 356, WALL_H = 288; // 세포벽 사각형 크기
+  const WALL_R = 10;                 // 모서리 반경
+  const WALL_T = 8;                  // 세포벽 두께
+  const MEM_T  = 5;                  // 세포막 두께
+  // 세포막은 세포벽 바로 안쪽에 맞닿음
+  const MEM_W  = WALL_W - WALL_T*2;
+  const MEM_H  = WALL_H - WALL_T*2;
+  const MEM_R  = Math.max(WALL_R - WALL_T, 4);
+  const organelles = [];
+
+  function draw() {
+    ctx.clearRect(0, 0, LW, LH);
+    const bg = ctx.createRadialGradient(CX, CY, 10, CX, CY, 240);
+    bg.addColorStop(0, '#1e293b'); bg.addColorStop(1, '#0f172a');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, LW, LH);
+
+    // 세포질 fill
+    const cf = ctx.createRadialGradient(CX-20, CY-25, 30, CX, CY, MEM_W/2);
+    cf.addColorStop(0, 'rgba(134,239,172,0.07)'); cf.addColorStop(1, 'rgba(22,163,74,0)');
+    ctx.fillStyle = cf;
+    ctx.beginPath();
+    ctx.roundRect(CX - MEM_W/2, CY - MEM_H/2, MEM_W, MEM_H, MEM_R);
+    ctx.fill();
+
+    // 세포벽 (바깥 사각형, 노란 글로우)
+    ctx.save();
+    ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 16;
+    ctx.strokeStyle = 'rgba(251,191,36,0.85)'; ctx.lineWidth = WALL_T;
+    ctx.beginPath();
+    ctx.roundRect(CX - WALL_W/2, CY - WALL_H/2, WALL_W, WALL_H, WALL_R);
+    ctx.stroke();
+    ctx.restore();
+
+    // 세포막 (세포벽 바로 안쪽, 초록 글로우, 맞닿음)
+    ctx.save();
+    ctx.shadowColor = '#4ade80'; ctx.shadowBlur = 12;
+    ctx.strokeStyle = 'rgba(134,239,172,0.85)'; ctx.lineWidth = MEM_T;
+    ctx.beginPath();
+    ctx.roundRect(CX - MEM_W/2, CY - MEM_H/2, MEM_W, MEM_H, MEM_R);
+    ctx.stroke();
+    ctx.restore();
+
+    organelles.forEach(o => o.draw());
+  }
+
+  // 핵
+  organelles.push({
+    label:'핵', desc:'유전물질(DNA)를 포함하고, 세포의 생명활동을 조절한다.',
+    rx:50, ry:42,
+    get x(){return CX;}, get y(){return CY+8;},
+    hitTest(mx,my){return ((mx-this.x)/this.rx)**2+((my-this.y)/this.ry)**2<1;},
+    draw(){
+      const x=this.x, y=this.y;
+      ctx.save();
+      ctx.shadowColor='#a78bfa'; ctx.shadowBlur=22;
+      const ng=ctx.createRadialGradient(x-14,y-14,5,x,y,50);
+      ng.addColorStop(0,'#c4b5fd'); ng.addColorStop(0.55,'#7c3aed'); ng.addColorStop(1,'#4c1d95');
+      ctx.fillStyle=ng;
+      ctx.beginPath(); ctx.ellipse(x,y,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.strokeStyle='rgba(196,181,253,0.5)'; ctx.lineWidth=1.8;
+      ctx.beginPath(); ctx.ellipse(x,y,this.rx,this.ry,0,0,Math.PI*2); ctx.stroke();
+      ctx.fillStyle='rgba(76,29,149,0.6)';
+      ctx.beginPath(); ctx.ellipse(x-9,y-8,10,8,-0.4,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+      labelTag(ctx, x, y+2, '핵', 'rgba(237,233,254,0.95)');
+    }
+  });
+
+  // 마이토콘드리아
+  organelles.push({
+    label:'마이토콘드리아', desc:'세포 내 양분을 분해하여 에너지를 생산한다.',
+    x:CX-108, y:CY+64, angle:-0.3, rx:30, ry:13,
+    hitTest(mx,my){
+      const c=Math.cos(-this.angle),s=Math.sin(-this.angle);
+      const dx=mx-this.x,dy=my-this.y;
+      return ((c*dx-s*dy)/this.rx)**2+((s*dx+c*dy)/this.ry)**2<1;
+    },
+    draw(){
+      ctx.save();
+      ctx.translate(this.x,this.y); ctx.rotate(this.angle);
+      ctx.shadowColor='#fb923c'; ctx.shadowBlur=10;
+      const mg=ctx.createRadialGradient(-7,-3,2,0,0,30);
+      mg.addColorStop(0,'#fed7aa'); mg.addColorStop(0.5,'#f97316'); mg.addColorStop(1,'#7c2d12');
+      ctx.fillStyle=mg;
+      ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.strokeStyle='rgba(254,215,170,0.35)'; ctx.lineWidth=1;
+      [-9,0,9].forEach(ox=>{
+        ctx.beginPath(); ctx.moveTo(ox,-this.ry+3);
+        ctx.bezierCurveTo(ox+4,0,ox-4,0,ox,this.ry-3); ctx.stroke();
+      });
+      ctx.strokeStyle='rgba(253,186,116,0.45)'; ctx.lineWidth=1.3;
+      ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.stroke();
+      ctx.restore();
+      labelTag(ctx, this.x, this.y+this.ry+16, '마이토콘드리아', 'rgba(253,186,116,0.95)');
+    }
+  });
+
+  // 엽록체 ×2
+  [{x:CX+96, y:CY-66, a:0.3}, {x:CX-88, y:CY-68, a:-0.2}].forEach(cfg => {
+    organelles.push({
+      label:'엽록체', desc:'햇빛을 받아 광합성을 하며, 양분을 합성하여 에너지를 저장한다.',
+      x:cfg.x, y:cfg.y, angle:cfg.a, rx:34, ry:16,
+      hitTest(mx,my){
+        const c=Math.cos(-this.angle),s=Math.sin(-this.angle);
+        const dx=mx-this.x,dy=my-this.y;
+        return ((c*dx-s*dy)/this.rx)**2+((s*dx+c*dy)/this.ry)**2<1;
+      },
+      draw(){
+        ctx.save();
+        ctx.translate(this.x,this.y); ctx.rotate(this.angle);
+        ctx.shadowColor='#4ade80'; ctx.shadowBlur=14;
+        const cg=ctx.createRadialGradient(-10,-5,2,0,0,34);
+        cg.addColorStop(0,'#86efac'); cg.addColorStop(0.5,'#16a34a'); cg.addColorStop(1,'#14532d');
+        ctx.fillStyle=cg;
+        ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur=0;
+        ctx.strokeStyle='rgba(187,247,208,0.4)'; ctx.lineWidth=1.2;
+        [-18,-6,6,18].forEach(ox=>{
+          ctx.beginPath(); ctx.moveTo(ox,-this.ry+4); ctx.lineTo(ox,this.ry-4); ctx.stroke();
+        });
+        ctx.strokeStyle='rgba(134,239,172,0.45)'; ctx.lineWidth=1.4;
+        ctx.beginPath(); ctx.ellipse(0,0,this.rx,this.ry,0,0,Math.PI*2); ctx.stroke();
+        ctx.restore();
+        labelTag(ctx, this.x, this.y-this.ry-14, '엽록체', 'rgba(134,239,172,0.95)');
+      }
     });
   });
 
-  closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
-  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('active'); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.classList.remove('active'); });
+  // 세포막 히트 영역 (안쪽 사각형 테두리 근처)
+  organelles.push({
+    label:'세포막', desc:'세포 내부를 보호하며, 세포 안과 밖의 물질 이동에 관여한다.',
+    hitTest(mx,my){
+      const hw=MEM_W/2, hh=MEM_H/2;
+      const ax=Math.abs(mx-CX), ay=Math.abs(my-CY);
+      const inside = ax<hw && ay<hh;
+      const innerHW = hw - MEM_T*2, innerHH = hh - MEM_T*2;
+      const deepInside = ax<innerHW && ay<innerHH;
+      return inside && !deepInside;
+    },
+    draw(){ labelTag(ctx, CX+50, CY - MEM_H/2 - 20, '세포막', 'rgba(134,239,172,0.95)'); }
+  });
+
+  // 세포벽 히트 영역 (바깥 사각형 테두리 근처)
+  organelles.push({
+    label:'세포벽', desc:'세포막 밖에 존재하며, 셀룰로스로 구성되어 딱딱하고 세포를 보호한다.',
+    hitTest(mx,my){
+      const hw=WALL_W/2, hh=WALL_H/2;
+      const ax=Math.abs(mx-CX), ay=Math.abs(my-CY);
+      const inside = ax<hw && ay<hh;
+      const innerHW = hw - WALL_T*2, innerHH = hh - WALL_T*2;
+      const deepInside = ax<innerHW && ay<innerHH;
+      return inside && !deepInside;
+    },
+    draw(){ labelTag(ctx, CX-50, CY - WALL_H/2 - 20, '세포벽', 'rgba(251,191,36,0.95)'); }
+  });
+
+  draw();
+  setupHover(canvas, tip, organelles, LW, LH);
+})();
+
+// ── 토글 ──────────────────────────────────────────────────
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = document.getElementById(btn.dataset.target);
+    const group  = btn.parentElement;
+    const card   = group.parentElement;
+    group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    card.querySelectorAll('.toggle-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    target.classList.add('active');
+  });
+});
+
+// ── 팝업 ──────────────────────────────────────────────────
+const overlay  = document.getElementById('termModal');
+const termEl   = document.getElementById('modalTerm');
+const defEl    = document.getElementById('modalDef');
+const closeBtn = document.getElementById('modalCloseBtn');
+document.querySelectorAll('[data-term]').forEach(el => {
+  el.addEventListener('click', () => {
+    termEl.textContent = el.dataset.term;
+    defEl.textContent  = el.dataset.def;
+    overlay.classList.add('active');
+  });
+});
+closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
+overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('active'); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') overlay.classList.remove('active'); });
 </script>
 </body>
 </html>
