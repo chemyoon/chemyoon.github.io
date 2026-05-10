@@ -399,14 +399,17 @@ h3 { color: #374151; margin-top: 20px; }
 
       <div class="tree-branch">
         <!-- 가로선 -->
-        <div class="tree-hline-wrap">
-          <div class="tree-hline"></div>
-          <div class="tree-col"><div class="tree-col-vline"></div></div>
-          <div class="tree-col"><div class="tree-col-vline"></div></div>
-          <div class="tree-col"><div class="tree-col-vline"></div></div>
+        <!-- 가로선: 카드 중심 사이만 연결 (양끝 삐침 없음) -->
+        <div style="width:90%; display:flex; position:relative; height:22px;">
+          <!-- 선은 왼쪽 카드 중심(1/6) ~ 오른쪽 카드 중심(5/6) -->
+          <div style="position:absolute; top:0; left:16.67%; right:16.67%; height:2px; background:#93c5fd;"></div>
+          <!-- 세 세로선 -->
+          <div style="flex:1; display:flex; justify-content:center;"><div style="width:2px; height:22px; background:#93c5fd;"></div></div>
+          <div style="flex:1; display:flex; justify-content:center;"><div style="width:2px; height:22px; background:#93c5fd;"></div></div>
+          <div style="flex:1; display:flex; justify-content:center;"><div style="width:2px; height:22px; background:#93c5fd;"></div></div>
         </div>
 
-        <!-- 카드 3개 -->
+        <!-- 카드 3개: 유전적 다양성↔종 다양성 위치 교환 -->
         <div class="diversity-cards">
           <div class="div-card div-eco"
                data-term="🌳 생태계 다양성"
@@ -420,18 +423,6 @@ h3 { color: #374151; margin-top: 20px; }
             </div>
           </div>
 
-          <div class="div-card div-species"
-               data-term="🦋 종 다양성"
-               data-def="생태계 속에서 살아가는 생물 종류의 다양성. 한 지역에 얼마나 많은 종류의 생물이 살고 있는지를 의미합니다.">
-            <div class="div-card-header">
-              <span class="div-card-icon">🦋</span>
-              <span class="div-card-title">종 다양성</span>
-            </div>
-            <div class="div-card-body">
-              한 지역에서 살아가는 생물 종류의 다양성. 종의 수와 각 종의 개체 수 비율로 나타냅니다.
-            </div>
-          </div>
-
           <div class="div-card div-gene"
                data-term="🧬 유전적 다양성"
                data-def="같은 종이지만 유전적인 차이를 보이는 생물들의 다양성. 예를 들어 같은 사람이라도 머리색·키·생김새가 모두 다릅니다.">
@@ -441,6 +432,18 @@ h3 { color: #374151; margin-top: 20px; }
             </div>
             <div class="div-card-body">
               같은 종 안에서 나타나는 유전적 차이. 같은 사람이라도 머리색·키·생김새가 다른 것이 그 예입니다.
+            </div>
+          </div>
+
+          <div class="div-card div-species"
+               data-term="🦋 종 다양성"
+               data-def="생태계 속에서 살아가는 생물 종류의 다양성. 한 지역에 얼마나 많은 종류의 생물이 살고 있는지를 의미합니다.">
+            <div class="div-card-header">
+              <span class="div-card-icon">🦋</span>
+              <span class="div-card-title">종 다양성</span>
+            </div>
+            <div class="div-card-body">
+              한 지역에서 살아가는 생물 종류의 다양성. 종의 수와 각 종의 개체 수 비율로 나타냅니다.
             </div>
           </div>
         </div>
