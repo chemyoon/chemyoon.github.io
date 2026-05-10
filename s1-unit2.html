@@ -58,23 +58,27 @@ h3{color:#374151;margin-top:20px;}
 .variation-keyword{cursor:pointer;background:#fce7f3;color:#9d174d;font-weight:700;padding:1px 8px;border-radius:4px;border-bottom:2px solid #f9a8d4;}
 .variation-keyword:hover{background:#fbcfe8;}
 
-/* 피라미드 */
-.pyramid-scene{position:relative;width:100%;max-width:480px;margin:12px auto 0;}
-.pyramid-scene canvas{display:block;width:100%;}
-.pyr-tip{position:absolute;background:rgba(15,23,42,0.93);color:#e2e8f0;font-size:0.82em;padding:9px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.13);pointer-events:none;opacity:0;transition:opacity 0.18s;max-width:220px;line-height:1.6;white-space:normal;z-index:10;}
-.pyr-tip strong{color:#7dd3fc;display:block;margin-bottom:3px;}
-.pyr-tip.show{opacity:1;}
+/* 구분선 */
+.section-divider{width:100%;border:none;border-top:1.5px dashed #e5e7eb;margin:24px 0;}
+
+/* 종자 은행 */
+.seed-bank{background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:18px 22px;margin-bottom:16px;display:flex;align-items:flex-start;gap:16px;}
+.seed-bank-icon{font-size:2.2em;line-height:1.2;flex-shrink:0;}
+.seed-bank-title{font-weight:700;font-size:1.05em;color:#15803d;margin-bottom:6px;}
+.seed-bank-desc{color:#374151;font-size:0.95em;line-height:1.7;}
+
+/* 강조 박스 */
+.highlight-box{background:linear-gradient(135deg,#eff6ff,#dbeafe);border-left:5px solid #2563eb;border-radius:8px;padding:14px 18px;color:#1e3a8a;font-size:0.97em;line-height:1.7;margin-bottom:20px;}
 
 /* 생태계 시뮬레이션 */
-.eco-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;}
+.eco-subtitle{font-size:0.88em;color:#6b7280;margin-bottom:14px;text-align:center;}
+.eco-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .eco-box{background:#f8fafc;border-radius:12px;padding:14px;position:relative;}
 .eco-title-badge{text-align:center;font-weight:700;font-size:0.9em;padding:6px 16px;border-radius:20px;color:white;margin-bottom:12px;display:inline-block;position:relative;left:50%;transform:translateX(-50%);}
 .low-badge{background:#ef4444;}
 .high-badge{background:#16a34a;}
 .eco-canvas-wrap{position:relative;width:100%;}
 .eco-canvas-wrap canvas{display:block;width:100%;border-radius:8px;background:#f8fafc;}
-
-/* 생태계 노드 */
 .eco-node{position:absolute;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);transition:opacity 0.5s,filter 0.5s;z-index:2;}
 .eco-node.clickable{cursor:pointer;}
 .eco-node.clickable:hover .eco-icon{transform:scale(1.15);filter:drop-shadow(0 0 8px #fbbf24);}
@@ -91,8 +95,6 @@ h3{color:#374151;margin-top:20px;}
 .eco-node.extinct  .eco-badge{opacity:1;background:#6b7280;color:white;}
 .eco-hint{position:absolute;top:-26px;left:50%;transform:translateX(-50%);background:#fef3c7;border:1px solid #fbbf24;color:#92400e;font-size:0.6em;font-weight:700;padding:2px 7px;border-radius:6px;white-space:nowrap;pointer-events:none;animation:hint 1.2s infinite;}
 @keyframes hint{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-3px);}}
-
-/* 생태계 범례 & 버튼 */
 .eco-legend{display:flex;gap:14px;justify-content:center;margin-top:10px;font-size:0.8em;flex-wrap:wrap;}
 .eco-leg{display:flex;align-items:center;gap:5px;}
 .eco-leg-dot{width:12px;height:12px;border-radius:50%;}
@@ -106,6 +108,13 @@ h3{color:#374151;margin-top:20px;}
 .eco-exp-title{font-weight:700;margin-bottom:5px;}
 .eco-exp-card.low .eco-exp-title{color:#b91c1c;}
 .eco-exp-card.high .eco-exp-title{color:#15803d;}
+
+/* 피라미드 */
+.pyramid-scene{position:relative;width:100%;max-width:480px;margin:12px auto 0;}
+.pyramid-scene canvas{display:block;width:100%;}
+.pyr-tip{position:absolute;background:rgba(15,23,42,0.93);color:#e2e8f0;font-size:0.82em;padding:9px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.13);pointer-events:none;opacity:0;transition:opacity 0.18s;max-width:220px;line-height:1.6;white-space:normal;z-index:10;}
+.pyr-tip strong{color:#7dd3fc;display:block;margin-bottom:3px;}
+.pyr-tip.show{opacity:1;}
 
 /* 팝업 */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;justify-content:center;align-items:center;padding:20px;}
@@ -175,7 +184,7 @@ h3{color:#374151;margin-top:20px;}
   </div>
 </div>
 
-<!-- ③ 생물 다양성 -->
+<!-- ③ 생물 다양성 + 보존 통합 -->
 <h2>③ 생물 다양성</h2>
 <div class="card">
   <p>카드에 마우스를 올리면 자세한 설명을 볼 수 있어요.</p>
@@ -215,28 +224,26 @@ h3{color:#374151;margin-top:20px;}
       </div>
     </div>
   </div>
-</div>
 
-<!-- ④ 생물의 분류 -->
-<h2>④ 생물의 분류</h2>
-<div class="card">
-  <p>생물은 공통된 특징에 따라 단계적으로 분류됩니다. 각 단계에 마우스를 올려보세요.</p>
-  <div class="pyramid-scene"><canvas id="canvas-pyramid"></canvas><div class="pyr-tip" id="pyr-tip"></div></div>
-</div>
+  <!-- 구분선 -->
+  <hr class="section-divider">
 
-<!-- ⑤ 생물 다양성 보존 -->
-<h2>⑤ 생물 다양성 보존을 위한 노력</h2>
-<div class="card">
-  <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:18px 22px;margin-bottom:16px;display:flex;align-items:flex-start;gap:16px;">
-    <div style="font-size:2.2em;line-height:1.2;">🌱</div>
+  <!-- 생물 다양성 보존 -->
+  <h3 style="margin-top:0;color:#15803d;">🌿 생물 다양성 보존을 위한 노력</h3>
+
+  <div class="seed-bank">
+    <div class="seed-bank-icon">🌱</div>
     <div>
-      <div style="font-weight:700;font-size:1.05em;color:#15803d;margin-bottom:6px;">종자 은행</div>
-      <div style="color:#374151;font-size:0.95em;line-height:1.7;">천재지변 등에 의한 식물의 <span id="extinction-keyword" style="cursor:pointer;background:#dcfce7;color:#15803d;font-weight:700;padding:1px 8px;border-radius:4px;border-bottom:2px solid #86efac;">멸종</span>에 대비하여 다양한 식물의 종자를 보관하는 시설이다.</div>
+      <div class="seed-bank-title">종자 은행</div>
+      <div class="seed-bank-desc">천재지변 등에 의한 식물의 <span id="extinction-keyword" style="cursor:pointer;background:#dcfce7;color:#15803d;font-weight:700;padding:1px 8px;border-radius:4px;border-bottom:2px solid #86efac;">멸종</span>에 대비하여 다양한 식물의 종자를 보관하는 시설이다.</div>
     </div>
   </div>
 
-  <p style="font-size:0.95em;color:#374151;margin-bottom:14px;">공통 생물(🌾벼 · 🦗메뚜기 · 🐸개구리 · 🦅매)을 클릭해서 멸종 시뮬레이션을 해보세요.</p>
+  <div class="highlight-box">
+    💡 생물 다양성이 높은 생태계는 특정 생물종의 <strong>멸종</strong>에 대해 안정적으로 대응한다.
+  </div>
 
+  <p class="eco-subtitle">🌿 공통 생물(🌾벼 · 🦗메뚜기 · 🐸개구리 · 🦅매)을 클릭해서 생물 다양성에 따른 멸종의 영향을 확인해보세요</p>
   <div class="eco-wrap">
     <div class="eco-box">
       <div class="eco-title-badge low-badge">생물 다양성이 낮은 생태계</div>
@@ -247,7 +254,6 @@ h3{color:#374151;margin-top:20px;}
       <div class="eco-canvas-wrap" id="high-wrap"><canvas id="high-canvas"></canvas></div>
     </div>
   </div>
-
   <div class="eco-legend">
     <div class="eco-leg"><div class="eco-leg-dot" style="background:#ef4444"></div>개체수 감소</div>
     <div class="eco-leg"><div class="eco-leg-dot" style="background:#3b82f6"></div>개체수 증가</div>
@@ -258,6 +264,13 @@ h3{color:#374151;margin-top:20px;}
     <div class="eco-exp-card low"><div class="eco-exp-title">😟 낮은 다양성 생태계</div><div id="low-explain"></div></div>
     <div class="eco-exp-card high"><div class="eco-exp-title">😊 높은 다양성 생태계</div><div id="high-explain"></div></div>
   </div>
+</div>
+
+<!-- ④ 생물의 분류 -->
+<h2>④ 생물의 분류</h2>
+<div class="card">
+  <p>생물은 공통된 특징에 따라 단계적으로 분류됩니다. 각 단계에 마우스를 올려보세요.</p>
+  <div class="pyramid-scene"><canvas id="canvas-pyramid"></canvas><div class="pyr-tip" id="pyr-tip"></div></div>
 </div>
 
 <!-- 하단 네비게이션 -->
@@ -278,60 +291,48 @@ h3{color:#374151;margin-top:20px;}
 
 <script>
 // ══ 공통 유틸 ════════════════════════════════════════════
-function setupHiDPI(canvas, w, h) {
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = w*dpr; canvas.height = h*dpr;
-  canvas.style.width = w+'px'; canvas.style.height = h+'px';
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-  return ctx;
+function setupHiDPI(canvas,w,h){
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=w*dpr;canvas.height=h*dpr;
+  canvas.style.width=w+'px';canvas.style.height=h+'px';
+  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);return ctx;
 }
-function labelTag(ctx, x, y, text, color) {
-  const fs=13, pad=6;
-  ctx.save();
-  ctx.font = `bold ${fs}px sans-serif`;
-  const tw = ctx.measureText(text).width;
-  ctx.fillStyle = 'rgba(15,23,42,0.78)';
-  ctx.beginPath(); ctx.roundRect(x-tw/2-pad, y-fs/2-pad+2, tw+pad*2, fs+pad*2-2, 6); ctx.fill();
-  ctx.strokeStyle = color.replace(/[\d.]+\)$/, '0.4)'); ctx.lineWidth=1; ctx.stroke();
-  ctx.fillStyle=color; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(text, x, y+1); ctx.restore();
+function labelTag(ctx,x,y,text,color){
+  const fs=13,pad=6;ctx.save();ctx.font=`bold ${fs}px sans-serif`;
+  const tw=ctx.measureText(text).width;
+  ctx.fillStyle='rgba(15,23,42,0.78)';ctx.beginPath();ctx.roundRect(x-tw/2-pad,y-fs/2-pad+2,tw+pad*2,fs+pad*2-2,6);ctx.fill();
+  ctx.strokeStyle=color.replace(/[\d.]+\)$/,'0.4)');ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,x,y+1);ctx.restore();
 }
-function setupHover(canvas, tip, orgs, LW, LH) {
-  canvas.addEventListener('mousemove', e => {
+function setupHover(canvas,tip,orgs,LW,LH){
+  canvas.addEventListener('mousemove',e=>{
     const rect=canvas.getBoundingClientRect();
-    const mx=(e.clientX-rect.left)*(LW/rect.width), my=(e.clientY-rect.top)*(LH/rect.height);
+    const mx=(e.clientX-rect.left)*(LW/rect.width),my=(e.clientY-rect.top)*(LH/rect.height);
     let found=null;
-    for (const o of orgs) { if (o.label&&o.desc&&o.hitTest(mx,my)){found=o;break;} }
-    if (found) {
+    for(const o of orgs){if(o.label&&o.desc&&o.hitTest(mx,my)){found=o;break;}}
+    if(found){
       tip.innerHTML=`<strong>${found.label}</strong>${found.desc}`;
-      let tx=(e.clientX-rect.left)+12, ty=(e.clientY-rect.top)-65;
-      if(tx+175>rect.width) tx-=190; if(ty<0) ty=(e.clientY-rect.top)+14;
-      tip.style.left=tx+'px'; tip.style.top=ty+'px';
-      tip.classList.add('show'); canvas.style.cursor='pointer';
-    } else { tip.classList.remove('show'); canvas.style.cursor='default'; }
+      let tx=(e.clientX-rect.left)+12,ty=(e.clientY-rect.top)-65;
+      if(tx+175>rect.width)tx-=190;if(ty<0)ty=(e.clientY-rect.top)+14;
+      tip.style.left=tx+'px';tip.style.top=ty+'px';tip.classList.add('show');canvas.style.cursor='pointer';
+    }else{tip.classList.remove('show');canvas.style.cursor='default';}
   });
-  canvas.addEventListener('mouseleave', ()=>tip.classList.remove('show'));
+  canvas.addEventListener('mouseleave',()=>tip.classList.remove('show'));
 }
 
 // ══ 동물 세포 ════════════════════════════════════════════
 (function(){
-  const LW=480,LH=340;
-  const canvas=document.getElementById('canvas-animal');
-  const tip=document.getElementById('tip-animal');
+  const LW=480,LH=340,canvas=document.getElementById('canvas-animal'),tip=document.getElementById('tip-animal');
   const ctx=setupHiDPI(canvas,LW,LH);
-  const CX=LW/2,CY=LH/2+10,RX=168,RY=128;
-  const orgs=[];
-  const bg=ctx.createRadialGradient(CX,CY,10,CX,CY,220);
-  bg.addColorStop(0,'#1e293b');bg.addColorStop(1,'#0f172a');
+  const CX=LW/2,CY=LH/2+10,RX=168,RY=128,orgs=[];
+  const bg=ctx.createRadialGradient(CX,CY,10,CX,CY,220);bg.addColorStop(0,'#1e293b');bg.addColorStop(1,'#0f172a');
   ctx.fillStyle=bg;ctx.fillRect(0,0,LW,LH);
-  const cf=ctx.createRadialGradient(CX-20,CY-25,30,CX,CY,RX);
-  cf.addColorStop(0,'rgba(125,211,252,0.07)');cf.addColorStop(1,'rgba(14,165,233,0)');
+  const cf=ctx.createRadialGradient(CX-20,CY-25,30,CX,CY,RX);cf.addColorStop(0,'rgba(125,211,252,0.07)');cf.addColorStop(1,'rgba(14,165,233,0)');
   ctx.fillStyle=cf;ctx.beginPath();ctx.ellipse(CX,CY,RX,RY,0,0,Math.PI*2);ctx.fill();
   ctx.save();ctx.shadowColor='#38bdf8';ctx.shadowBlur=18;ctx.strokeStyle='rgba(125,211,252,0.55)';ctx.lineWidth=5;
   ctx.beginPath();ctx.ellipse(CX,CY,RX,RY,0,0,Math.PI*2);ctx.stroke();ctx.restore();
   orgs.push({label:'핵',desc:'유전물질(DNA)를 포함하고, 세포의 생명활동을 조절한다.',rx:50,ry:42,get x(){return CX;},get y(){return CY;},
-    hitTest(mx,my){return ((mx-this.x)/this.rx)**2+((my-this.y)/this.ry)**2<1;},
+    hitTest(mx,my){return((mx-this.x)/this.rx)**2+((my-this.y)/this.ry)**2<1;},
     draw(){const x=this.x,y=this.y;ctx.save();ctx.shadowColor='#a78bfa';ctx.shadowBlur=22;
       const ng=ctx.createRadialGradient(x-14,y-14,5,x,y,50);ng.addColorStop(0,'#c4b5fd');ng.addColorStop(0.55,'#7c3aed');ng.addColorStop(1,'#4c1d95');
       ctx.fillStyle=ng;ctx.beginPath();ctx.ellipse(x,y,this.rx,this.ry,0,0,Math.PI*2);ctx.fill();
@@ -357,19 +358,15 @@ function setupHover(canvas, tip, orgs, LW, LH) {
 
 // ══ 식물 세포 ════════════════════════════════════════════
 (function(){
-  const LW=480,LH=360;
-  const canvas=document.getElementById('canvas-plant');
-  const tip=document.getElementById('tip-plant');
+  const LW=480,LH=360,canvas=document.getElementById('canvas-plant'),tip=document.getElementById('tip-plant');
   const ctx=setupHiDPI(canvas,LW,LH);
   const CX=LW/2,CY=LH/2+10;
-  const WALL_W=356,WALL_H=288,WALL_R=10,WALL_T=8;
-  const MEM_T=5,MEM_W=WALL_W-WALL_T*2,MEM_H=WALL_H-WALL_T*2,MEM_R=Math.max(WALL_R-WALL_T,4);
+  const WALL_W=356,WALL_H=288,WALL_R=10,WALL_T=8,MEM_T=5;
+  const MEM_W=WALL_W-WALL_T*2,MEM_H=WALL_H-WALL_T*2,MEM_R=Math.max(WALL_R-WALL_T,4);
   const orgs=[];
-  const bg=ctx.createRadialGradient(CX,CY,10,CX,CY,240);
-  bg.addColorStop(0,'#1e293b');bg.addColorStop(1,'#0f172a');
+  const bg=ctx.createRadialGradient(CX,CY,10,CX,CY,240);bg.addColorStop(0,'#1e293b');bg.addColorStop(1,'#0f172a');
   ctx.fillStyle=bg;ctx.fillRect(0,0,LW,LH);
-  const cf=ctx.createRadialGradient(CX-20,CY-25,30,CX,CY,MEM_W/2);
-  cf.addColorStop(0,'rgba(134,239,172,0.07)');cf.addColorStop(1,'rgba(22,163,74,0)');
+  const cf=ctx.createRadialGradient(CX-20,CY-25,30,CX,CY,MEM_W/2);cf.addColorStop(0,'rgba(134,239,172,0.07)');cf.addColorStop(1,'rgba(22,163,74,0)');
   ctx.fillStyle=cf;ctx.beginPath();ctx.roundRect(CX-MEM_W/2,CY-MEM_H/2,MEM_W,MEM_H,MEM_R);ctx.fill();
   ctx.save();ctx.shadowColor='#fbbf24';ctx.shadowBlur=16;ctx.strokeStyle='rgba(251,191,36,0.85)';ctx.lineWidth=WALL_T;
   ctx.beginPath();ctx.roundRect(CX-WALL_W/2,CY-WALL_H/2,WALL_W,WALL_H,WALL_R);ctx.stroke();ctx.restore();
@@ -414,9 +411,7 @@ function setupHover(canvas, tip, orgs, LW, LH) {
 
 // ══ 분류 피라미드 ═════════════════════════════════════════
 (function(){
-  const LW=480,LH=440;
-  const canvas=document.getElementById('canvas-pyramid');
-  const tip=document.getElementById('pyr-tip');
+  const LW=480,LH=440,canvas=document.getElementById('canvas-pyramid'),tip=document.getElementById('pyr-tip');
   const ctx=setupHiDPI(canvas,LW,LH);
   const levels=[
     {label:'종',emojis:['🐱'],color:'#7c3aed',tip:'<strong>종 (Species)</strong>두 생물의 자손이 번식 능력이 있을 경우, 같은 종에 해당한다.'},
@@ -508,39 +503,30 @@ function setupHover(canvas, tip, orgs, LW, LH) {
     }
   };
 
-  const ECO_H = 580;
-
-  function buildEco(eco, canvasId, wrapId) {
-    const wrap=document.getElementById(wrapId);
-    const canvas=document.getElementById(canvasId);
-    const dpr=window.devicePixelRatio||1;
-    const W=wrap.clientWidth||380;
-    canvas.width=W*dpr; canvas.height=ECO_H*dpr;
-    canvas.style.width=W+'px'; canvas.style.height=ECO_H+'px';
-    const ctx=canvas.getContext('2d');
-    ctx.scale(dpr,dpr);
-    ctx.fillStyle='#f8fafc'; ctx.fillRect(0,0,W,ECO_H);
-
+  const ECO_H=580;
+  function buildEco(eco,canvasId,wrapId){
+    const wrap=document.getElementById(wrapId),canvas=document.getElementById(canvasId);
+    const dpr=window.devicePixelRatio||1,W=wrap.clientWidth||380;
+    canvas.width=W*dpr;canvas.height=ECO_H*dpr;canvas.style.width=W+'px';canvas.style.height=ECO_H+'px';
+    const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+    ctx.fillStyle='#f8fafc';ctx.fillRect(0,0,W,ECO_H);
     eco.edges.forEach(([fid,tid])=>{
-      const fn=eco.nodes.find(n=>n.id===fid), tn=eco.nodes.find(n=>n.id===tid);
+      const fn=eco.nodes.find(n=>n.id===fid),tn=eco.nodes.find(n=>n.id===tid);
       const fx=fn.x*W,fy=fn.y*ECO_H,tx=tn.x*W,ty=tn.y*ECO_H;
-      const dx=tx-fx,dy=ty-fy,len=Math.sqrt(dx*dx+dy*dy);
-      const ux=dx/len,uy=dy/len,pad=28;
+      const dx=tx-fx,dy=ty-fy,len=Math.sqrt(dx*dx+dy*dy),ux=dx/len,uy=dy/len,pad=28;
       const sx=fx+ux*pad,sy=fy+uy*pad,ex=tx-ux*pad,ey=ty-uy*pad;
       const ang=Math.atan2(ey-sy,ex-sx);
-      ctx.save();
-      ctx.strokeStyle='rgba(16,185,129,0.45)';ctx.lineWidth=2;ctx.setLineDash([5,4]);
+      ctx.save();ctx.strokeStyle='rgba(16,185,129,0.45)';ctx.lineWidth=2;ctx.setLineDash([5,4]);
       ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(ex,ey);ctx.stroke();ctx.setLineDash([]);
       ctx.fillStyle='rgba(16,185,129,0.65)';ctx.beginPath();
       ctx.moveTo(ex,ey);ctx.lineTo(ex-11*Math.cos(ang-0.42),ey-11*Math.sin(ang-0.42));
       ctx.lineTo(ex-11*Math.cos(ang+0.42),ey-11*Math.sin(ang+0.42));ctx.closePath();ctx.fill();ctx.restore();
     });
-
     eco.nodes.forEach(n=>{
       const div=document.createElement('div');
       div.className='eco-node'+(n.clickable?' clickable':'');
       div.id=canvasId+'-'+n.id;
-      div.style.left=(n.x*W)+'px'; div.style.top=(n.y*ECO_H)+'px';
+      div.style.left=(n.x*W)+'px';div.style.top=(n.y*ECO_H)+'px';
       div.innerHTML=(n.clickable?'<div class="eco-hint">클릭!</div>':'')+
         `<div class="eco-icon">${n.emoji}</div>`+
         `<div class="eco-label">${n.label}</div>`+
@@ -554,12 +540,12 @@ function setupHover(canvas, tip, orgs, LW, LH) {
 
   let active=false;
   function applyScenario(eco,canvasId,key){
-    const s=eco.scenarios[key]; if(!s)return;
+    const s=eco.scenarios[key];if(!s)return;
     const extEl=document.getElementById(canvasId+'-'+key);
     if(extEl){extEl.classList.add('extinct');const b=document.getElementById('ebadge-'+canvasId+'-'+key);if(b)b.textContent='✕ 멸종';const h=extEl.querySelector('.eco-hint');if(h)h.style.display='none';}
     Object.entries(s).forEach(([id,state])=>{
       if(id==='explain')return;
-      const el=document.getElementById(canvasId+'-'+id); if(!el)return;
+      const el=document.getElementById(canvasId+'-'+id);if(!el)return;
       el.classList.remove('increase','decrease');
       if(state==='increase'||state==='decrease'){el.classList.add(state);const b=document.getElementById('ebadge-'+canvasId+'-'+id);if(b)b.textContent=state==='increase'?'↑ 증가':'↓ 감소';}
     });
@@ -569,9 +555,9 @@ function setupHover(canvas, tip, orgs, LW, LH) {
   ['rice','grass','frog','hawk'].forEach(lid=>{
     const hid=MAP[lid];
     ['low-canvas-'+lid,'high-canvas-'+hid].forEach(domId=>{
-      const el=document.getElementById(domId); if(!el)return;
+      const el=document.getElementById(domId);if(!el)return;
       el.addEventListener('click',()=>{
-        if(active)return; active=true;
+        if(active)return;active=true;
         document.querySelectorAll('.eco-hint').forEach(h=>h.style.display='none');
         applyScenario(LOW,'low-canvas',lid);
         applyScenario(HIGH,'high-canvas',hid);
@@ -586,8 +572,8 @@ function setupHover(canvas, tip, orgs, LW, LH) {
     active=false;
     [...LOW.nodes,...HIGH.nodes].forEach(n=>{
       const pre=LOW.nodes.includes(n)?'low-canvas-':'high-canvas-';
-      const el=document.getElementById(pre+n.id); if(el)el.classList.remove('extinct','increase','decrease');
-      const b=document.getElementById('ebadge-'+pre+n.id); if(b)b.textContent='';
+      const el=document.getElementById(pre+n.id);if(el)el.classList.remove('extinct','increase','decrease');
+      const b=document.getElementById('ebadge-'+pre+n.id);if(b)b.textContent='';
     });
     document.querySelectorAll('.eco-hint').forEach(h=>h.style.display='');
     document.getElementById('eco-explain').classList.remove('show');
@@ -601,7 +587,7 @@ document.querySelectorAll('.toggle-btn').forEach(btn=>{
     const group=btn.parentElement,card=group.parentElement;
     group.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
     card.querySelectorAll('.toggle-content').forEach(c=>c.classList.remove('active'));
-    btn.classList.add('active'); target.classList.add('active');
+    btn.classList.add('active');target.classList.add('active');
   });
 });
 
@@ -613,7 +599,9 @@ const closeBtn=document.getElementById('modalCloseBtn');
 document.querySelectorAll('[data-term]').forEach(el=>{
   el.addEventListener('click',()=>{termEl.textContent=el.dataset.term;defEl.textContent=el.dataset.def;overlay.classList.add('active');});
 });
-document.getElementById('extinction-keyword').addEventListener('click',()=>{termEl.textContent='멸종';defEl.textContent='생태계에서 특정 생물종이 사라지는 것.';overlay.classList.add('active');});
+document.getElementById('extinction-keyword').addEventListener('click',()=>{
+  termEl.textContent='멸종';defEl.textContent='생태계에서 특정 생물종이 사라지는 것.';overlay.classList.add('active');
+});
 closeBtn.addEventListener('click',()=>overlay.classList.remove('active'));
 overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('active');});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.classList.remove('active');});
