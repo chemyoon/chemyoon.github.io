@@ -28,7 +28,34 @@ h3 { color: #374151; margin-top: 20px; }
 .organelle {
   background: white; border: 1px solid #d1d5db; border-radius: 6px;
   padding: 10px 12px; text-align: center; font-weight: 600; color: #1e40af;
+  cursor: default; position: relative; transition: all 0.2s;
 }
+.organelle:hover {
+  background: #eff6ff; border-color: #93c5fd;
+  transform: translateY(-3px); box-shadow: 0 4px 12px rgba(37,99,235,0.15);
+}
+.organelle .org-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%; transform: translateX(-50%);
+  background: #1e40af; color: white;
+  font-size: 0.82em; font-weight: 400;
+  padding: 8px 12px; border-radius: 8px;
+  width: 180px; line-height: 1.5;
+  text-align: left; z-index: 10;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+  white-space: normal;
+  pointer-events: none;
+}
+.organelle .org-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #1e40af;
+}
+.organelle:hover .org-tooltip { display: block; }
 
 /* 생물 구성 단계 */
 .stages { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: 16px 0; }
@@ -267,9 +294,9 @@ h3 { color: #374151; margin-top: 20px; }
       <text x="325" y="44" text-anchor="middle" font-size="12" fill="#dc2626" font-weight="bold">세포막</text>
     </svg>
     <div class="organelle-list">
-      <div class="organelle">핵</div>
-      <div class="organelle">마이토콘드리아</div>
-      <div class="organelle">세포막</div>
+      <div class="organelle">핵<span class="org-tooltip">유전물질(DNA)를 포함하고, 세포의 생명활동을 조절한다.</span></div>
+      <div class="organelle">마이토콘드리아<span class="org-tooltip">세포 내 양분을 분해하여 에너지를 생산한다.</span></div>
+      <div class="organelle">세포막<span class="org-tooltip">세포 내부를 보호하며, 세포 안과 밖의 물질 이동에 관여한다.</span></div>
     </div>
   </div>
   <div class="toggle-content" id="cell-plant">
@@ -326,11 +353,11 @@ h3 { color: #374151; margin-top: 20px; }
       <text x="20" y="248" text-anchor="start" font-size="11" fill="#dc2626" font-weight="bold">세포막 (안쪽 빨간 선)</text>
     </svg>
     <div class="organelle-list">
-      <div class="organelle">핵</div>
-      <div class="organelle">마이토콘드리아</div>
-      <div class="organelle">세포막</div>
-      <div class="organelle">엽록체</div>
-      <div class="organelle">세포벽</div>
+      <div class="organelle">핵<span class="org-tooltip">유전물질(DNA)를 포함하고, 세포의 생명활동을 조절한다.</span></div>
+      <div class="organelle">마이토콘드리아<span class="org-tooltip">세포 내 양분을 분해하여 에너지를 생산한다.</span></div>
+      <div class="organelle">세포막<span class="org-tooltip">세포 내부를 보호하며, 세포 안과 밖의 물질 이동에 관여한다.</span></div>
+      <div class="organelle">엽록체<span class="org-tooltip">햇빛을 받아 광합성을 하며, 양분을 합성하여 에너지를 저장한다.</span></div>
+      <div class="organelle">세포벽<span class="org-tooltip">세포막 밖에 존재하며, 셀룰로스로 구성되어 딱딱하고 세포를 보호한다.</span></div>
     </div>
   </div>
 </div>
