@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>3단원 열 - 과학 1</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body{font-family:'Pretendard',sans-serif;max-width:860px;margin:40px auto;padding:20px;line-height:1.7;background:#f9fafb;color:#1f2937;}
+h1{color:#2563eb;border-bottom:3px solid #2563eb;padding-bottom:8px;}
+h2{color:#1e40af;margin-top:36px;}
+h3{color:#374151;margin-top:20px;}
+.card{border:1px solid #ddd;border-radius:10px;padding:20px 24px;margin:18px 0;background:white;}
+.nav-btn{display:inline-block;padding:8px 16px;background:#eff6ff;color:#1e40af;text-decoration:none;border-radius:6px;font-weight:600;margin-right:6px;}
+.nav-btn:hover{background:#2563eb;color:white;}
+
+/* 입자모형 조건 카드 */
+.conditions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:0;}
+.cond-item{display:flex;align-items:flex-start;gap:12px;background:#f0f7ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:14px 16px;}
+.cond-num{background:#2563eb;color:white;font-weight:700;font-size:0.9em;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.cond-text{font-size:0.92em;color:#1e3a8a;line-height:1.6;}
+
+/* 시뮬레이션 컨트롤 */
+.sim-controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px;}
+.ctrl-group{display:flex;align-items:center;gap:8px;}
+.ctrl-label{font-size:0.88em;font-weight:600;color:#374151;}
+.btn-group{display:flex;gap:6px;}
+.sim-btn{padding:7px 16px;border:2px solid #d1d5db;background:#f3f4f6;border-radius:8px;font-size:0.88em;font-weight:600;color:#374151;cursor:pointer;transition:all 0.18s;}
+.sim-btn:hover{background:#e5e7eb;}
+.sim-btn.active{background:#2563eb;border-color:#2563eb;color:white;}
+.temp-wrap{display:flex;align-items:center;gap:10px;flex:1;min-width:200px;}
+.temp-slider{flex:1;accent-color:#2563eb;cursor:pointer;}
+.temp-val{font-size:0.9em;font-weight:700;color:#2563eb;min-width:60px;}
+
+/* 캔버스 */
+.sim-scene{position:relative;width:100%;border-radius:12px;overflow:hidden;background:#0f172a;}
+.sim-scene canvas{display:block;width:100%;border-radius:12px;}
+
+/* 팝업 */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;justify-content:center;align-items:center;padding:20px;}
+.modal-overlay.active{display:flex;}
+.modal{background:white;border-radius:12px;max-width:480px;width:100%;padding:24px 28px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.3);animation:modalIn 0.2s;}
+@keyframes modalIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.modal h3{color:#1e40af;margin:0 0 12px 0;padding-right:30px;}
+.modal p{margin:0;color:#374151;}
+.modal-close{position:absolute;top:12px;right:14px;width:32px;height:32px;border:none;background:#f3f4f6;border-radius:50%;font-size:18px;cursor:pointer;color:#6b7280;}
+.modal-close:hover{background:#ef4444;color:white;}
+</style>
+</head>
+<body>
+
+<div>
+  <a class="nav-btn" href="index.html">🏠 홈</a>
+  <a class="nav-btn" href="s1-unit2.html">← 생물의 구성과 다양성</a>
+  <a class="nav-btn" href="s1-unit4.html">→ 물질의 상태 변화</a>
+</div>
+
+<h1>3단원. 열</h1>
+
+<!-- ① 입자 모형 -->
+<h2>① 입자 모형</h2>
+<div class="card">
+  <p>물질을 이루는 입자들은 다음과 같은 특징을 가집니다.</p>
+
+  <div class="conditions" style="margin-top:14px;">
+    <div class="cond-item">
+      <div class="cond-num">1</div>
+      <div class="cond-text"><strong>입자의 개수는 보존된다.</strong><br>물질이 상태가 변해도 입자의 수는 변하지 않는다.</div>
+    </div>
+    <div class="cond-item">
+      <div class="cond-num">2</div>
+      <div class="cond-text"><strong>무질서한 직선운동을 한다.</strong><br>입자들은 일정한 방향 없이 끊임없이 움직인다.</div>
+    </div>
+    <div class="cond-item">
+      <div class="cond-num">3</div>
+      <div class="cond-text"><strong>운동 속도는 온도에 비례한다.</strong><br>온도가 높을수록 입자들이 더 빠르게 운동한다.</div>
+    </div>
+    <div class="cond-item">
+      <div class="cond-num">4</div>
+      <div class="cond-text"><strong>입자 간의 거리는 온도에 비례한다.</strong><br>온도가 높을수록 입자들 사이의 평균 거리가 멀어진다.</div>
+    </div>
+  </div>
+
+  <!-- 시뮬레이션 -->
+  <div style="margin-top:24px;border-top:1.5px dashed #e5e7eb;padding-top:20px;">
+    <p style="font-size:0.9em;color:#6b7280;margin-bottom:14px;">입자 수와 온도를 조절하며 입자 모형을 확인해보세요.</p>
+    <div class="sim-controls">
+      <div class="ctrl-group">
+        <span class="ctrl-label">입자 수</span>
+        <div class="btn-group">
+          <button class="sim-btn active" data-count="10">10개</button>
+          <button class="sim-btn" data-count="20">20개</button>
+          <button class="sim-btn" data-count="30">30개</button>
+        </div>
+      </div>
+      <div class="ctrl-group temp-wrap">
+        <span class="ctrl-label">온도</span>
+        <input type="range" class="temp-slider" id="temp-slider" min="1" max="10" value="4" step="1">
+        <span class="temp-val" id="temp-label">보통</span>
+      </div>
+    </div>
+    <div class="sim-scene" id="sim-wrap">
+      <canvas id="sim-canvas"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- 하단 네비게이션 -->
+<div style="margin-top:40px;text-align:center;">
+  <a class="nav-btn" href="science1.html">← 과학 1 단원 목록</a>
+  <a class="nav-btn" href="s1-unit2.html">← 2단원</a>
+  <a class="nav-btn" href="s1-unit4.html">4단원 →</a>
+</div>
+
+<!-- 팝업 -->
+<div class="modal-overlay" id="termModal">
+  <div class="modal">
+    <button class="modal-close" id="modalCloseBtn">✕</button>
+    <h3 id="modalTerm"></h3>
+    <p id="modalDef"></p>
+  </div>
+</div>
+
+<script>
+// ══ 입자 시뮬레이션 ══════════════════════════════════════
+const canvas  = document.getElementById('sim-canvas');
+const ctx     = canvas.getContext('2d');
+const wrap    = document.getElementById('sim-wrap');
+const tempSlider = document.getElementById('temp-slider');
+const tempLabel  = document.getElementById('temp-label');
+const countBtns  = document.querySelectorAll('[data-count]');
+
+const dpr = window.devicePixelRatio || 1;
+let LW, LH;
+
+function resizeCanvas() {
+  LW = wrap.clientWidth;
+  LH = Math.round(LW * 0.46);
+  canvas.width  = LW * dpr;
+  canvas.height = LH * dpr;
+  canvas.style.width  = LW + 'px';
+  canvas.style.height = LH + 'px';
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(dpr, dpr);
+}
+window.addEventListener('resize', () => { resizeCanvas(); resetParticles(); });
+resizeCanvas();
+
+let particleCount = 10;
+let tempLevel = 4;
+const TEMP_LABELS = ['매우 낮음','낮음','낮음','보통','보통','보통','높음','높음','매우 높음','매우 높음'];
+const PARTICLE_COLOR = 'rgba(96,165,250,0.95)';
+const R = 9;
+let particles = [];
+
+function baseSpeed(t) { return 0.8 + t * 0.7; }
+
+function resetParticles() {
+  const spd = baseSpeed(tempLevel);
+  particles = [];
+  for (let i = 0; i < particleCount; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    particles.push({
+      x: R + Math.random() * (LW - R * 2),
+      y: R + Math.random() * (LH - R * 2),
+      vx: spd * Math.cos(angle),
+      vy: spd * Math.sin(angle),
+      trail: [],
+    });
+  }
+}
+
+function updateParticles() {
+  const spd = baseSpeed(tempLevel);
+
+  // 이동 + 벽 충돌
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < R)      { p.x = R;      p.vx =  Math.abs(p.vx); }
+    if (p.x > LW - R) { p.x = LW - R; p.vx = -Math.abs(p.vx); }
+    if (p.y < R)      { p.y = R;      p.vy =  Math.abs(p.vy); }
+    if (p.y > LH - R) { p.y = LH - R; p.vy = -Math.abs(p.vy); }
+    p.trail.push({ x: p.x, y: p.y });
+    if (p.trail.length > 10) p.trail.shift();
+  });
+
+  // 입자 간 충돌
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const a = particles[i], b = particles[j];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < R * 2 && dist > 0) {
+        const overlap = (R * 2 - dist) / 2;
+        const nx = dx / dist, ny = dy / dist;
+        a.x -= nx * overlap; a.y -= ny * overlap;
+        b.x += nx * overlap; b.y += ny * overlap;
+        const dvx = b.vx - a.vx, dvy = b.vy - a.vy;
+        const dot = dvx * nx + dvy * ny;
+        if (dot < 0) {
+          a.vx += dot * nx; a.vy += dot * ny;
+          b.vx -= dot * nx; b.vy -= dot * ny;
+          const ma = Math.sqrt(a.vx*a.vx + a.vy*a.vy);
+          const mb = Math.sqrt(b.vx*b.vx + b.vy*b.vy);
+          if (ma > 0) { a.vx = a.vx/ma*spd; a.vy = a.vy/ma*spd; }
+          if (mb > 0) { b.vx = b.vx/mb*spd; b.vy = b.vy/mb*spd; }
+        }
+      }
+    }
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, LW, LH);
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(0, 0, LW, LH);
+
+  // 격자
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < LW; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,LH); ctx.stroke(); }
+  for (let y = 0; y < LH; y += 40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(LW,y); ctx.stroke(); }
+
+  particles.forEach(p => {
+    // 잔상
+    p.trail.forEach((pt, i) => {
+      const a = (i / p.trail.length) * 0.15;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, R * 0.55, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(96,165,250,${a.toFixed(2)})`;
+      ctx.fill();
+    });
+    // 글로우
+    const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, R * 2.4);
+    grd.addColorStop(0, 'rgba(96,165,250,0.35)');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.beginPath(); ctx.arc(p.x, p.y, R * 2.4, 0, Math.PI*2);
+    ctx.fillStyle = grd; ctx.fill();
+    // 본체
+    ctx.beginPath(); ctx.arc(p.x, p.y, R, 0, Math.PI*2);
+    ctx.fillStyle = PARTICLE_COLOR; ctx.fill();
+  });
+
+  // 온도 바
+  const barW = 120, barH = 8, bx = 14, by = LH - 26;
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('온도', bx, by - 4);
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  ctx.beginPath(); ctx.roundRect(bx, by, barW, barH, 4); ctx.fill();
+  const grad = ctx.createLinearGradient(bx, 0, bx + barW, 0);
+  grad.addColorStop(0, '#3b82f6'); grad.addColorStop(1, '#ef4444');
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.roundRect(bx, by, barW * (tempLevel / 10), barH, 4); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+  ctx.fillText(`입자 수: ${particleCount}`, LW - 14, LH - 14);
+}
+
+function loop() { updateParticles(); draw(); requestAnimationFrame(loop); }
+
+countBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    countBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    particleCount = parseInt(btn.dataset.count);
+    resetParticles();
+  });
+});
+
+tempSlider.addEventListener('input', () => {
+  tempLevel = parseInt(tempSlider.value);
+  tempLabel.textContent = TEMP_LABELS[tempLevel - 1];
+  const spd = baseSpeed(tempLevel);
+  particles.forEach(p => {
+    const mag = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
+    if (mag > 0) { p.vx = p.vx/mag*spd; p.vy = p.vy/mag*spd; }
+  });
+});
+
+// ══ 팝업 ═════════════════════════════════════════════════
+const overlay  = document.getElementById('termModal');
+const termEl   = document.getElementById('modalTerm');
+const defEl    = document.getElementById('modalDef');
+const closeBtn = document.getElementById('modalCloseBtn');
+document.querySelectorAll('[data-term]').forEach(el => {
+  el.addEventListener('click', () => {
+    termEl.textContent = el.dataset.term;
+    defEl.textContent  = el.dataset.def;
+    overlay.classList.add('active');
+  });
+});
+closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
+overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('active'); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') overlay.classList.remove('active'); });
+
+resetParticles();
+loop();
+</script>
+</body>
+</html>
