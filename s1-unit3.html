@@ -465,13 +465,14 @@ h3{color:#374151;margin-top:20px;}
     graphCtx.fillStyle='#f8fafc';graphCtx.fillRect(0,0,GW,GH);
     const pw=GW-PAD.l-PAD.r, ph=GH-PAD.t-PAD.b;
     graphCtx.strokeStyle='#e5e7eb';graphCtx.lineWidth=1;
-    for(let i=0;i<=4;i++){
-      const y=PAD.t+ph*(i/4);
+    // Y축: 2,4,6,8,10 (5단계)
+    const yTicks=[10,8,6,4,2];
+    yTicks.forEach(val=>{
+      const y=PAD.t+ph*(1-(val-1)/9);
       graphCtx.beginPath();graphCtx.moveTo(PAD.l,y);graphCtx.lineTo(PAD.l+pw,y);graphCtx.stroke();
-      const val=10-(10-1)*(i/4);
       graphCtx.fillStyle='#9ca3af';graphCtx.font='10px sans-serif';graphCtx.textAlign='right';
-      graphCtx.fillText(val.toFixed(0),PAD.l-6,y+4);
-    }
+      graphCtx.fillText(val,PAD.l-6,y+4);
+    });
     graphCtx.strokeStyle='#d1d5db';graphCtx.lineWidth=1;
     graphCtx.beginPath();graphCtx.moveTo(PAD.l,PAD.t+ph);graphCtx.lineTo(PAD.l+pw,PAD.t+ph);graphCtx.stroke();
     graphCtx.beginPath();graphCtx.moveTo(PAD.l,PAD.t);graphCtx.lineTo(PAD.l,PAD.t+ph);graphCtx.stroke();
