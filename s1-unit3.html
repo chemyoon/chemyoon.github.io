@@ -166,6 +166,7 @@ h3{color:#374151;margin-top:20px;}
     </div>
   </div>
 </div>
+  <!-- 열의 전달 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -220,13 +221,12 @@ body{font-family:'Pretendard',sans-serif;max-width:860px;margin:40px auto;paddin
       <button class="mat-btn" data-mat="B">물질 B <span style="font-size:0.8em;opacity:0.7;">(보통 전도율)</span></button>
       <button class="mat-btn" data-mat="C">물질 C <span style="font-size:0.8em;opacity:0.7;">(높은 전도율)</span></button>
       
-      <!-- 수정된 부분: 열원 켜기 체크박스 추가 -->
       <label style="display:flex;align-items:center;gap:6px;font-size:0.85em;font-weight:600;color:#ef4444;cursor:pointer;margin-left:auto;">
         <input type="checkbox" id="cond-toggle" style="accent-color:#ef4444;width:16px;height:16px;cursor:pointer;"> 열원 켜기
       </label>
       <button class="reset-btn" id="cond-reset">🔄 초기화</button>
     </div>
-    <p class="desc" id="cond-desc">물질 A: 열전도율이 낮아 열이 천천히 전달됩니다. 열원 위치를 움직인 후 열원을 켜보세요.</p>
+    <p class="desc" id="cond-desc">물질 A: 열전도율이 낮아 열이 천천히 전달됩니다. 열원을 껐다 켜면서 열의 이동과 냉각을 관찰해보세요.</p>
   </div>
   <!-- 대류 컨트롤 -->
   <div id="ctrl-conv" style="display:none;">
@@ -269,10 +269,10 @@ const COND=(function(){
   let heatPos=0.10;
   let matRate=0.004;
   let matName='A';
-  let isHeatOn=false; // 열원 상태 변수 추가
+  let isHeatOn=false;
 
   const MAT={
-    A:{rate:0.003, label:'물질 A',desc:'물질 A: 열전도율이 낮아 열이 천천히 전달됩니다. 열원 위치를 움직인 후 열원을 켜보세요.'},
+    A:{rate:0.003, label:'물질 A',desc:'물질 A: 열전도율이 낮아 열이 천천히 전달됩니다. 열원을 껐다 켜면서 열의 이동과 냉각을 관찰해보세요.'},
     B:{rate:0.010, label:'물질 B',desc:'물질 B: 열전도율이 보통으로 열이 일반적인 속도로 전달됩니다.'},
     C:{rate:0.035, label:'물질 C',desc:'물질 C: 열전도율이 매우 높아 열이 빠르게 전체로 전달됩니다.'},
   };
@@ -311,13 +311,11 @@ const COND=(function(){
     });
   });
 
-  // 열원 켜기/끄기 이벤트
   const condToggle = document.getElementById('cond-toggle');
   condToggle.addEventListener('change', e => {
     isHeatOn = e.target.checked;
   });
 
-  // 초기화 시 열원도 끄기
   document.getElementById('cond-reset').addEventListener('click',()=>{
     particles.forEach(p=>p.heat=0);
     flames=[];
@@ -345,7 +343,6 @@ const COND=(function(){
     const nh=particles.map(p=>p.heat);
     for(let row=0;row<ROWS;row++){
       for(let col=0;col<COLS;col++){
-        // 기존의 건너뛰기(continue) 로직 삭제 -> 모든 입자가 자연스럽게 상호작용
         const h=particles[idx(col,row)].heat;
         const r=matRate;
         if(col>0)      nh[idx(col-1,row)]+=Math.max(0,(h-particles[idx(col-1,row)].heat)*r);
@@ -360,16 +357,22 @@ const COND=(function(){
       if(isHeatOn && p.col===minC){
         p.heat=1;
       } else {
-        p.heat=Math.max(0,Math.min(1,nh[i]));
+        let currentHeat = nh[i];
+        
+        // 추가된 부분: 열원이 꺼져있으면 서서히 식어감 (자연 냉각)
+        if(!isHeatOn) {
+          // 온도가 높을 땐 빨리 식고(0.99), 낮을 땐 확실하게 0이 되도록(-0.002) 조치
+          currentHeat = currentHeat * 0.99 - 0.002; 
+        }
+        
+        p.heat=Math.max(0,Math.min(1,currentHeat));
       }
       
-      // 진동 로직이 모든 입자에 적용되도록 수정 (return 제거)
       const v=p.heat*4.5;
       p.ox=(Math.random()-0.5)*v;
       p.oy=(Math.random()-0.5)*v;
     });
 
-    // 불꽃은 열원이 켜져있을 때만 생성
     if(isHeatOn) {
       for(let i=0;i<3;i++) flames.push({
         x:hx+(Math.random()-0.5)*22,y:H*0.86,
@@ -437,7 +440,6 @@ const COND=(function(){
 
     const padX=32, hx=padX+heatPos*(W-padX*2);
     
-    // 열원 상태에 따른 시각 효과
     if(isHeatOn) {
       ctx.fillStyle='rgba(255,150,0,0.15)';
       ctx.beginPath();ctx.ellipse(hx,H*0.9,20,9,0,0,Math.PI*2);ctx.fill();
