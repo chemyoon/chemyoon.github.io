@@ -415,13 +415,13 @@ function setupHover(canvas,tip,orgs,LW,LH){
   const LW=480,LH=440,canvas=document.getElementById('canvas-pyramid'),tip=document.getElementById('pyr-tip');
   const ctx=setupHiDPI(canvas,LW,LH);
   const levels=[
-    {label:'종',emojis:['🐱'],color:'#7c3aed',tip:'<strong>종 (Species)</strong>두 생물의 자손이 번식 능력이 있을 경우, 같은 종에 해당한다.'},
-    {label:'속',emojis:['🐱','🐈'],color:'#4f46e5',tip:'<strong>속 (Genus)</strong>'},
-    {label:'과',emojis:['🐱','🐈','🐯','🦁'],color:'#1d4ed8',tip:'<strong>과 (Family)</strong>'},
-    {label:'목',emojis:['🐱','🐈','🐯','🦁','🦝','🐻'],color:'#0369a1',tip:'<strong>목 (Order)</strong>'},
-    {label:'강',emojis:['🐱','🐈','🐯','🦁','🦝','🐻','🐒','🧑'],color:'#047857',tip:'<strong>강 (Class)</strong>'},
-    {label:'문',emojis:['🐱','🐈','🐯','🦁','🦝','🐻','🐒','🧑','🦎','🦆'],color:'#b45309',tip:'<strong>문 (Phylum)</strong>'},
-    {label:'계',emojis:['🐱','🐈','🐯','🦁','🦝','🐻','🐒','🧑','🦎','🦆','🐌','⭐'],color:'#b91c1c',tip:'<strong>계 (Kingdom)</strong>'},
+    {label:'종',emojis:['🐱'],color:'#7c3aed',tip:'<strong>종 </strong>두 생물의 자손이 번식 능력이 있을 경우, 같은 종에 해당한다.'},
+    {label:'속',emojis:['🐱','🐈'],color:'#4f46e5',tip:'<strong>속</strong>'},
+    {label:'과',emojis:['🐱','🐈','🐯','🦁'],color:'#1d4ed8',tip:'<strong>과</strong>'},
+    {label:'목',emojis:['🐱','🐈','🐯','🦁','🦝','🐻'],color:'#0369a1',tip:'<strong>목</strong>'},
+    {label:'강',emojis:['🐱','🐈','🐯','🦁','🦝','🐻','🐒','🧑'],color:'#047857',tip:'<strong>강</strong>'},
+    {label:'문',emojis:['🐱','🐈','🐯','🦁','🦝','🐻','🐒','🧑','🦎','🦆'],color:'#b45309',tip:'<strong>문</strong>'},
+    {label:'계',emojis:['🐱','🐈','🐯','🦁','🦝','🐻','🐒','🧑','🦎','🦆','🐌','⭐'],color:'#b91c1c',tip:'<strong>계</strong>'},
   ];
   const N=levels.length,TOP_Y=20,BOT_Y=LH-20,BOT_X0=20,BOT_X1=LW-20,TIP_X=LW/2,TOTAL_H=BOT_Y-TOP_Y;
   const rowY=i=>TOP_Y+(TOTAL_H/N)*i;
