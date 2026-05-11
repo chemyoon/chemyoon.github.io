@@ -51,25 +51,6 @@ h3{color:#374151;margin-top:20px;}
 .leg{display:flex;align-items:center;gap:5px;}
 .leg-line{width:24px;height:3px;border-radius:2px;}
 
-/* 열의 이동 탭 */
-.tab-group{display:flex;gap:8px;margin-bottom:16px;}
-.tab-btn{padding:9px 22px;border:2px solid #d1d5db;background:#f3f4f6;border-radius:8px;font-size:0.9em;font-weight:600;color:#374151;cursor:pointer;transition:all 0.18s;}
-.tab-btn:hover{background:#e5e7eb;}
-.tab-btn.active{background:#2563eb;border-color:#2563eb;color:white;}
-.sim-stack{position:relative;width:100%;border-radius:12px;overflow:hidden;background:#0f172a;}
-.sim-stack::before{content:'';display:block;padding-top:48%;}
-.sim-layer{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;pointer-events:none;}
-.sim-layer.active{opacity:1;pointer-events:auto;}
-.sim-layer canvas{display:block;width:100%;height:100%;}
-.ctrl-row{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;}
-.ctrl-label{font-size:0.85em;font-weight:600;color:#374151;}
-.reset-btn{padding:6px 18px;background:#ef4444;color:white;border:none;border-radius:7px;font-size:0.85em;font-weight:600;cursor:pointer;}
-.reset-btn:hover{background:#dc2626;}
-.mat-btn{padding:6px 18px;border:2px solid #d1d5db;background:#f3f4f6;border-radius:7px;font-size:0.85em;font-weight:600;color:#374151;cursor:pointer;transition:all 0.15s;}
-.mat-btn:hover{background:#e5e7eb;}
-.mat-btn.active{background:#2563eb;border-color:#2563eb;color:white;}
-.desc{font-size:0.88em;color:#6b7280;margin-top:10px;line-height:1.6;}
-
 /* 팝업 */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;justify-content:center;align-items:center;padding:20px;}
 .modal-overlay.active{display:flex;}
@@ -95,11 +76,24 @@ h3{color:#374151;margin-top:20px;}
 <div class="card">
   <p>물질을 이루는 입자들은 다음과 같은 특징을 가집니다.</p>
   <div class="conditions">
-    <div class="cond-item"><div class="cond-num">1</div><div class="cond-text"><strong>입자의 개수는 보존된다.</strong><br>물질이 상태가 변해도 입자의 수는 변하지 않는다.</div></div>
-    <div class="cond-item"><div class="cond-num">2</div><div class="cond-text"><strong>무질서한 직선운동을 한다.</strong><br>입자들은 일정한 방향 없이 끊임없이 움직인다.</div></div>
-    <div class="cond-item"><div class="cond-num">3</div><div class="cond-text"><strong>운동 속도는 온도에 비례한다.</strong><br>온도가 높을수록 입자들이 더 빠르게 운동한다.</div></div>
-    <div class="cond-item"><div class="cond-num">4</div><div class="cond-text"><strong>입자 간의 거리는 온도에 비례한다.</strong><br>온도가 높을수록 입자들 사이의 평균 거리가 멀어진다.</div></div>
+    <div class="cond-item">
+      <div class="cond-num">1</div>
+      <div class="cond-text"><strong>입자의 개수는 보존된다.</strong><br>물질이 상태가 변해도 입자의 수는 변하지 않는다.</div>
+    </div>
+    <div class="cond-item">
+      <div class="cond-num">2</div>
+      <div class="cond-text"><strong>무질서한 직선운동을 한다.</strong><br>입자들은 일정한 방향 없이 끊임없이 움직인다.</div>
+    </div>
+    <div class="cond-item">
+      <div class="cond-num">3</div>
+      <div class="cond-text"><strong>운동 속도는 온도에 비례한다.</strong><br>온도가 높을수록 입자들이 더 빠르게 운동한다.</div>
+    </div>
+    <div class="cond-item">
+      <div class="cond-num">4</div>
+      <div class="cond-text"><strong>입자 간의 거리는 온도에 비례한다.</strong><br>온도가 높을수록 입자들 사이의 평균 거리가 멀어진다.</div>
+    </div>
   </div>
+
   <div style="margin-top:24px;border-top:1.5px dashed #e5e7eb;padding-top:20px;">
     <p style="font-size:0.9em;color:#6b7280;margin-bottom:14px;">입자 수와 온도를 조절하며 입자 모형을 확인해보세요.</p>
     <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px;">
@@ -117,7 +111,9 @@ h3{color:#374151;margin-top:20px;}
         <span style="font-size:0.9em;font-weight:700;color:#2563eb;min-width:60px;" id="temp-label">보통</span>
       </div>
     </div>
-    <div class="sim-scene" id="sim-wrap"><canvas id="sim-canvas"></canvas></div>
+    <div class="sim-scene" id="sim-wrap">
+      <canvas id="sim-canvas"></canvas>
+    </div>
   </div>
 </div>
 
@@ -125,6 +121,7 @@ h3{color:#374151;margin-top:20px;}
 <h2>② 열평형</h2>
 <div class="card">
   <p>두 물체의 온도를 다르게 설정하고 칸막이를 없애보세요. 열평형이 일어나는 과정을 관찰할 수 있어요.</p>
+
   <div class="temp-controls" style="margin-top:14px;">
     <div class="ctrl-col">
       <div class="ctrl-title">왼쪽 온도</div>
@@ -141,40 +138,77 @@ h3{color:#374151;margin-top:20px;}
       </div>
     </div>
   </div>
-  <div class="sim-scene" id="eq-wrap"><canvas id="eq-canvas"></canvas></div>
+
+  <div class="sim-scene" id="eq-wrap">
+    <canvas id="eq-canvas"></canvas>
+  </div>
+
   <div class="divider-toggle">
     <label class="divider-label">
       <input type="checkbox" id="eq-divider" checked>
       <span id="eq-divider-label">🧱 칸막이 있음 — 체크 해제 시 열평형 시작</span>
     </label>
   </div>
+
   <div class="temp-status">
     <div class="t-chip chip-l" id="eq-status-left">왼쪽: —</div>
     <div class="t-chip chip-r" id="eq-status-right">오른쪽: —</div>
   </div>
+
   <div class="graph-section">
     <div class="graph-hint">📈 온도 변화 그래프 <span id="graph-hint" style="font-weight:400;color:#9ca3af;">— 칸막이를 제거하면 기록이 시작돼요</span></div>
-    <div class="graph-wrap" id="graph-wrap"><canvas id="graph-canvas"></canvas></div>
+    <div class="graph-wrap" id="graph-wrap">
+      <canvas id="graph-canvas"></canvas>
+    </div>
     <div class="graph-legend">
       <div class="leg"><div class="leg-line" style="background:#f97316;"></div>왼쪽 온도</div>
       <div class="leg"><div class="leg-line" style="background:#3b82f6;"></div>오른쪽 온도</div>
     </div>
   </div>
 </div>
-
-<!-- ③ 열의 이동 -->
-<h2>③ 열의 이동</h2>
+  <!-- 열의 전달 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Pretendard',sans-serif;max-width:860px;margin:40px auto;padding:20px;background:#f9fafb;color:#1f2937;}
+.card{border:1px solid #ddd;border-radius:10px;padding:20px 24px;margin:18px 0;background:white;}
+.tab-group{display:flex;gap:8px;margin-bottom:16px;}
+.tab-btn{padding:9px 22px;border:2px solid #d1d5db;background:#f3f4f6;border-radius:8px;font-size:0.9em;font-weight:600;color:#374151;cursor:pointer;transition:all 0.18s;}
+.tab-btn:hover{background:#e5e7eb;}
+.tab-btn.active{background:#2563eb;border-color:#2563eb;color:white;}
+.sim-stack{position:relative;width:100%;border-radius:12px;overflow:hidden;background:#0f172a;}
+.sim-stack::before{content:'';display:block;padding-top:48%;}
+.sim-layer{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;pointer-events:none;}
+.sim-layer.active{opacity:1;pointer-events:auto;}
+.sim-layer canvas{display:block;width:100%;height:100%;}
+.ctrl-row{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;}
+.ctrl-label{font-size:0.85em;font-weight:600;color:#374151;}
+.reset-btn{padding:6px 18px;background:#ef4444;color:white;border:none;border-radius:7px;font-size:0.85em;font-weight:600;cursor:pointer;}
+.reset-btn:hover{background:#dc2626;}
+.mat-btn{padding:6px 18px;border:2px solid #d1d5db;background:#f3f4f6;border-radius:7px;font-size:0.85em;font-weight:600;color:#374151;cursor:pointer;transition:all 0.15s;}
+.mat-btn:hover{background:#e5e7eb;}
+.mat-btn.active{background:#2563eb;border-color:#2563eb;color:white;}
+.desc{font-size:0.88em;color:#6b7280;margin-top:10px;line-height:1.6;}
+</style>
+</head>
+<body>
 <div class="card">
+  <h2 style="color:#1e40af;margin-bottom:16px;">③ 열의 이동</h2>
   <div class="tab-group">
     <button class="tab-btn active" data-tab="cond">🔥 전도</button>
     <button class="tab-btn" data-tab="conv">🌊 대류</button>
     <button class="tab-btn" data-tab="rad">🔥 복사</button>
   </div>
+
   <div class="sim-stack" id="sim-stack">
     <div class="sim-layer active" id="layer-cond"><canvas id="cond-canvas"></canvas></div>
     <div class="sim-layer"        id="layer-conv"><canvas id="conv-canvas"></canvas></div>
     <div class="sim-layer"        id="layer-rad" ><canvas id="rad-canvas"></canvas></div>
   </div>
+
   <!-- 전도 컨트롤 -->
   <div id="ctrl-cond">
     <div class="ctrl-row">
@@ -186,6 +220,7 @@ h3{color:#374151;margin-top:20px;}
       <button class="mat-btn active" data-mat="A">물질 A <span style="font-size:0.8em;opacity:0.7;">(낮은 전도율)</span></button>
       <button class="mat-btn" data-mat="B">물질 B <span style="font-size:0.8em;opacity:0.7;">(보통 전도율)</span></button>
       <button class="mat-btn" data-mat="C">물질 C <span style="font-size:0.8em;opacity:0.7;">(높은 전도율)</span></button>
+      
       <label style="display:flex;align-items:center;gap:6px;font-size:0.85em;font-weight:600;color:#ef4444;cursor:pointer;margin-left:auto;">
         <input type="checkbox" id="cond-toggle" style="accent-color:#ef4444;width:16px;height:16px;cursor:pointer;"> 열원 켜기
       </label>
@@ -204,6 +239,406 @@ h3{color:#374151;margin-top:20px;}
   </div>
 </div>
 
+<script>
+const dpr = window.devicePixelRatio||1;
+
+function makeCtx(id){
+  const stack=document.getElementById('sim-stack');
+  const canvas=document.getElementById(id);
+  const W=stack.clientWidth, H=stack.clientHeight;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr,dpr);
+  return {ctx,W,H};
+}
+
+function heatRGB(t){
+  return {r:Math.round(50+t*205),g:Math.round(100-t*60),b:Math.round(220-t*200)};
+}
+function heatCol(t){const c=heatRGB(t);return `rgb(${c.r},${c.g},${c.b})`;}
+function heatColA(t,a){const c=heatRGB(t);return `rgba(${c.r},${c.g},${c.b},${a})`;}
+
+// ══════════════════════════════════════════════════════
+// 전도
+// ══════════════════════════════════════════════════════
+const COND=(function(){
+  let ctx,W,H;
+  const COLS=14, ROWS=3, R=8;
+  let particles=[], flames=[];
+  let heatPos=0.10;
+  let matRate=0.004;
+  let matName='A';
+  let isHeatOn=false;
+
+  const MAT={
+    A:{rate:0.003, label:'물질 A',desc:'물질 A: 열전도율이 낮아 열이 천천히 전달됩니다. 열원을 껐다 켜면서 열의 이동과 냉각을 관찰해보세요.'},
+    B:{rate:0.010, label:'물질 B',desc:'물질 B: 열전도율이 보통으로 열이 일반적인 속도로 전달됩니다.'},
+    C:{rate:0.035, label:'물질 C',desc:'물질 C: 열전도율이 매우 높아 열이 빠르게 전체로 전달됩니다.'},
+  };
+
+  function init(){
+    const s=makeCtx('cond-canvas'); ctx=s.ctx; W=s.W; H=s.H;
+    flames=[];
+    const padX=32, rodCenterY=H*0.46, rowGap=R*2.6;
+    const spacing=(W-padX*2)/(COLS-1);
+    particles=[];
+    for(let row=0;row<ROWS;row++){
+      for(let col=0;col<COLS;col++){
+        particles.push({col,row,
+          bx:padX+col*spacing,
+          by:rodCenterY+(row-1)*rowGap,
+          ox:0,oy:0,heat:0
+        });
+      }
+    }
+  }
+
+  function idx(col,row){return row*COLS+col;}
+
+  document.getElementById('cond-slider').addEventListener('input',e=>{
+    heatPos=parseInt(e.target.value)/100;
+  });
+  
+  document.querySelectorAll('.mat-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.mat-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      matName=btn.dataset.mat;
+      matRate=MAT[matName].rate;
+      document.getElementById('cond-desc').textContent=MAT[matName].desc;
+      particles.forEach(p=>p.heat=0);
+    });
+  });
+
+  const condToggle = document.getElementById('cond-toggle');
+  condToggle.addEventListener('change', e => {
+    isHeatOn = e.target.checked;
+  });
+
+  document.getElementById('cond-reset').addEventListener('click',()=>{
+    particles.forEach(p=>p.heat=0);
+    flames=[];
+    isHeatOn = false;
+    condToggle.checked = false;
+  });
+
+  function update(){
+    const padX=32;
+    const hx=padX+heatPos*(W-padX*2);
+
+    let minD=Infinity, minC=-1;
+    for(let c=0;c<COLS;c++){
+      const d=Math.abs(particles[idx(c,2)].bx-hx);
+      if(d<minD){minD=d;minC=c;}
+    }
+    
+    // 열원이 켜져 있을 때만 가열
+    if(isHeatOn && minC>=0){
+      particles[idx(minC,0)].heat=1;
+      particles[idx(minC,1)].heat=1;
+      particles[idx(minC,2)].heat=1;
+    }
+
+    const nh=particles.map(p=>p.heat);
+    for(let row=0;row<ROWS;row++){
+      for(let col=0;col<COLS;col++){
+        const h=particles[idx(col,row)].heat;
+        const r=matRate;
+        if(col>0)      nh[idx(col-1,row)]+=Math.max(0,(h-particles[idx(col-1,row)].heat)*r);
+        if(col<COLS-1) nh[idx(col+1,row)]+=Math.max(0,(h-particles[idx(col+1,row)].heat)*r);
+        if(row>0)      nh[idx(col,row-1)]+=Math.max(0,(h-particles[idx(col,row-1)].heat)*r);
+        if(row<ROWS-1) nh[idx(col,row+1)]+=Math.max(0,(h-particles[idx(col,row+1)].heat)*r);
+      }
+    }
+    
+    particles.forEach((p,i)=>{
+      // 열원이 켜져있고 열원 위치면 1로 유지, 아니면 계산된 열 적용
+      if(isHeatOn && p.col===minC){
+        p.heat=1;
+      } else {
+        let currentHeat = nh[i];
+        
+        // 추가된 부분: 열원이 꺼져있으면 서서히 식어감 (자연 냉각)
+        if(!isHeatOn) {
+          // 온도가 높을 땐 빨리 식고(0.99), 낮을 땐 확실하게 0이 되도록(-0.002) 조치
+          currentHeat = currentHeat * 0.99 - 0.002; 
+        }
+        
+        p.heat=Math.max(0,Math.min(1,currentHeat));
+      }
+      
+      const v=p.heat*4.5;
+      p.ox=(Math.random()-0.5)*v;
+      p.oy=(Math.random()-0.5)*v;
+    });
+
+    if(isHeatOn) {
+      for(let i=0;i<3;i++) flames.push({
+        x:hx+(Math.random()-0.5)*22,y:H*0.86,
+        vy:-(1.5+Math.random()*2.5),vx:(Math.random()-0.5)*1.2,
+        life:1,size:5+Math.random()*10
+      });
+    }
+    flames.forEach(f=>{f.y+=f.vy;f.x+=f.vx;f.life-=0.032;});
+    flames=flames.filter(f=>f.life>0);
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#0f172a'; ctx.fillRect(0,0,W,H);
+
+    if(particles.length===0) return;
+
+    const p0=particles[0], pE=particles[COLS-1];
+    const p2b=particles[idx(0,2)], pE2b=particles[idx(COLS-1,2)];
+
+    ctx.strokeStyle='rgba(148,163,184,0.35)'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
+    ctx.beginPath();
+    ctx.roundRect(p0.bx-R-6, p0.by-R-6, (pE.bx-p0.bx)+R*2+12, (p2b.by-p0.by)+R*2+12, 10);
+    ctx.stroke(); ctx.setLineDash([]);
+
+    ctx.fillStyle='rgba(148,163,184,0.6)';
+    ctx.font='bold 12px sans-serif'; ctx.textAlign='left';
+    ctx.fillText(MAT[matName].label, p0.bx-R-4, p0.by-R-10);
+
+    ctx.fillStyle='rgba(71,85,105,0.3)';
+    ctx.beginPath();
+    ctx.roundRect(p0.bx-R-2, p0.by-R-2, (pE.bx-p0.bx)+R*2+4, (p2b.by-p0.by)+R*2+4, 8);
+    ctx.fill();
+
+    for(let row=0;row<ROWS;row++){
+      for(let col=0;col<COLS-1;col++){
+        const a=particles[idx(col,row)], b=particles[idx(col+1,row)];
+        ctx.strokeStyle=heatColA((a.heat+b.heat)/2,0.45); ctx.lineWidth=2.5; ctx.setLineDash([]);
+        ctx.beginPath();ctx.moveTo(a.bx+a.ox,a.by+a.oy);ctx.lineTo(b.bx+b.ox,b.by+b.oy);ctx.stroke();
+      }
+    }
+    for(let col=0;col<COLS;col++){
+      for(let row=0;row<ROWS-1;row++){
+        const a=particles[idx(col,row)], b=particles[idx(col,row+1)];
+        ctx.strokeStyle=heatColA((a.heat+b.heat)/2,0.45); ctx.lineWidth=2.5;
+        ctx.beginPath();ctx.moveTo(a.bx+a.ox,a.by+a.oy);ctx.lineTo(b.bx+b.ox,b.by+b.oy);ctx.stroke();
+      }
+    }
+
+    particles.forEach(p=>{
+      const x=p.bx+p.ox, y=p.by+p.oy;
+      if(p.heat>0.04){
+        const grd=ctx.createRadialGradient(x,y,0,x,y,R*2.2);
+        grd.addColorStop(0,heatColA(p.heat,p.heat*0.45));
+        grd.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.beginPath();ctx.arc(x,y,R*2.2,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
+      }
+      ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fillStyle=heatCol(p.heat);ctx.fill();
+    });
+
+    flames.forEach(f=>{
+      ctx.beginPath();ctx.arc(f.x,f.y,f.size*f.life,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,${Math.round(80+f.life*140)},0,${f.life*0.85})`;ctx.fill();
+    });
+
+    const padX=32, hx=padX+heatPos*(W-padX*2);
+    
+    if(isHeatOn) {
+      ctx.fillStyle='rgba(255,150,0,0.15)';
+      ctx.beginPath();ctx.ellipse(hx,H*0.9,20,9,0,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+      ctx.fillText('열원(ON)',hx,H-6);
+    } else {
+      ctx.fillStyle='rgba(148,163,184,0.15)';
+      ctx.beginPath();ctx.ellipse(hx,H*0.9,20,9,0,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(148,163,184,0.5)';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+      ctx.fillText('열원(OFF)',hx,H-6);
+    }
+  }
+
+  return {init,update,draw};
+})();
+
+// ══════════════════════════════════════════════════════
+// 대류
+// ══════════════════════════════════════════════════════
+const CONV=(function(){
+  let ctx,W,H;
+  const N=60,R=7;
+  let particles=[];
+
+  function init(){
+    const s=makeCtx('conv-canvas'); ctx=s.ctx; W=s.W; H=s.H;
+    particles=[];
+    const padX=24,padY=18,botY=H-36;
+    for(let i=0;i<N;i++){
+      const x=padX+Math.random()*(W-padX*2);
+      const y=padY+Math.random()*(botY-padY);
+      const fromBot=(y-padY)/(botY-padY);
+      particles.push({x,y,vx:(Math.random()-0.5)*0.8,vy:(Math.random()-0.5)*0.8,heat:1-fromBot*0.9});
+    }
+  }
+  document.getElementById('conv-reset').addEventListener('click',init);
+
+  function update(){
+    const padX=24,padY=18,botY=H-36,height=botY-padY;
+    particles.forEach(p=>{
+      const buoy=(p.heat-0.45)*0.18;
+      p.vy-=buoy;
+      const xNorm=(p.x-padX)/(W-padX*2);
+      const circX=(xNorm<0.5?0.04:-0.04)*(p.heat>0.5?1:-1);
+      p.vx+=circX;
+      p.vx*=0.94; p.vy*=0.92;
+      p.vx+=(Math.random()-0.5)*0.15; p.vy+=(Math.random()-0.5)*0.08;
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<padX){p.x=padX;p.vx=Math.abs(p.vx)*0.5;}
+      if(p.x>W-padX){p.x=W-padX;p.vx=-Math.abs(p.vx)*0.5;}
+      if(p.y<padY){p.y=padY;p.vy=Math.abs(p.vy)*0.4;}
+      if(p.y>botY){p.y=botY;p.vy=-Math.abs(p.vy)*0.4;}
+      const fromBot=(p.y-padY)/height;
+      if(fromBot>0.82) p.heat=Math.min(1,p.heat+0.012);
+      if(fromBot<0.15) p.heat=Math.max(0.05,p.heat-0.006);
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#0f172a'; ctx.fillRect(0,0,W,H);
+    const padX=24,botY=H-36;
+    ctx.strokeStyle='rgba(148,163,184,0.45)'; ctx.lineWidth=3;
+    ctx.beginPath();
+    ctx.moveTo(padX-16,18);ctx.lineTo(padX-16,botY+2);
+    ctx.lineTo(W-padX+16,botY+2);ctx.lineTo(W-padX+16,18);
+    ctx.stroke();
+    const gy=ctx.createLinearGradient(0,botY,0,H);
+    gy.addColorStop(0,'rgba(239,68,68,0.55)');gy.addColorStop(1,'rgba(239,68,68,0)');
+    ctx.fillStyle=gy; ctx.fillRect(padX-16,botY,W-padX*2+32,H-botY);
+    ctx.fillStyle='rgba(239,68,68,0.9)';ctx.font='bold 12px sans-serif';ctx.textAlign='center';
+    ctx.fillText('🔥 열원',W/2,H-8);
+    particles.forEach(p=>{
+      const col=heatCol(p.heat);
+      if(p.heat>0.12){
+        const grd=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,R*2);
+        grd.addColorStop(0,heatColA(p.heat,p.heat*0.3));
+        grd.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.beginPath();ctx.arc(p.x,p.y,R*2,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
+      }
+      ctx.beginPath();ctx.arc(p.x,p.y,R,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+    });
+  }
+  return {init,update,draw};
+})();
+
+// ══════════════════════════════════════════════════════
+// 복사
+// ══════════════════════════════════════════════════════
+const RAD=(function(){
+  let ctx,W,H;
+  const ZONES=['매우 낮음','낮음','보통','높음','매우 높음'];
+  let rings=[],timer=0,flames=[];
+  let FX,FY;
+
+  function init(){
+    const s=makeCtx('rad-canvas'); ctx=s.ctx; W=s.W; H=s.H;
+    FX=70; FY=H*0.62;
+    rings=[]; flames=[]; timer=0;
+  }
+
+  function update(){
+    timer++;
+    if(timer%18===0) rings.push({r:18,maxR:W*0.96,alpha:0.65,speed:2.6});
+    rings.forEach(r=>{r.r+=r.speed;r.alpha=0.65*(1-r.r/r.maxR);});
+    rings=rings.filter(r=>r.r<r.maxR);
+    for(let i=0;i<3;i++) flames.push({
+      x:FX+(Math.random()-0.5)*22,y:FY,
+      vy:-(1.2+Math.random()*2.8),vx:(Math.random()-0.5)*0.8,
+      life:1,size:5+Math.random()*10
+    });
+    flames.forEach(f=>{f.y+=f.vy;f.x+=f.vx;f.life-=0.03;});
+    flames=flames.filter(f=>f.life>0);
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const sky=ctx.createLinearGradient(0,0,0,H*0.65);
+    sky.addColorStop(0,'#0f172a');sky.addColorStop(1,'#1e293b');
+    ctx.fillStyle=sky; ctx.fillRect(0,0,W,H*0.65);
+    const groundY=H*0.65;
+    const gnd=ctx.createLinearGradient(0,groundY,0,H);
+    gnd.addColorStop(0,'#374151');gnd.addColorStop(1,'#1f2937');
+    ctx.fillStyle=gnd; ctx.fillRect(0,groundY,W,H-groundY);
+    ctx.strokeStyle='rgba(107,114,128,0.5)'; ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(0,groundY);ctx.lineTo(W,groundY);ctx.stroke();
+    const bg=ctx.createRadialGradient(FX,FY,10,FX,FY,W*0.9);
+    bg.addColorStop(0,'rgba(239,68,68,0.2)');
+    bg.addColorStop(0.2,'rgba(251,146,60,0.10)');
+    bg.addColorStop(0.45,'rgba(250,204,21,0.06)');
+    bg.addColorStop(0.7,'rgba(96,165,250,0.03)');
+    bg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    rings.forEach(ring=>{
+      ctx.beginPath();
+      ctx.arc(FX,FY,ring.r,-Math.PI*0.75,Math.PI*0.25);
+      ctx.strokeStyle=`rgba(251,146,60,${ring.alpha.toFixed(2)})`;
+      ctx.lineWidth=1.8; ctx.stroke();
+    });
+    const zoneW=(W-FX-20)/ZONES.length;
+    const zColors=['rgba(96,165,250,0.85)','rgba(134,239,172,0.85)','rgba(250,204,21,0.85)','rgba(251,146,60,0.85)','rgba(239,68,68,0.85)'];
+    ZONES.slice().reverse().forEach((label,i)=>{
+      const zx=FX+10+i*zoneW;
+      if(i>0){
+        ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+        ctx.beginPath();ctx.moveTo(zx,28);ctx.lineTo(zx,groundY-10);ctx.stroke();ctx.setLineDash([]);
+      }
+      ctx.fillStyle=zColors[i];ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+      ctx.fillText(label,zx+zoneW/2,18);
+    });
+    ctx.fillStyle='#78350f';
+    ctx.beginPath();ctx.roundRect(FX-22,FY+2,18,8,3);ctx.fill();
+    ctx.beginPath();ctx.roundRect(FX+4,FY,20,8,3);ctx.fill();
+    ctx.save();ctx.translate(FX,FY+6);ctx.rotate(0.4);
+    ctx.fillStyle='#92400e';ctx.beginPath();ctx.roundRect(-22,0,44,6,3);ctx.fill();
+    ctx.restore();
+    flames.forEach(f=>{
+      ctx.beginPath();ctx.arc(f.x,f.y,f.size*f.life,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,${Math.round(60+f.life*160)},0,${f.life*0.85})`;ctx.fill();
+    });
+    const fg=ctx.createRadialGradient(FX,FY,2,FX,FY,45);
+    fg.addColorStop(0,'rgba(255,180,30,0.5)');
+    fg.addColorStop(0.5,'rgba(239,68,68,0.2)');
+    fg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath();ctx.arc(FX,FY,45,0,Math.PI*2);ctx.fillStyle=fg;ctx.fill();
+  }
+  return {init,update,draw};
+})();
+
+// ══ 탭 전환 ══════════════════════════════════════════
+let activeTab='cond';
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    ['cond','conv','rad'].forEach(t=>{
+      document.getElementById('layer-'+t).classList.remove('active');
+      document.getElementById('ctrl-'+t).style.display='none';
+    });
+    btn.classList.add('active');
+    activeTab=btn.dataset.tab;
+    document.getElementById('layer-'+activeTab).classList.add('active');
+    document.getElementById('ctrl-'+activeTab).style.display='block';
+  });
+});
+
+window.addEventListener('load',()=>{
+  COND.init(); CONV.init(); RAD.init();
+  function loop(){
+    if(activeTab==='cond'){COND.update();COND.draw();}
+    if(activeTab==='conv'){CONV.update();CONV.draw();}
+    if(activeTab==='rad') {RAD.update(); RAD.draw();}
+    requestAnimationFrame(loop);
+  }
+  loop();
+});
+window.addEventListener('resize',()=>{COND.init();CONV.init();RAD.init();});
+</script>
+</body>
+</html>
 <!-- 하단 네비게이션 -->
 <div style="margin-top:40px;text-align:center;">
   <a class="nav-btn" href="science1.html">← 과학 1 단원 목록</a>
@@ -221,65 +656,68 @@ h3{color:#374151;margin-top:20px;}
 </div>
 
 <script>
-// ══ ① 입자 모형 ══════════════════════════════════════════
+// ══ ① 입자 모형 시뮬레이션 ══════════════════════════════
 (function(){
-  const canvas=document.getElementById('sim-canvas');
-  const ctx=canvas.getContext('2d');
-  const wrap=document.getElementById('sim-wrap');
-  const tempSlider=document.getElementById('temp-slider');
-  const tempLabel=document.getElementById('temp-label');
-  const countBtns=document.querySelectorAll('[data-count]');
-  const dpr=window.devicePixelRatio||1;
-  let LW,LH;
+  const canvas  = document.getElementById('sim-canvas');
+  const ctx     = canvas.getContext('2d');
+  const wrap    = document.getElementById('sim-wrap');
+  const tempSlider = document.getElementById('temp-slider');
+  const tempLabel  = document.getElementById('temp-label');
+  const countBtns  = document.querySelectorAll('[data-count]');
+
+  const dpr = window.devicePixelRatio || 1;
+  let LW, LH;
 
   function resizeCanvas(){
-    LW=wrap.clientWidth;LH=Math.round(LW*0.46);
-    canvas.width=LW*dpr;canvas.height=LH*dpr;
-    canvas.style.width=LW+'px';canvas.style.height=LH+'px';
-    ctx.setTransform(1,0,0,1,0,0);ctx.scale(dpr,dpr);
+    LW = wrap.clientWidth;
+    LH = Math.round(LW * 0.46);
+    canvas.width = LW*dpr; canvas.height = LH*dpr;
+    canvas.style.width = LW+'px'; canvas.style.height = LH+'px';
+    ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr,dpr);
   }
-  window.addEventListener('resize',()=>{resizeCanvas();resetParticles();});
+  window.addEventListener('resize', ()=>{ resizeCanvas(); resetParticles(); });
   resizeCanvas();
 
-  const LABELS=['매우 낮음','낮음','낮음','보통','보통','보통','높음','높음','매우 높음','매우 높음'];
-  const COLOR='rgba(96,165,250,0.95)';
-  const R=9;
-  let particleCount=10,tempLevel=4,particles=[];
+  const LABELS = ['매우 낮음','낮음','낮음','보통','보통','보통','높음','높음','매우 높음','매우 높음'];
+  const COLOR  = 'rgba(96,165,250,0.95)';
+  const R = 9;
+  let particleCount = 10, tempLevel = 4, particles = [];
 
-  function spd(t){return 0.8+t*0.7;}
+  function spd(t){ return 0.8 + t*0.7; }
 
   function resetParticles(){
-    const s=spd(tempLevel);
-    particles=Array.from({length:particleCount},()=>{
-      const a=Math.random()*Math.PI*2;
-      return{x:R+Math.random()*(LW-R*2),y:R+Math.random()*(LH-R*2),vx:s*Math.cos(a),vy:s*Math.sin(a),trail:[]};
+    const s = spd(tempLevel);
+    particles = Array.from({length: particleCount}, ()=>{
+      const a = Math.random()*Math.PI*2;
+      return { x: R+Math.random()*(LW-R*2), y: R+Math.random()*(LH-R*2),
+               vx: s*Math.cos(a), vy: s*Math.sin(a), trail: [] };
     });
   }
 
   function update(){
-    const s=spd(tempLevel);
+    const s = spd(tempLevel);
     particles.forEach(p=>{
-      p.x+=p.vx;p.y+=p.vy;
-      if(p.x<R){p.x=R;p.vx=Math.abs(p.vx);}
-      if(p.x>LW-R){p.x=LW-R;p.vx=-Math.abs(p.vx);}
-      if(p.y<R){p.y=R;p.vy=Math.abs(p.vy);}
-      if(p.y>LH-R){p.y=LH-R;p.vy=-Math.abs(p.vy);}
-      p.trail.push({x:p.x,y:p.y});
-      if(p.trail.length>10)p.trail.shift();
+      p.x += p.vx; p.y += p.vy;
+      if(p.x < R)     { p.x = R;     p.vx =  Math.abs(p.vx); }
+      if(p.x > LW-R)  { p.x = LW-R;  p.vx = -Math.abs(p.vx); }
+      if(p.y < R)     { p.y = R;     p.vy =  Math.abs(p.vy); }
+      if(p.y > LH-R)  { p.y = LH-R;  p.vy = -Math.abs(p.vy); }
+      p.trail.push({x:p.x, y:p.y});
+      if(p.trail.length > 10) p.trail.shift();
     });
-    for(let i=0;i<particles.length;i++){
-      for(let j=i+1;j<particles.length;j++){
-        const a=particles[i],b=particles[j];
-        const dx=b.x-a.x,dy=b.y-a.y,dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist<R*2&&dist>0){
-          const ov=(R*2-dist)/2,nx=dx/dist,ny=dy/dist;
-          a.x-=nx*ov;a.y-=ny*ov;b.x+=nx*ov;b.y+=ny*ov;
+    for(let i=0; i<particles.length; i++){
+      for(let j=i+1; j<particles.length; j++){
+        const a=particles[i], b=particles[j];
+        const dx=b.x-a.x, dy=b.y-a.y, dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist < R*2 && dist > 0){
+          const ov=(R*2-dist)/2, nx=dx/dist, ny=dy/dist;
+          a.x -= nx*ov; a.y -= ny*ov; b.x += nx*ov; b.y += ny*ov;
           const dot=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
-          if(dot<0){
-            a.vx+=dot*nx;a.vy+=dot*ny;b.vx-=dot*nx;b.vy-=dot*ny;
-            const ma=Math.sqrt(a.vx**2+a.vy**2),mb=Math.sqrt(b.vx**2+b.vy**2);
-            if(ma>0){a.vx=a.vx/ma*s;a.vy=a.vy/ma*s;}
-            if(mb>0){b.vx=b.vx/mb*s;b.vy=b.vy/mb*s;}
+          if(dot < 0){
+            a.vx+=dot*nx; a.vy+=dot*ny; b.vx-=dot*nx; b.vy-=dot*ny;
+            const ma=Math.sqrt(a.vx**2+a.vy**2), mb=Math.sqrt(b.vx**2+b.vy**2);
+            if(ma>0){a.vx=a.vx/ma*s; a.vy=a.vy/ma*s;}
+            if(mb>0){b.vx=b.vx/mb*s; b.vy=b.vy/mb*s;}
           }
         }
       }
@@ -288,34 +726,35 @@ h3{color:#374151;margin-top:20px;}
 
   function draw(){
     ctx.clearRect(0,0,LW,LH);
-    ctx.fillStyle='#0f172a';ctx.fillRect(0,0,LW,LH);
-    ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;
+    ctx.fillStyle='#0f172a'; ctx.fillRect(0,0,LW,LH);
+    ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
     for(let x=0;x<LW;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,LH);ctx.stroke();}
     for(let y=0;y<LH;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(LW,y);ctx.stroke();}
     particles.forEach(p=>{
       p.trail.forEach((pt,i)=>{
         const a=(i/p.trail.length)*0.15;
-        ctx.beginPath();ctx.arc(pt.x,pt.y,R*0.55,0,Math.PI*2);
-        ctx.fillStyle=`rgba(96,165,250,${a.toFixed(2)})`;ctx.fill();
+        ctx.beginPath(); ctx.arc(pt.x,pt.y,R*0.55,0,Math.PI*2);
+        ctx.fillStyle=`rgba(96,165,250,${a.toFixed(2)})`; ctx.fill();
       });
       const grd=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,R*2.4);
-      grd.addColorStop(0,'rgba(96,165,250,0.35)');grd.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.beginPath();ctx.arc(p.x,p.y,R*2.4,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
-      ctx.beginPath();ctx.arc(p.x,p.y,R,0,Math.PI*2);ctx.fillStyle=COLOR;ctx.fill();
+      grd.addColorStop(0,'rgba(96,165,250,0.35)'); grd.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.beginPath(); ctx.arc(p.x,p.y,R*2.4,0,Math.PI*2); ctx.fillStyle=grd; ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x,p.y,R,0,Math.PI*2); ctx.fillStyle=COLOR; ctx.fill();
     });
+    // 온도 바
     const bw=120,bh=8,bx=14,by=LH-26;
-    ctx.fillStyle='rgba(255,255,255,0.55)';ctx.font='11px sans-serif';ctx.textAlign='left';
+    ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font='11px sans-serif'; ctx.textAlign='left';
     ctx.fillText('온도',bx,by-4);
     ctx.fillStyle='rgba(255,255,255,0.12)';
-    ctx.beginPath();ctx.roundRect(bx,by,bw,bh,4);ctx.fill();
+    ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,4); ctx.fill();
     const g=ctx.createLinearGradient(bx,0,bx+bw,0);
-    g.addColorStop(0,'#3b82f6');g.addColorStop(1,'#ef4444');
-    ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(bx,by,bw*(tempLevel/10),bh,4);ctx.fill();
-    ctx.fillStyle='rgba(255,255,255,0.45)';ctx.font='11px sans-serif';ctx.textAlign='right';
+    g.addColorStop(0,'#3b82f6'); g.addColorStop(1,'#ef4444');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.roundRect(bx,by,bw*(tempLevel/10),bh,4); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.45)'; ctx.font='11px sans-serif'; ctx.textAlign='right';
     ctx.fillText(`입자 수: ${particleCount}`,LW-14,LH-14);
   }
 
-  function loop(){update();draw();requestAnimationFrame(loop);}
+  function loop(){ update(); draw(); requestAnimationFrame(loop); }
 
   countBtns.forEach(btn=>{
     btn.addEventListener('click',()=>{
@@ -331,78 +770,89 @@ h3{color:#374151;margin-top:20px;}
     const s=spd(tempLevel);
     particles.forEach(p=>{
       const m=Math.sqrt(p.vx**2+p.vy**2);
-      if(m>0){p.vx=p.vx/m*s;p.vy=p.vy/m*s;}
+      if(m>0){p.vx=p.vx/m*s; p.vy=p.vy/m*s;}
     });
   });
 
-  resetParticles();loop();
+  resetParticles(); loop();
 })();
 
-// ══ ② 열평형 ══════════════════════════════════════════════
+// ══ ② 열평형 시뮬레이션 ══════════════════════════════════
 (function(){
-  const simCanvas=document.getElementById('eq-canvas');
-  const simCtx=simCanvas.getContext('2d');
-  const simWrap=document.getElementById('eq-wrap');
-  const graphCanvas=document.getElementById('graph-canvas');
-  const graphCtx=graphCanvas.getContext('2d');
-  const graphWrap=document.getElementById('graph-wrap');
-  const leftSlider=document.getElementById('eq-left-temp');
-  const rightSlider=document.getElementById('eq-right-temp');
-  const leftValEl=document.getElementById('eq-left-val');
-  const rightValEl=document.getElementById('eq-right-val');
-  const divCheck=document.getElementById('eq-divider');
-  const divLabel=document.getElementById('eq-divider-label');
-  const statusL=document.getElementById('eq-status-left');
-  const statusR=document.getElementById('eq-status-right');
-  const graphHint=document.getElementById('graph-hint');
-  const dpr=window.devicePixelRatio||1;
-  let LW,LH,GW,GH;
+  const simCanvas  = document.getElementById('eq-canvas');
+  const simCtx     = simCanvas.getContext('2d');
+  const simWrap    = document.getElementById('eq-wrap');
+  const graphCanvas= document.getElementById('graph-canvas');
+  const graphCtx   = graphCanvas.getContext('2d');
+  const graphWrap  = document.getElementById('graph-wrap');
+  const leftSlider = document.getElementById('eq-left-temp');
+  const rightSlider= document.getElementById('eq-right-temp');
+  const leftValEl  = document.getElementById('eq-left-val');
+  const rightValEl = document.getElementById('eq-right-val');
+  const divCheck   = document.getElementById('eq-divider');
+  const divLabel   = document.getElementById('eq-divider-label');
+  const statusL    = document.getElementById('eq-status-left');
+  const statusR    = document.getElementById('eq-status-right');
+  const graphHint  = document.getElementById('graph-hint');
+
+  const dpr = window.devicePixelRatio || 1;
+  let LW, LH, GW, GH;
 
   function resizeSim(){
-    LW=simWrap.clientWidth;LH=Math.round(LW*0.42);
-    simCanvas.width=LW*dpr;simCanvas.height=LH*dpr;
-    simCanvas.style.width=LW+'px';simCanvas.style.height=LH+'px';
-    simCtx.setTransform(1,0,0,1,0,0);simCtx.scale(dpr,dpr);
+    LW = simWrap.clientWidth;
+    LH = Math.round(LW*0.42);
+    simCanvas.width=LW*dpr; simCanvas.height=LH*dpr;
+    simCanvas.style.width=LW+'px'; simCanvas.style.height=LH+'px';
+    simCtx.setTransform(1,0,0,1,0,0); simCtx.scale(dpr,dpr);
   }
   function resizeGraph(){
-    GW=graphWrap.clientWidth;GH=200;
-    graphCanvas.width=GW*dpr;graphCanvas.height=GH*dpr;
-    graphCanvas.style.width=GW+'px';graphCanvas.style.height=GH+'px';
-    graphCtx.setTransform(1,0,0,1,0,0);graphCtx.scale(dpr,dpr);
+    GW = graphWrap.clientWidth;
+    GH = 200;
+    graphCanvas.width=GW*dpr; graphCanvas.height=GH*dpr;
+    graphCanvas.style.width=GW+'px'; graphCanvas.style.height=GH+'px';
+    graphCtx.setTransform(1,0,0,1,0,0); graphCtx.scale(dpr,dpr);
   }
-  window.addEventListener('resize',()=>{resizeSim();resizeGraph();init();});
-  resizeSim();resizeGraph();
+  window.addEventListener('resize',()=>{ resizeSim(); resizeGraph(); init(); });
+  resizeSim(); resizeGraph();
 
   const EQ_LABELS=['매우 낮음','낮음','낮음','보통','보통','보통','높음','높음','매우 높음','매우 높음'];
-  const N=15,R=8,PAD={t:14,r:14,b:28,l:44},MAX_PTS=600;
-  let leftTemp=8,rightTemp=2,curL=8,curR=2;
-  let hasDivider=true,graphing=false;
-  let leftP=[],rightP=[],graphData=[],frameCount=0;
+  const N=15, R=8;
+  const PAD={t:14,r:14,b:28,l:44};
+  const MAX_PTS=600;
 
-  function spd(t){return 0.7+t*0.65;}
+  let leftTemp=8, rightTemp=2, curL=8, curR=2;
+  let hasDivider=true, graphing=false;
+  let leftP=[], rightP=[], graphData=[], frameCount=0;
+
+  function spd(t){ return 0.7+t*0.65; }
+
   function makeP(n,t,xMin,xMax){
     const s=spd(t);
     return Array.from({length:n},()=>{
       const a=Math.random()*Math.PI*2;
-      return{x:xMin+R+Math.random()*(xMax-xMin-R*2),y:R+Math.random()*(LH-R*2),vx:s*Math.cos(a),vy:s*Math.sin(a),trail:[]};
+      return {x:xMin+R+Math.random()*(xMax-xMin-R*2), y:R+Math.random()*(LH-R*2),
+              vx:s*Math.cos(a), vy:s*Math.sin(a), trail:[]};
     });
   }
+
   function init(){
-    curL=leftTemp;curR=rightTemp;
+    curL=leftTemp; curR=rightTemp;
     leftP=makeP(N,leftTemp,0,LW/2);
     rightP=makeP(N,rightTemp,LW/2,LW);
-    graphData=[];graphing=false;
+    graphData=[]; graphing=false;
     graphHint.textContent='— 칸막이를 제거하면 기록이 시작돼요';
   }
+
   function adjSpd(particles,s){
     particles.forEach(p=>{
       const m=Math.sqrt(p.vx**2+p.vy**2);
-      if(m>0){p.vx=p.vx/m*s;p.vy=p.vy/m*s;}
+      if(m>0){p.vx=p.vx/m*s; p.vy=p.vy/m*s;}
     });
   }
+
   function updateGroup(particles,xMin,xMax,s){
     particles.forEach(p=>{
-      p.x+=p.vx;p.y+=p.vy;
+      p.x+=p.vx; p.y+=p.vy;
       if(p.x<xMin+R){p.x=xMin+R;p.vx=Math.abs(p.vx);}
       if(p.x>xMax-R){p.x=xMax-R;p.vx=-Math.abs(p.vx);}
       if(p.y<R){p.y=R;p.vy=Math.abs(p.vy);}
@@ -428,7 +878,11 @@ h3{color:#374151;margin-top:20px;}
       }
     }
   }
-  function tempToColor(t){return{r:Math.round(30+(t-1)/9*180),g:80,b:Math.round(200-(t-1)/9*180)};}
+
+  function tempToColor(t){
+    return {r:Math.round(30+(t-1)/9*180),g:80,b:Math.round(200-(t-1)/9*180)};
+  }
+
   function drawParticles(particles,c){
     const col=`rgba(${c.r},${c.g},${c.b},0.95)`;
     particles.forEach(p=>{
@@ -443,6 +897,7 @@ h3{color:#374151;margin-top:20px;}
       simCtx.beginPath();simCtx.arc(p.x,p.y,R,0,Math.PI*2);simCtx.fillStyle=col;simCtx.fill();
     });
   }
+
   function drawTempBar(bx,by,t,c,label){
     const bw=110,bh=7;
     simCtx.fillStyle=`rgba(${c.r},${c.g},${c.b},0.7)`;
@@ -453,6 +908,7 @@ h3{color:#374151;margin-top:20px;}
     simCtx.fillStyle=`rgba(${c.r},${c.g},${c.b},0.85)`;
     simCtx.beginPath();simCtx.roundRect(bx,by,bw*(t/10),bh,4);simCtx.fill();
   }
+
   function drawSim(){
     simCtx.clearRect(0,0,LW,LH);
     simCtx.fillStyle='#0f172a';simCtx.fillRect(0,0,LW,LH);
@@ -475,12 +931,15 @@ h3{color:#374151;margin-top:20px;}
     drawTempBar(14,LH-26,curL,lc,'왼쪽');
     drawTempBar(mid+14,LH-26,curR,rc,'오른쪽');
   }
+
   function drawGraph(){
     graphCtx.clearRect(0,0,GW,GH);
     graphCtx.fillStyle='#f8fafc';graphCtx.fillRect(0,0,GW,GH);
-    const pw=GW-PAD.l-PAD.r,ph=GH-PAD.t-PAD.b;
+    const pw=GW-PAD.l-PAD.r, ph=GH-PAD.t-PAD.b;
     graphCtx.strokeStyle='#e5e7eb';graphCtx.lineWidth=1;
-    [10,8,6,4,2].forEach(val=>{
+    // Y축: 2,4,6,8,10 (5단계)
+    const yTicks=[10,8,6,4,2];
+    yTicks.forEach(val=>{
       const y=PAD.t+ph*(1-(val-1)/9);
       graphCtx.beginPath();graphCtx.moveTo(PAD.l,y);graphCtx.lineTo(PAD.l+pw,y);graphCtx.stroke();
       graphCtx.fillStyle='#9ca3af';graphCtx.font='10px sans-serif';graphCtx.textAlign='right';
@@ -494,28 +953,31 @@ h3{color:#374151;margin-top:20px;}
     graphCtx.save();graphCtx.translate(12,PAD.t+ph/2);graphCtx.rotate(-Math.PI/2);
     graphCtx.fillStyle='#9ca3af';graphCtx.font='10px sans-serif';graphCtx.textAlign='center';
     graphCtx.fillText('온도',0,0);graphCtx.restore();
-    if(!graphing||graphData.length<2)return;
-    const n=graphData.length,xScale=pw/Math.max(MAX_PTS-1,n-1);
+    if(!graphing||graphData.length<2) return;
+    const n=graphData.length, xScale=pw/Math.max(MAX_PTS-1,n-1);
     function plotLine(key,color){
       graphCtx.beginPath();graphCtx.strokeStyle=color;graphCtx.lineWidth=2.5;graphCtx.lineJoin='round';
       graphData.forEach((d,i)=>{
-        const x=PAD.l+i*xScale,y=PAD.t+ph*(1-(d[key]-1)/9);
+        const x=PAD.l+i*xScale, y=PAD.t+ph*(1-(d[key]-1)/9);
         i===0?graphCtx.moveTo(x,y):graphCtx.lineTo(x,y);
       });
       graphCtx.stroke();
     }
-    plotLine('l','#f97316');plotLine('r','#3b82f6');
-    const last=graphData[n-1],lx=PAD.l+(n-1)*xScale;
+    plotLine('l','#f97316'); plotLine('r','#3b82f6');
+    const last=graphData[n-1], lx=PAD.l+(n-1)*xScale;
     [[last.l,'#f97316'],[last.r,'#3b82f6']].forEach(([val,col])=>{
       const ly=PAD.t+ph*(1-(val-1)/9);
-      graphCtx.beginPath();graphCtx.arc(lx,ly,4,0,Math.PI*2);graphCtx.fillStyle=col;graphCtx.fill();
+      graphCtx.beginPath();graphCtx.arc(lx,ly,4,0,Math.PI*2);
+      graphCtx.fillStyle=col;graphCtx.fill();
     });
   }
+
   function updateStatus(){
     const diff=Math.abs(curL-curR);
     if(!hasDivider&&diff<0.3){
       statusL.className='t-chip chip-eq';statusR.className='t-chip chip-eq';
-      statusL.textContent='🌡️ 열평형 도달!';statusR.textContent=`평형 온도: ${curL.toFixed(1)}`;
+      statusL.textContent='🌡️ 열평형 도달!';
+      statusR.textContent=`평형 온도: ${curL.toFixed(1)}`;
     } else {
       statusL.className='t-chip chip-l';statusR.className='t-chip chip-r';
       const li=Math.round(Math.min(10,Math.max(1,curL)))-1;
@@ -524,26 +986,33 @@ h3{color:#374151;margin-top:20px;}
       statusR.textContent=`오른쪽: ${curR.toFixed(1)} (${EQ_LABELS[ri]})`;
     }
   }
+
   function update(){
     const mid=LW/2;
     if(!hasDivider){
-      const eq=(curL+curR)/2,rate=0.008;
-      curL+=(eq-curL)*rate;curR+=(eq-curR)*rate;
-      if(frameCount%6===0&&graphData.length<MAX_PTS)graphData.push({l:curL,r:curR});
-    } else {curL=leftTemp;curR=rightTemp;}
+      const eq=(curL+curR)/2, rate=0.008;
+      curL+=(eq-curL)*rate; curR+=(eq-curR)*rate;
+      if(frameCount%6===0&&graphData.length<MAX_PTS) graphData.push({l:curL,r:curR});
+    } else {
+      curL=leftTemp; curR=rightTemp;
+    }
     frameCount++;
     const sL=spd(curL),sR=spd(curR);
     adjSpd(leftP,sL);adjSpd(rightP,sR);
-    updateGroup(leftP,0,mid,sL);updateGroup(rightP,mid,LW,sR);
+    updateGroup(leftP,0,mid,sL);
+    updateGroup(rightP,mid,LW,sR);
   }
-  function loop(){update();drawSim();drawGraph();updateStatus();requestAnimationFrame(loop);}
+
+  function loop(){ update(); drawSim(); drawGraph(); updateStatus(); requestAnimationFrame(loop); }
 
   leftSlider.addEventListener('input',()=>{
-    leftTemp=parseInt(leftSlider.value);leftValEl.textContent=EQ_LABELS[leftTemp-1];
+    leftTemp=parseInt(leftSlider.value);
+    leftValEl.textContent=EQ_LABELS[leftTemp-1];
     if(hasDivider){curL=leftTemp;adjSpd(leftP,spd(leftTemp));}
   });
   rightSlider.addEventListener('input',()=>{
-    rightTemp=parseInt(rightSlider.value);rightValEl.textContent=EQ_LABELS[rightTemp-1];
+    rightTemp=parseInt(rightSlider.value);
+    rightValEl.textContent=EQ_LABELS[rightTemp-1];
     if(hasDivider){curR=rightTemp;adjSpd(rightP,spd(rightTemp));}
   });
   divCheck.addEventListener('change',()=>{
@@ -556,324 +1025,30 @@ h3{color:#374151;margin-top:20px;}
       graphHint.textContent='— 칸막이를 제거하면 기록이 시작돼요';
     } else {
       divLabel.textContent='🔓 칸막이 제거됨 — 열평형 진행 중';
-      graphing=true;graphHint.textContent='— 기록 중...';resizeGraph();
+      graphing=true;
+      graphHint.textContent='— 기록 중...';
+      resizeGraph();
     }
   });
 
-  init();loop();
+  init(); loop();
 })();
 
-// ══ ③ 열의 이동 ══════════════════════════════════════════
-const dpr2=window.devicePixelRatio||1;
-
-function makeCtx(id){
-  const stack=document.getElementById('sim-stack');
-  const canvas=document.getElementById(id);
-  const W=stack.clientWidth,H=stack.clientHeight;
-  canvas.width=W*dpr2;canvas.height=H*dpr2;
-  canvas.style.width=W+'px';canvas.style.height=H+'px';
-  const ctx=canvas.getContext('2d');
-  ctx.setTransform(1,0,0,1,0,0);ctx.scale(dpr2,dpr2);
-  return{ctx,W,H};
-}
-
-function heatRGB(t){return{r:Math.round(50+t*205),g:Math.round(100-t*60),b:Math.round(220-t*200)};}
-function heatCol(t){const c=heatRGB(t);return`rgb(${c.r},${c.g},${c.b})`;}
-function heatColA(t,a){const c=heatRGB(t);return`rgba(${c.r},${c.g},${c.b},${a})`;}
-
-const COND=(function(){
-  let ctx,W,H;
-  const COLS=14,ROWS=3,R=8;
-  let particles=[],flames=[],heatPos=0.10,matRate=0.004,matName='A',isHeatOn=false;
-  const MAT={
-    A:{rate:0.003,label:'물질 A',desc:'물질 A: 열전도율이 낮아 열이 천천히 전달됩니다. 열원을 껐다 켜면서 열의 이동과 냉각을 관찰해보세요.'},
-    B:{rate:0.010,label:'물질 B',desc:'물질 B: 열전도율이 보통으로 열이 일반적인 속도로 전달됩니다.'},
-    C:{rate:0.035,label:'물질 C',desc:'물질 C: 열전도율이 매우 높아 열이 빠르게 전체로 전달됩니다.'},
-  };
-
-  function init(){
-    const s=makeCtx('cond-canvas');ctx=s.ctx;W=s.W;H=s.H;
-    flames=[];particles=[];
-    const padX=32,rodCenterY=H*0.46,rowGap=R*2.6,spacing=(W-padX*2)/(COLS-1);
-    for(let row=0;row<ROWS;row++)
-      for(let col=0;col<COLS;col++)
-        particles.push({col,row,bx:padX+col*spacing,by:rodCenterY+(row-1)*rowGap,ox:0,oy:0,heat:0});
-  }
-
-  function idx(col,row){return row*COLS+col;}
-
-  document.getElementById('cond-slider').addEventListener('input',e=>{heatPos=parseInt(e.target.value)/100;});
-  document.querySelectorAll('.mat-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      document.querySelectorAll('.mat-btn').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      matName=btn.dataset.mat;matRate=MAT[matName].rate;
-      document.getElementById('cond-desc').textContent=MAT[matName].desc;
-      particles.forEach(p=>p.heat=0);
-    });
-  });
-  const condToggle=document.getElementById('cond-toggle');
-  condToggle.addEventListener('change',e=>{isHeatOn=e.target.checked;});
-  document.getElementById('cond-reset').addEventListener('click',()=>{
-    particles.forEach(p=>p.heat=0);flames=[];isHeatOn=false;condToggle.checked=false;
-  });
-
-  function update(){
-    const padX=32,hx=padX+heatPos*(W-padX*2);
-    let minD=Infinity,minC=-1;
-    for(let c=0;c<COLS;c++){
-      const d=Math.abs(particles[idx(c,2)].bx-hx);
-      if(d<minD){minD=d;minC=c;}
-    }
-    if(isHeatOn&&minC>=0){
-      particles[idx(minC,0)].heat=1;
-      particles[idx(minC,1)].heat=1;
-      particles[idx(minC,2)].heat=1;
-    }
-    const nh=particles.map(p=>p.heat);
-    for(let row=0;row<ROWS;row++){
-      for(let col=0;col<COLS;col++){
-        if(col===minC&&isHeatOn)continue;
-        const h=particles[idx(col,row)].heat,r=matRate;
-        if(col>0)      nh[idx(col-1,row)]+=Math.max(0,(h-particles[idx(col-1,row)].heat)*r);
-        if(col<COLS-1) nh[idx(col+1,row)]+=Math.max(0,(h-particles[idx(col+1,row)].heat)*r);
-        if(row>0)      nh[idx(col,row-1)]+=Math.max(0,(h-particles[idx(col,row-1)].heat)*r);
-        if(row<ROWS-1) nh[idx(col,row+1)]+=Math.max(0,(h-particles[idx(col,row+1)].heat)*r);
-      }
-    }
-    particles.forEach((p,i)=>{
-      if(isHeatOn&&p.col===minC){p.heat=1;}
-      else{
-        let h=nh[i];
-        if(!isHeatOn)h=h*0.99-0.002;
-        p.heat=Math.max(0,Math.min(1,h));
-      }
-      const v=p.heat*4.5;p.ox=(Math.random()-0.5)*v;p.oy=(Math.random()-0.5)*v;
-    });
-    if(isHeatOn){
-      const hx2=padX+heatPos*(W-padX*2);
-      for(let i=0;i<3;i++) flames.push({
-        x:hx2+(Math.random()-0.5)*22,y:H*0.86,
-        vy:-(1.5+Math.random()*2.5),vx:(Math.random()-0.5)*1.2,life:1,size:5+Math.random()*10
-      });
-    }
-    flames.forEach(f=>{f.y+=f.vy;f.x+=f.vx;f.life-=0.032;});
-    flames=flames.filter(f=>f.life>0);
-  }
-
-  function draw(){
-    ctx.clearRect(0,0,W,H);ctx.fillStyle='#0f172a';ctx.fillRect(0,0,W,H);
-    if(!particles.length)return;
-    const p0=particles[0],pE=particles[COLS-1],p2b=particles[idx(0,2)];
-    ctx.strokeStyle='rgba(148,163,184,0.35)';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);
-    ctx.beginPath();ctx.roundRect(p0.bx-R-6,p0.by-R-6,(pE.bx-p0.bx)+R*2+12,(p2b.by-p0.by)+R*2+12,10);
-    ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='rgba(148,163,184,0.6)';ctx.font='bold 12px sans-serif';ctx.textAlign='left';
-    ctx.fillText(MAT[matName].label,p0.bx-R-4,p0.by-R-10);
-    ctx.fillStyle='rgba(71,85,105,0.3)';
-    ctx.beginPath();ctx.roundRect(p0.bx-R-2,p0.by-R-2,(pE.bx-p0.bx)+R*2+4,(p2b.by-p0.by)+R*2+4,8);ctx.fill();
-    for(let row=0;row<ROWS;row++)
-      for(let col=0;col<COLS-1;col++){
-        const a=particles[idx(col,row)],b=particles[idx(col+1,row)];
-        ctx.strokeStyle=heatColA((a.heat+b.heat)/2,0.45);ctx.lineWidth=2.5;ctx.setLineDash([]);
-        ctx.beginPath();ctx.moveTo(a.bx+a.ox,a.by+a.oy);ctx.lineTo(b.bx+b.ox,b.by+b.oy);ctx.stroke();
-      }
-    for(let col=0;col<COLS;col++)
-      for(let row=0;row<ROWS-1;row++){
-        const a=particles[idx(col,row)],b=particles[idx(col,row+1)];
-        ctx.strokeStyle=heatColA((a.heat+b.heat)/2,0.45);ctx.lineWidth=2.5;
-        ctx.beginPath();ctx.moveTo(a.bx+a.ox,a.by+a.oy);ctx.lineTo(b.bx+b.ox,b.by+b.oy);ctx.stroke();
-      }
-    particles.forEach(p=>{
-      const x=p.bx+p.ox,y=p.by+p.oy;
-      if(p.heat>0.04){
-        const grd=ctx.createRadialGradient(x,y,0,x,y,R*2.2);
-        grd.addColorStop(0,heatColA(p.heat,p.heat*0.45));grd.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.beginPath();ctx.arc(x,y,R*2.2,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
-      }
-      ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fillStyle=heatCol(p.heat);ctx.fill();
-    });
-    flames.forEach(f=>{
-      ctx.beginPath();ctx.arc(f.x,f.y,f.size*f.life,0,Math.PI*2);
-      ctx.fillStyle=`rgba(255,${Math.round(80+f.life*140)},0,${f.life*0.85})`;ctx.fill();
-    });
-    const padX=32,hx=padX+heatPos*(W-padX*2);
-    if(isHeatOn){
-      ctx.fillStyle='rgba(255,150,0,0.15)';
-      ctx.beginPath();ctx.ellipse(hx,H*0.9,20,9,0,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
-      ctx.fillText('열원(ON)',hx,H-6);
-    } else {
-      ctx.fillStyle='rgba(148,163,184,0.15)';
-      ctx.beginPath();ctx.ellipse(hx,H*0.9,20,9,0,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='rgba(148,163,184,0.5)';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
-      ctx.fillText('열원(OFF)',hx,H-6);
-    }
-  }
-  return{init,update,draw};
-})();
-
-const CONV=(function(){
-  let ctx,W,H;
-  const N=60,R=7;
-  let particles=[];
-  function init(){
-    const s=makeCtx('conv-canvas');ctx=s.ctx;W=s.W;H=s.H;particles=[];
-    const padX=24,padY=18,botY=H-36;
-    for(let i=0;i<N;i++){
-      const x=padX+Math.random()*(W-padX*2),y=padY+Math.random()*(botY-padY);
-      const fromBot=(y-padY)/(botY-padY);
-      particles.push({x,y,vx:(Math.random()-0.5)*0.8,vy:(Math.random()-0.5)*0.8,heat:1-fromBot*0.9});
-    }
-  }
-  document.getElementById('conv-reset').addEventListener('click',init);
-  function update(){
-    const padX=24,padY=18,botY=H-36,height=botY-padY;
-    particles.forEach(p=>{
-      const buoy=(p.heat-0.45)*0.18;p.vy-=buoy;
-      const xNorm=(p.x-padX)/(W-padX*2);
-      p.vx+=(xNorm<0.5?0.04:-0.04)*(p.heat>0.5?1:-1);
-      p.vx*=0.94;p.vy*=0.92;
-      p.vx+=(Math.random()-0.5)*0.15;p.vy+=(Math.random()-0.5)*0.08;
-      p.x+=p.vx;p.y+=p.vy;
-      if(p.x<padX){p.x=padX;p.vx=Math.abs(p.vx)*0.5;}
-      if(p.x>W-padX){p.x=W-padX;p.vx=-Math.abs(p.vx)*0.5;}
-      if(p.y<padY){p.y=padY;p.vy=Math.abs(p.vy)*0.4;}
-      if(p.y>botY){p.y=botY;p.vy=-Math.abs(p.vy)*0.4;}
-      const fromBot=(p.y-padY)/height;
-      if(fromBot>0.82)p.heat=Math.min(1,p.heat+0.012);
-      if(fromBot<0.15)p.heat=Math.max(0.05,p.heat-0.006);
-    });
-  }
-  function draw(){
-    ctx.clearRect(0,0,W,H);ctx.fillStyle='#0f172a';ctx.fillRect(0,0,W,H);
-    const padX=24,botY=H-36;
-    ctx.strokeStyle='rgba(148,163,184,0.45)';ctx.lineWidth=3;
-    ctx.beginPath();ctx.moveTo(padX-16,18);ctx.lineTo(padX-16,botY+2);
-    ctx.lineTo(W-padX+16,botY+2);ctx.lineTo(W-padX+16,18);ctx.stroke();
-    const gy=ctx.createLinearGradient(0,botY,0,H);
-    gy.addColorStop(0,'rgba(239,68,68,0.55)');gy.addColorStop(1,'rgba(239,68,68,0)');
-    ctx.fillStyle=gy;ctx.fillRect(padX-16,botY,W-padX*2+32,H-botY);
-    ctx.fillStyle='rgba(239,68,68,0.9)';ctx.font='bold 12px sans-serif';ctx.textAlign='center';
-    ctx.fillText('🔥 열원',W/2,H-8);
-    particles.forEach(p=>{
-      const col=heatCol(p.heat);
-      if(p.heat>0.12){
-        const grd=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,R*2);
-        grd.addColorStop(0,heatColA(p.heat,p.heat*0.3));grd.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.beginPath();ctx.arc(p.x,p.y,R*2,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
-      }
-      ctx.beginPath();ctx.arc(p.x,p.y,R,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
-    });
-  }
-  return{init,update,draw};
-})();
-
-const RAD=(function(){
-  let ctx,W,H;
-  const ZONES=['매우 낮음','낮음','보통','높음','매우 높음'];
-  let rings=[],timer=0,flames=[],FX,FY;
-  function init(){
-    const s=makeCtx('rad-canvas');ctx=s.ctx;W=s.W;H=s.H;
-    FX=70;FY=H*0.62;rings=[];flames=[];timer=0;
-  }
-  function update(){
-    timer++;
-    if(timer%18===0)rings.push({r:18,maxR:W*0.96,alpha:0.65,speed:2.6});
-    rings.forEach(r=>{r.r+=r.speed;r.alpha=0.65*(1-r.r/r.maxR);});
-    rings=rings.filter(r=>r.r<r.maxR);
-    for(let i=0;i<3;i++) flames.push({
-      x:FX+(Math.random()-0.5)*22,y:FY,
-      vy:-(1.2+Math.random()*2.8),vx:(Math.random()-0.5)*0.8,life:1,size:5+Math.random()*10
-    });
-    flames.forEach(f=>{f.y+=f.vy;f.x+=f.vx;f.life-=0.03;});
-    flames=flames.filter(f=>f.life>0);
-  }
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    const sky=ctx.createLinearGradient(0,0,0,H*0.65);
-    sky.addColorStop(0,'#0f172a');sky.addColorStop(1,'#1e293b');
-    ctx.fillStyle=sky;ctx.fillRect(0,0,W,H*0.65);
-    const groundY=H*0.65;
-    const gnd=ctx.createLinearGradient(0,groundY,0,H);
-    gnd.addColorStop(0,'#374151');gnd.addColorStop(1,'#1f2937');
-    ctx.fillStyle=gnd;ctx.fillRect(0,groundY,W,H-groundY);
-    ctx.strokeStyle='rgba(107,114,128,0.5)';ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.moveTo(0,groundY);ctx.lineTo(W,groundY);ctx.stroke();
-    const bg=ctx.createRadialGradient(FX,FY,10,FX,FY,W*0.9);
-    bg.addColorStop(0,'rgba(239,68,68,0.2)');bg.addColorStop(0.2,'rgba(251,146,60,0.10)');
-    bg.addColorStop(0.45,'rgba(250,204,21,0.06)');bg.addColorStop(0.7,'rgba(96,165,250,0.03)');
-    bg.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-    rings.forEach(ring=>{
-      ctx.beginPath();ctx.arc(FX,FY,ring.r,-Math.PI*0.75,Math.PI*0.25);
-      ctx.strokeStyle=`rgba(251,146,60,${ring.alpha.toFixed(2)})`;ctx.lineWidth=1.8;ctx.stroke();
-    });
-    const zoneW=(W-FX-20)/ZONES.length;
-    const zColors=['rgba(96,165,250,0.85)','rgba(134,239,172,0.85)','rgba(250,204,21,0.85)','rgba(251,146,60,0.85)','rgba(239,68,68,0.85)'];
-    ZONES.slice().reverse().forEach((label,i)=>{
-      const zx=FX+10+i*zoneW;
-      if(i>0){
-        ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
-        ctx.beginPath();ctx.moveTo(zx,28);ctx.lineTo(zx,groundY-10);ctx.stroke();ctx.setLineDash([]);
-      }
-      ctx.fillStyle=zColors[i];ctx.font='bold 11px sans-serif';ctx.textAlign='center';
-      ctx.fillText(label,zx+zoneW/2,18);
-    });
-    ctx.fillStyle='#78350f';
-    ctx.beginPath();ctx.roundRect(FX-22,FY+2,18,8,3);ctx.fill();
-    ctx.beginPath();ctx.roundRect(FX+4,FY,20,8,3);ctx.fill();
-    ctx.save();ctx.translate(FX,FY+6);ctx.rotate(0.4);
-    ctx.fillStyle='#92400e';ctx.beginPath();ctx.roundRect(-22,0,44,6,3);ctx.fill();ctx.restore();
-    flames.forEach(f=>{
-      ctx.beginPath();ctx.arc(f.x,f.y,f.size*f.life,0,Math.PI*2);
-      ctx.fillStyle=`rgba(255,${Math.round(60+f.life*160)},0,${f.life*0.85})`;ctx.fill();
-    });
-    const fg=ctx.createRadialGradient(FX,FY,2,FX,FY,45);
-    fg.addColorStop(0,'rgba(255,180,30,0.5)');fg.addColorStop(0.5,'rgba(239,68,68,0.2)');fg.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.beginPath();ctx.arc(FX,FY,45,0,Math.PI*2);ctx.fillStyle=fg;ctx.fill();
-  }
-  return{init,update,draw};
-})();
-
-let activeTab='cond';
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    ['cond','conv','rad'].forEach(t=>{
-      document.getElementById('layer-'+t).classList.remove('active');
-      document.getElementById('ctrl-'+t).style.display='none';
-    });
-    btn.classList.add('active');
-    activeTab=btn.dataset.tab;
-    document.getElementById('layer-'+activeTab).classList.add('active');
-    document.getElementById('ctrl-'+activeTab).style.display='block';
-  });
-});
-
-window.addEventListener('load',()=>{
-  COND.init();CONV.init();RAD.init();
-  function loop(){
-    if(activeTab==='cond'){COND.update();COND.draw();}
-    if(activeTab==='conv'){CONV.update();CONV.draw();}
-    if(activeTab==='rad'){RAD.update();RAD.draw();}
-    requestAnimationFrame(loop);
-  }
-  loop();
-});
-window.addEventListener('resize',()=>{COND.init();CONV.init();RAD.init();});
-
-// ══ 팝업 ══════════════════════════════════════════════════
-const overlay=document.getElementById('termModal');
-const termEl=document.getElementById('modalTerm');
-const defEl=document.getElementById('modalDef');
-const closeBtn=document.getElementById('modalCloseBtn');
+// ══ 팝업 ═════════════════════════════════════════════════
+const overlay  = document.getElementById('termModal');
+const termEl   = document.getElementById('modalTerm');
+const defEl    = document.getElementById('modalDef');
+const closeBtn = document.getElementById('modalCloseBtn');
 document.querySelectorAll('[data-term]').forEach(el=>{
-  el.addEventListener('click',()=>{termEl.textContent=el.dataset.term;defEl.textContent=el.dataset.def;overlay.classList.add('active');});
+  el.addEventListener('click',()=>{
+    termEl.textContent=el.dataset.term;
+    defEl.textContent=el.dataset.def;
+    overlay.classList.add('active');
+  });
 });
 closeBtn.addEventListener('click',()=>overlay.classList.remove('active'));
-overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('active');});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.classList.remove('active');});
+overlay.addEventListener('click',e=>{ if(e.target===overlay)overlay.classList.remove('active'); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape')overlay.classList.remove('active'); });
 </script>
 </body>
 </html>
