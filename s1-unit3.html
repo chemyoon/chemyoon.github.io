@@ -262,6 +262,203 @@ function heatColA(t,a){const c=heatRGB(t);return `rgba(${c.r},${c.g},${c.b},${a}
 // ══════════════════════════════════════════════════════
 // 전도
 // ══════════════════════════════════════════════════════
+const COND=(function(){
+  let ctx,W,H;
+  const COLS=14, ROWS=3, R=8;
+  let particles=[], flames=[];
+  let heatPos=0.10;
+  let matRate=0.004;
+  let matName='A';
+  let isHeatOn=false;
+
+  const MAT={
+    A:{rate:0.003, label:'물질 A',desc:'물질 A: 열전도율이 낮아 열이 천천히 전달됩니다. 열원을 껐다 켜면서 열의 이동과 냉각을 관찰해보세요.'},
+    B:{rate:0.010, label:'물질 B',desc:'물질 B: 열전도율이 보통으로 열이 일반적인 속도로 전달됩니다.'},
+    C:{rate:0.035, label:'물질 C',desc:'물질 C: 열전도율이 매우 높아 열이 빠르게 전체로 전달됩니다.'},
+  };
+
+  function init(){
+    const s=makeCtx('cond-canvas'); ctx=s.ctx; W=s.W; H=s.H;
+    flames=[];
+    const padX=32, rodCenterY=H*0.46, rowGap=R*2.6;
+    const spacing=(W-padX*2)/(COLS-1);
+    particles=[];
+    for(let row=0;row<ROWS;row++){
+      for(let col=0;col<COLS;col++){
+        particles.push({col,row,
+          bx:padX+col*spacing,
+          by:rodCenterY+(row-1)*rowGap,
+          ox:0,oy:0,heat:0
+        });
+      }
+    }
+  }
+
+  function idx(col,row){return row*COLS+col;}
+
+  document.getElementById('cond-slider').addEventListener('input',e=>{
+    heatPos=parseInt(e.target.value)/100;
+  });
+  
+  document.querySelectorAll('.mat-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.mat-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      matName=btn.dataset.mat;
+      matRate=MAT[matName].rate;
+      document.getElementById('cond-desc').textContent=MAT[matName].desc;
+      particles.forEach(p=>p.heat=0);
+    });
+  });
+
+  const condToggle = document.getElementById('cond-toggle');
+  condToggle.addEventListener('change', e => {
+    isHeatOn = e.target.checked;
+  });
+
+  document.getElementById('cond-reset').addEventListener('click',()=>{
+    particles.forEach(p=>p.heat=0);
+    flames=[];
+    isHeatOn = false;
+    condToggle.checked = false;
+  });
+
+  function update(){
+    const padX=32;
+    const hx=padX+heatPos*(W-padX*2);
+
+    let minD=Infinity, minC=-1;
+    for(let c=0;c<COLS;c++){
+      const d=Math.abs(particles[idx(c,2)].bx-hx);
+      if(d<minD){minD=d;minC=c;}
+    }
+    
+    // 열원이 켜져 있을 때만 가열
+    if(isHeatOn && minC>=0){
+      particles[idx(minC,0)].heat=1;
+      particles[idx(minC,1)].heat=1;
+      particles[idx(minC,2)].heat=1;
+    }
+
+    const nh=particles.map(p=>p.heat);
+    for(let row=0;row<ROWS;row++){
+      for(let col=0;col<COLS;col++){
+        const h=particles[idx(col,row)].heat;
+        const r=matRate;
+        if(col>0)      nh[idx(col-1,row)]+=Math.max(0,(h-particles[idx(col-1,row)].heat)*r);
+        if(col<COLS-1) nh[idx(col+1,row)]+=Math.max(0,(h-particles[idx(col+1,row)].heat)*r);
+        if(row>0)      nh[idx(col,row-1)]+=Math.max(0,(h-particles[idx(col,row-1)].heat)*r);
+        if(row<ROWS-1) nh[idx(col,row+1)]+=Math.max(0,(h-particles[idx(col,row+1)].heat)*r);
+      }
+    }
+    
+    particles.forEach((p,i)=>{
+      // 열원이 켜져있고 열원 위치면 1로 유지, 아니면 계산된 열 적용
+      if(isHeatOn && p.col===minC){
+        p.heat=1;
+      } else {
+        let currentHeat = nh[i];
+        
+        // 추가된 부분: 열원이 꺼져있으면 서서히 식어감 (자연 냉각)
+        if(!isHeatOn) {
+          // 온도가 높을 땐 빨리 식고(0.99), 낮을 땐 확실하게 0이 되도록(-0.002) 조치
+          currentHeat = currentHeat * 0.99 - 0.002; 
+        }
+        
+        p.heat=Math.max(0,Math.min(1,currentHeat));
+      }
+      
+      const v=p.heat*4.5;
+      p.ox=(Math.random()-0.5)*v;
+      p.oy=(Math.random()-0.5)*v;
+    });
+
+    if(isHeatOn) {
+      for(let i=0;i<3;i++) flames.push({
+        x:hx+(Math.random()-0.5)*22,y:H*0.86,
+        vy:-(1.5+Math.random()*2.5),vx:(Math.random()-0.5)*1.2,
+        life:1,size:5+Math.random()*10
+      });
+    }
+    flames.forEach(f=>{f.y+=f.vy;f.x+=f.vx;f.life-=0.032;});
+    flames=flames.filter(f=>f.life>0);
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#0f172a'; ctx.fillRect(0,0,W,H);
+
+    if(particles.length===0) return;
+
+    const p0=particles[0], pE=particles[COLS-1];
+    const p2b=particles[idx(0,2)], pE2b=particles[idx(COLS-1,2)];
+
+    ctx.strokeStyle='rgba(148,163,184,0.35)'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
+    ctx.beginPath();
+    ctx.roundRect(p0.bx-R-6, p0.by-R-6, (pE.bx-p0.bx)+R*2+12, (p2b.by-p0.by)+R*2+12, 10);
+    ctx.stroke(); ctx.setLineDash([]);
+
+    ctx.fillStyle='rgba(148,163,184,0.6)';
+    ctx.font='bold 12px sans-serif'; ctx.textAlign='left';
+    ctx.fillText(MAT[matName].label, p0.bx-R-4, p0.by-R-10);
+
+    ctx.fillStyle='rgba(71,85,105,0.3)';
+    ctx.beginPath();
+    ctx.roundRect(p0.bx-R-2, p0.by-R-2, (pE.bx-p0.bx)+R*2+4, (p2b.by-p0.by)+R*2+4, 8);
+    ctx.fill();
+
+    for(let row=0;row<ROWS;row++){
+      for(let col=0;col<COLS-1;col++){
+        const a=particles[idx(col,row)], b=particles[idx(col+1,row)];
+        ctx.strokeStyle=heatColA((a.heat+b.heat)/2,0.45); ctx.lineWidth=2.5; ctx.setLineDash([]);
+        ctx.beginPath();ctx.moveTo(a.bx+a.ox,a.by+a.oy);ctx.lineTo(b.bx+b.ox,b.by+b.oy);ctx.stroke();
+      }
+    }
+    for(let col=0;col<COLS;col++){
+      for(let row=0;row<ROWS-1;row++){
+        const a=particles[idx(col,row)], b=particles[idx(col,row+1)];
+        ctx.strokeStyle=heatColA((a.heat+b.heat)/2,0.45); ctx.lineWidth=2.5;
+        ctx.beginPath();ctx.moveTo(a.bx+a.ox,a.by+a.oy);ctx.lineTo(b.bx+b.ox,b.by+b.oy);ctx.stroke();
+      }
+    }
+
+    particles.forEach(p=>{
+      const x=p.bx+p.ox, y=p.by+p.oy;
+      if(p.heat>0.04){
+        const grd=ctx.createRadialGradient(x,y,0,x,y,R*2.2);
+        grd.addColorStop(0,heatColA(p.heat,p.heat*0.45));
+        grd.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.beginPath();ctx.arc(x,y,R*2.2,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
+      }
+      ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fillStyle=heatCol(p.heat);ctx.fill();
+    });
+
+    flames.forEach(f=>{
+      ctx.beginPath();ctx.arc(f.x,f.y,f.size*f.life,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,${Math.round(80+f.life*140)},0,${f.life*0.85})`;ctx.fill();
+    });
+
+    const padX=32, hx=padX+heatPos*(W-padX*2);
+    
+    if(isHeatOn) {
+      ctx.fillStyle='rgba(255,150,0,0.15)';
+      ctx.beginPath();ctx.ellipse(hx,H*0.9,20,9,0,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+      ctx.fillText('열원(ON)',hx,H-6);
+    } else {
+      ctx.fillStyle='rgba(148,163,184,0.15)';
+      ctx.beginPath();ctx.ellipse(hx,H*0.9,20,9,0,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(148,163,184,0.5)';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+      ctx.fillText('열원(OFF)',hx,H-6);
+    }
+  }
+
+  return {init,update,draw};
+})();
+
+// ══════════════════════════════════════════════════════
+// 대류
+// ══════════════════════════════════════════════════════
 const CONV=(function(){
   let ctx,W,H;
   const N=40, R=7;
@@ -361,157 +558,6 @@ const CONV=(function(){
     ctx.fillStyle=gy; ctx.fillRect(padX-16, botY, W-padX*2+32, H-botY);
     ctx.fillStyle='rgba(239,68,68,0.9)'; ctx.font='bold 12px sans-serif'; ctx.textAlign='center';
     ctx.fillText('🔥 열원', W/2, H-8);
-
-    // 입자
-    particles.forEach(p=>{
-      const col = heatCol(p.heat);
-      if(p.heat > 0.12){
-        const grd=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,R*2);
-        grd.addColorStop(0, heatColA(p.heat, p.heat*0.3));
-        grd.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.beginPath(); ctx.arc(p.x,p.y,R*2,0,Math.PI*2); ctx.fillStyle=grd; ctx.fill();
-      }
-      ctx.beginPath(); ctx.arc(p.x,p.y,R,0,Math.PI*2); ctx.fillStyle=col; ctx.fill();
-    });
-  }
-
-  return {init,update,draw};
-})();
-// ══════════════════════════════════════════════════════
-// 대류
-// ══════════════════════════════════════════════════════
-const CONV=(function(){
-  let ctx,W,H;
-  const N=40, R=7;
-  let particles=[];
-
-  function init(){
-    const s=makeCtx('conv-canvas'); ctx=s.ctx; W=s.W; H=s.H;
-    particles=[];
-
-    const padX=28, padY=22, botY=H-40;
-    const midX=W/2;
-
-    // 왼쪽 루프: 반시계 방향 (하단 중앙→왼쪽 상승→상단 왼쪽→오른쪽 하강→하단 중앙)
-    // 오른쪽 루프: 시계 방향 (하단 중앙→오른쪽 상승→상단 오른쪽→왼쪽 하강→하단 중앙)
-    // 각 루프에 N/2개씩 배치, t=0~1로 위치 초기화
-    for(let i=0;i<N;i++){
-      const isLeft = i < N/2;
-      const t = (i % (N/2)) / (N/2); // 0~1 위치
-      const heat = getHeatFromT(t);
-      const pos = getPosFromT(t, isLeft, padX, padY, botY, midX);
-      particles.push({
-        t,               // 루프 내 위치 (0~1)
-        isLeft,          // 어느 루프인지
-        x: pos.x,
-        y: pos.y,
-        heat,
-        speed: 0.0015 + Math.random()*0.0008,
-      });
-    }
-  }
-
-  // t=0: 하단 중앙, t=0.25: 좌/우 바깥 중간 높이, t=0.5: 상단, t=0.75: 반대쪽 중간 높이
-  function getPosFromT(t, isLeft, padX, padY, botY, midX){
-    const w2 = midX - padX; // 루프 가로 절반
-    const h  = botY - padY;
-    const cx = isLeft ? padX + w2/2 : midX + w2/2; // 루프 중심 X
-    const rx = w2/2 - R;
-    const ry = h/2 - R;
-    const cy = padY + h/2;
-
-    // 타원 경로 (반시계=왼쪽, 시계=오른쪽)
-    const angle = isLeft
-      ? -Math.PI/2 + t * Math.PI*2        // 반시계
-      : -Math.PI/2 - t * Math.PI*2;       // 시계
-    return {
-      x: cx + rx * Math.cos(angle),
-      y: cy + ry * Math.sin(angle),
-    };
-  }
-
-  // t 기준 열: 하단(t≈0, t≈1) → 뜨겁고, 상단(t≈0.5) → 차갑고
-  function getHeatFromT(t){
-    // t=0: 하단(뜨거움), t=0.5: 상단(차가움)
-    return 1 - Math.abs(Math.sin(t * Math.PI));
-  }
-
-  document.getElementById('conv-reset').addEventListener('click',init);
-
-  function update(){
-    const padX=28, padY=22, botY=H-40;
-    const midX=W/2;
-
-    particles.forEach(p=>{
-      // 루프를 따라 전진
-      p.t += p.speed;
-      if(p.t >= 1) p.t -= 1;
-
-      const pos = getPosFromT(p.t, p.isLeft, padX, padY, botY, midX);
-      p.x = pos.x;
-      p.y = pos.y;
-
-      // 위치에 따라 열 갱신: 하단=뜨겁, 상단=차갑
-      const yNorm = (p.y - padY) / (botY - padY); // 0=상단, 1=하단
-      const targetHeat = yNorm * 0.95 + 0.05;
-      p.heat += (targetHeat - p.heat) * 0.04;
-    });
-  }
-
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle='#0f172a'; ctx.fillRect(0,0,W,H);
-
-    const padX=28, padY=22, botY=H-40;
-    const midX=W/2;
-
-    // 냄비 테두리
-    ctx.strokeStyle='rgba(148,163,184,0.4)'; ctx.lineWidth=3;
-    ctx.beginPath();
-    ctx.moveTo(padX-16, padY-8);
-    ctx.lineTo(padX-16, botY+2);
-    ctx.lineTo(W-padX+16, botY+2);
-    ctx.lineTo(W-padX+16, padY-8);
-    ctx.stroke();
-
-    // 중앙 구분선 (옅게)
-    ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
-    ctx.beginPath(); ctx.moveTo(midX, padY); ctx.lineTo(midX, botY); ctx.stroke();
-    ctx.setLineDash([]);
-
-    // 하단 열원
-    const gy=ctx.createLinearGradient(0,botY,0,H);
-    gy.addColorStop(0,'rgba(239,68,68,0.55)'); gy.addColorStop(1,'rgba(239,68,68,0)');
-    ctx.fillStyle=gy; ctx.fillRect(padX-16, botY, W-padX*2+32, H-botY);
-    ctx.fillStyle='rgba(239,68,68,0.9)'; ctx.font='bold 12px sans-serif'; ctx.textAlign='center';
-    ctx.fillText('🔥 열원', W/2, H-8);
-
-    // 순환 방향 화살표 (배경에 희미하게)
-    function drawArrow(cx, cy, rx, ry, clockwise){
-      ctx.save();
-      ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1.5;
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2);
-      ctx.stroke();
-
-      // 화살촉
-      const aAngle = clockwise ? Math.PI*0.25 : Math.PI*0.75;
-      const ax = cx + rx*Math.cos(aAngle);
-      const ay = cy + ry*Math.sin(aAngle);
-      const tangentAngle = clockwise ? aAngle + Math.PI/2 : aAngle - Math.PI/2;
-      ctx.fillStyle='rgba(255,255,255,0.1)';
-      ctx.beginPath();
-      ctx.moveTo(ax + 7*Math.cos(tangentAngle), ay + 7*Math.sin(tangentAngle));
-      ctx.lineTo(ax + 7*Math.cos(tangentAngle+2.4), ay + 7*Math.sin(tangentAngle+2.4));
-      ctx.lineTo(ax + 7*Math.cos(tangentAngle-2.4), ay + 7*Math.sin(tangentAngle-2.4));
-      ctx.closePath(); ctx.fill();
-      ctx.restore();
-    }
-
-    const w2 = midX - padX;
-    const h2 = (botY - padY)/2;
-    drawArrow(padX + w2/2,    padY + h2, w2/2-R, h2-R, false); // 왼쪽 반시계
-    drawArrow(midX + w2/2,   padY + h2, w2/2-R, h2-R, true);  // 오른쪽 시계
 
     // 입자
     particles.forEach(p=>{
