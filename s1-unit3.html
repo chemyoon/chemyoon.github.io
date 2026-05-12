@@ -706,6 +706,327 @@ window.addEventListener('resize',()=>{COND.init();CONV.init();RAD.init();});
 </script>
 </body>
 </html>
+  <!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Pretendard',sans-serif;max-width:860px;margin:40px auto;padding:20px;background:#f9fafb;color:#1f2937;}
+.card{border:1px solid #ddd;border-radius:10px;padding:20px 24px;margin:18px 0;background:white;}
+h2{color:#1e40af;margin-bottom:16px;}
+
+/* 비열 정의 */
+.def-text{font-size:1.05em;line-height:2;color:#1f2937;}
+.block{display:inline-block;background:#2563eb;color:white;font-weight:700;padding:2px 10px;border-radius:6px;margin:0 2px;}
+
+/* 인터랙티브 문장 */
+.interactive-section{margin-top:22px;border-top:1.5px dashed #e5e7eb;padding-top:18px;}
+.interactive-title{font-size:0.88em;font-weight:600;color:#6b7280;margin-bottom:14px;}
+.sentence{font-size:1.02em;line-height:2.6;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:16px 20px;border-radius:10px;border:1.5px solid #e5e7eb;background:#f9fafb;transition:all 0.3s;}
+.sentence.wrong{background:#fff5f5;border-color:#fca5a5;}
+.sentence.correct{background:#f0fdf4;border-color:#86efac;}
+
+/* 토글 드롭다운 */
+.toggle-wrap{position:relative;display:inline-block;}
+.toggle-box{
+  display:inline-flex;align-items:center;gap:6px;
+  min-width:72px;height:36px;
+  border:2px solid #d1d5db;background:white;border-radius:8px;
+  padding:0 10px;cursor:pointer;font-size:0.92em;font-weight:600;color:#9ca3af;
+  transition:all 0.18s;user-select:none;
+}
+.toggle-box.filled{color:#1f2937;border-color:#6b7280;}
+.toggle-box.correct{background:#dcfce7;border-color:#16a34a;color:#15803d;}
+.toggle-box.wrong{background:#fee2e2;border-color:#ef4444;color:#b91c1c;}
+.toggle-box .arrow{font-size:0.7em;margin-left:auto;opacity:0.5;}
+.dropdown{
+  display:none;position:absolute;top:calc(100% + 4px);left:0;
+  background:white;border:1.5px solid #d1d5db;border-radius:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:50;min-width:100%;overflow:hidden;
+}
+.dropdown.open{display:block;}
+.dropdown-item{padding:8px 16px;font-size:0.92em;font-weight:600;cursor:pointer;color:#374151;white-space:nowrap;}
+.dropdown-item:hover{background:#eff6ff;color:#1d4ed8;}
+
+.feedback{margin-top:10px;font-size:0.88em;font-weight:600;min-height:22px;transition:all 0.3s;}
+.feedback.wrong{color:#ef4444;}
+.feedback.correct{color:#16a34a;}
+
+/* 비열 달리기 iframe */
+.game-wrap{margin-top:22px;border-top:1.5px dashed #e5e7eb;padding-top:18px;}
+.game-title{font-size:0.88em;font-weight:600;color:#6b7280;margin-bottom:12px;}
+.game-frame{width:100%;border:none;border-radius:10px;overflow:hidden;}
+</style>
+</head>
+<body>
+<h2>④ 비열</h2>
+<div class="card">
+
+  <!-- 비열 정의 -->
+  <p class="def-text">
+    비열이란, <span class="block">1 kg</span>의 물질의 온도를 <span class="block">1 °C</span> 올리는 데 필요한 열량을 말합니다.<br>
+    물질마다 고유한 비열 값을 가지며, 비열이 클수록 온도 변화가 어렵고, 작을수록 쉽게 온도가 변합니다.
+  </p>
+
+  <!-- 인터랙티브 문장 (1개) -->
+  <div class="interactive-section">
+    <div class="interactive-title">💡 아래 문장을 완성해보세요. 빈칸을 클릭해서 알맞은 말을 고르세요.</div>
+
+    <div class="sentence" id="s1">
+      <span>비열이</span>
+      <div class="toggle-wrap">
+        <div class="toggle-box" id="tb1" onclick="openDrop(event,'drop1')">
+          <span id="tv1">　　　</span><span class="arrow">▾</span>
+        </div>
+        <div class="dropdown" id="drop1">
+          <div class="dropdown-item" onclick="select('tb1','tv1','drop1','높으')">높으</div>
+          <div class="dropdown-item" onclick="select('tb1','tv1','drop1','낮으')">낮으</div>
+        </div>
+      </div>
+      <span>면, 1°C 올리기 위해</span>
+      <div class="toggle-wrap">
+        <div class="toggle-box" id="tb2" onclick="openDrop(event,'drop2')">
+          <span id="tv2">　　　</span><span class="arrow">▾</span>
+        </div>
+        <div class="dropdown" id="drop2">
+          <div class="dropdown-item" onclick="select('tb2','tv2','drop2','많은')">많은</div>
+          <div class="dropdown-item" onclick="select('tb2','tv2','drop2','적은')">적은</div>
+        </div>
+      </div>
+      <span>열이 필요하므로, 온도가 오르기</span>
+      <div class="toggle-wrap">
+        <div class="toggle-box" id="tb3" onclick="openDrop(event,'drop3')">
+          <span id="tv3">　　　</span><span class="arrow">▾</span>
+        </div>
+        <div class="dropdown" id="drop3">
+          <div class="dropdown-item" onclick="select('tb3','tv3','drop3','쉽다')">쉽다</div>
+          <div class="dropdown-item" onclick="select('tb3','tv3','drop3','어렵다')">어렵다</div>
+        </div>
+      </div>
+    </div>
+    <div class="feedback" id="fb1"></div>
+  </div>
+
+  <!-- 비열 달리기 게임 -->
+  <div class="game-wrap">
+    <div class="game-title">🏃 비열 달리기 — 실험으로 비열을 직접 비교해보세요!</div>
+    <iframe class="game-frame" id="game-frame" height="1100" srcdoc=""></iframe>
+  </div>
+</div>
+
+<script>
+// 토글 드롭다운
+const answers = { tb1: null, tb2: null, tb3: null };
+
+function openDrop(e, dropId){
+  e.stopPropagation();
+  document.querySelectorAll('.dropdown').forEach(d=>{ if(d.id!==dropId) d.classList.remove('open'); });
+  document.getElementById(dropId).classList.toggle('open');
+}
+document.addEventListener('click', ()=>{ document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open')); });
+
+function select(tbId, tvId, dropId, text){
+  const tb = document.getElementById(tbId);
+  const tv = document.getElementById(tvId);
+  document.getElementById(dropId).classList.remove('open');
+  tv.textContent = text;
+  answers[tbId] = text;
+  tb.classList.add('filled');
+  tb.classList.remove('correct','wrong');
+  updateSentence();
+}
+
+function updateSentence(){
+  const sentence = document.getElementById('s1');
+  const fb = document.getElementById('fb1');
+
+  // 세 칸 모두 선택됐는지 확인
+  if(!answers.tb1 || !answers.tb2 || !answers.tb3){
+    sentence.classList.remove('wrong','correct');
+    document.querySelectorAll('#tb1,#tb2,#tb3').forEach(tb=>tb.classList.remove('correct','wrong'));
+    fb.className='feedback'; fb.textContent=''; return;
+  }
+
+  // 두 가지 정답 조합
+  const combo1 = answers.tb1==='낮으' && answers.tb2==='적은' && answers.tb3==='쉽다';
+  const combo2 = answers.tb1==='높으' && answers.tb2==='많은' && answers.tb3==='어렵다';
+  const allCorrect = combo1 || combo2;
+
+  sentence.classList.remove('wrong','correct');
+  fb.className='feedback';
+
+  if(allCorrect){
+    // 각 토글 초록
+    ['tb1','tb2','tb3'].forEach(id=>{ document.getElementById(id).classList.add('correct'); document.getElementById(id).classList.remove('wrong'); });
+    sentence.classList.add('correct');
+    fb.classList.add('correct');
+    fb.textContent='✅ 정확해요!';
+  } else {
+    // 틀린 토글만 빨강, 맞는 건 그대로
+    const correct1 = (answers.tb1==='낮으'&&answers.tb2==='적은'&&answers.tb3==='쉽다');
+    const correct2 = (answers.tb1==='높으'&&answers.tb2==='많은'&&answers.tb3==='어렵다');
+    ['tb1','tb2','tb3'].forEach(id=>{ document.getElementById(id).classList.remove('correct','wrong'); });
+    sentence.classList.add('wrong');
+    fb.classList.add('wrong');
+    fb.textContent='🔄 다시 생각해보아요.';
+  }
+}
+
+// 비열 달리기 HTML 삽입
+const gameHTML = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미스터리 비열 탐구</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; text-align: center; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        h1 { color: #2c3e50; }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .intro-container { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 30px; }
+        .info-box { background-color: #fff; padding: 15px 25px; border-left: 5px solid #3498db; border-radius: 5px; width: 80%; max-width: 700px; text-align: left; box-shadow: 0 2px 5px rgba(0,0,0,0.05); line-height: 1.6; }
+        .material-pool { background-color: #fff9c4; border-left: 5px solid #f1c40f; padding: 15px 25px; border-radius: 5px; width: 80%; max-width: 700px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 18px; }
+        .pool-list { font-weight: bold; color: #d35400; margin-top: 10px; word-break: keep-all; }
+        .box-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 700px; margin: 0 auto 30px auto; }
+        .mystery-item { display: flex; flex-direction: column; align-items: center; }
+        .mystery-box { background-color: #7f8c8d; color: white; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 30px; font-weight: bold; box-shadow: inset 0 -5px 0 rgba(0,0,0,0.2), 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s; margin-bottom: 10px; }
+        .mystery-item.selected .mystery-box { background-color: #e74c3c; box-shadow: inset 0 -5px 0 rgba(0,0,0,0.2), 0 4px 15px rgba(231,76,60,0.5); transform: scale(1.05); }
+        .checkbox-container { font-size: 18px; font-weight: bold; cursor: pointer; }
+        .checkbox-container input { transform: scale(1.5); margin-right: 8px; cursor: pointer; }
+        .btn-next { padding: 15px 40px; font-size: 18px; font-weight: bold; background-color: #2ecc71; color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-next:hover { background-color: #27ae60; }
+        .btn-retry { background-color: #f39c12; }
+        .btn-retry:hover { background-color: #d68910; }
+        .page2-layout { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .experiment-container { display: flex; justify-content: center; gap: 40px; margin-top: 30px; min-height: 350px; align-items: flex-end; }
+        .experiment-wrap { display: flex; flex-direction: column; align-items: center; }
+        .thermometer { width: 20px; height: 150px; background-color: #eee; border: 2px solid #bdc3c7; border-radius: 10px 10px 0 0; position: relative; overflow: hidden; margin-bottom: -5px; z-index: 1; }
+        .mercury { width: 100%; background-color: #ff4757; position: absolute; bottom: 0; height: 10%; transition: height 0.1s linear; }
+        .mystery-box-p2 { background-color: #34495e; color: white; width: 120px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 5px; font-size: 24px; font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 2; }
+        .temp-text { font-size: 16px; margin-top: 5px; color: #f1c40f; }
+        .fire { font-size: 50px; opacity: 0; transition: opacity 0.2s; margin-top: 5px; }
+        .heating .fire { opacity: 1; animation: burn 0.5s infinite alternate; }
+        @keyframes burn { 0% { transform: scale(1); } 100% { transform: scale(1.2); } }
+        .controls-wrapper { width: 100%; display: flex; justify-content: center; margin: 20px 0 40px 0; }
+        #heatBtn { padding: 15px 50px; font-size: 22px; font-weight: bold; color: white; background-color: #e74c3c; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 6px 10px rgba(0,0,0,0.2); user-select: none; }
+        #heatBtn:active { transform: translateY(4px); box-shadow: 0 2px 5px rgba(0,0,0,0.2); background-color: #c0392b; }
+        .quiz-section { background-color: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 80%; max-width: 850px; margin: 0 auto; }
+        .answer-row { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 30px 0; font-size: 24px; font-weight: bold; color: #2c3e50; }
+        .hint-text { font-size: 24px; font-weight: bold; white-space: nowrap; }
+        .square-select { appearance: none; width: 80px; height: 80px; font-size: 28px; font-weight: bold; text-align: center; border: 3px solid #34495e; border-radius: 10px; background-color: #ecf0f1; cursor: pointer; color: #2c3e50; }
+        .square-select:focus { outline: none; border-color: #e74c3c; }
+        .btn-submit { padding: 12px 40px; font-size: 18px; font-weight: bold; background-color: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-submit:hover { background-color: #2980b9; }
+        #resultModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100; width: 400px; }
+        #modalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 99; }
+    </style>
+</head>
+<body>
+    <div id="page1" class="page active">
+        <h1>📦 미스터리 박스: 비열을 찾아라!</h1>
+        <div class="intro-container">
+            <div class="info-box"><strong>[학습 목표]</strong> 비열은 1kg의 물체 온도를 1도 올리는 데 필요한 열량입니다.<br>물질마다 고유의 비열을 가지고 있으며, 같은 열을 가하더라도 <strong>비열에 따라 온도가 변하는 정도가 다릅니다.</strong><br>아래 상자들 중 <strong>3~4개를 선택</strong>하여 가열 실험을 준비하세요.</div>
+            <div class="material-pool">A ~ H 상자 안에는 아래의 8가지 물질 중 하나가 <strong>랜덤</strong>으로 들어있습니다!<div class="pool-list" id="poolList"></div></div>
+        </div>
+        <div class="box-grid" id="boxGrid"></div>
+        <button class="btn-next" onclick="goToPage2()">실험 준비 완료! (다음 단계로) ❯</button>
+    </div>
+    <div id="page2" class="page">
+        <h1>🔥 동시에 가열하여 비열 비교하기</h1>
+        <p>미스터리 상자들에 <strong>동일한 열</strong>을 가합니다. 빨간 버튼을 꾹 누르고 온도 변화를 관찰하세요.</p>
+        <div class="page2-layout">
+            <div class="experiment-container" id="experimentContainer"></div>
+            <div class="controls-wrapper"><button id="heatBtn">🔥 꾹 누르고 있으세요! 🔥</button></div>
+            <div class="quiz-section">
+                <h2>📝 실험 결과: 비열의 크기 비교</h2>
+                <p>가열 시 나타난 결과를 바탕으로, <strong>비열이 작은 물질부터 큰 물질 순서대로</strong> 상자 기호를 입력하세요.</p>
+                <div class="answer-row" id="answerRow"></div>
+                <button class="btn-submit" onclick="submitAnswer()">정답 제출</button>
+            </div>
+        </div>
+    </div>
+    <div id="modalOverlay"></div>
+    <div id="resultModal">
+        <h2 id="modalTitle">결과</h2>
+        <p id="modalMessage" style="font-size: 18px; line-height: 1.5;"></p>
+        <div id="revealSection" style="display: none; margin-top: 20px; font-weight: bold; font-size: 18px; color: #34495e; background: #ecf0f1; padding: 15px; border-radius: 10px;"></div>
+        <div id="modalButtons" style="margin-top: 25px;"></div>
+    </div>
+    <script>
+        const materialData=[{name:'금',specificHeat:129},{name:'구리',specificHeat:385},{name:'철',specificHeat:450},{name:'모래',specificHeat:800},{name:'유리',specificHeat:840},{name:'알루미늄',specificHeat:900},{name:'나무',specificHeat:1700},{name:'물',specificHeat:4184}];
+        let boxes={},selectedBoxIds=[],heatInterval;
+        function init(){
+            const names=materialData.map(m=>m.name).join(' · ');
+            document.getElementById('poolList').innerText='[ '+names+' ]';
+            let shuffled=[...materialData].sort(()=>Math.random()-0.5);
+            const labels=['A','B','C','D','E','F','G','H'];
+            const grid=document.getElementById('boxGrid');
+            labels.forEach((label,index)=>{
+                boxes[label]={id:label,material:shuffled[index].name,specificHeat:shuffled[index].specificHeat,temp:10};
+                let itemDiv=document.createElement('div');
+                itemDiv.className='mystery-item';itemDiv.id='item-'+label;
+                itemDiv.innerHTML='<div class="mystery-box">?</div><label class="checkbox-container"><input type="checkbox" id="check-'+label+'" value="'+label+'" onchange="handleCheck(this)">상자 '+label+'</label>';
+                grid.appendChild(itemDiv);
+            });
+        }
+        function handleCheck(checkbox){
+            const label=checkbox.value;const itemDiv=document.getElementById('item-'+label);
+            if(checkbox.checked){if(selectedBoxIds.length>=4){alert('최대 4개까지만 선택할 수 있습니다.');checkbox.checked=false;return;}selectedBoxIds.push(label);itemDiv.classList.add('selected');}
+            else{selectedBoxIds=selectedBoxIds.filter(id=>id!==label);itemDiv.classList.remove('selected');}
+        }
+        function goToPage2(){
+            if(selectedBoxIds.length<3||selectedBoxIds.length>4){alert('비열을 비교할 상자를 3개 또는 4개 선택해주세요!');return;}
+            document.getElementById('page1').classList.remove('active');document.getElementById('page2').classList.add('active');
+            setupExperiment();setupQuiz();
+        }
+        function setupExperiment(){
+            const container=document.getElementById('experimentContainer');container.innerHTML='';
+            selectedBoxIds.forEach(id=>{
+                const wrap=document.createElement('div');wrap.className='experiment-wrap';
+                wrap.innerHTML='<div class="thermometer"><div class="mercury" id="mercury-'+id+'"></div></div><div class="mystery-box-p2">상자 '+id+'<div class="temp-text" id="text-'+id+'">10 °C</div></div><div class="fire">🔥</div>';
+                container.appendChild(wrap);
+            });
+        }
+        function setupQuiz(){
+            const row=document.getElementById('answerRow');
+            row.innerHTML='<span class="hint-text">비열 작음</span> &nbsp;&nbsp;&nbsp;';
+            for(let i=0;i<selectedBoxIds.length;i++){
+                let selectHtml='<select class="square-select" id="ans-'+i+'"><option value="">?</option>';
+                selectedBoxIds.forEach(id=>{selectHtml+='<option value="'+id+'">'+id+'</option>';});
+                selectHtml+='</select>';row.innerHTML+=selectHtml;
+                if(i<selectedBoxIds.length-1)row.innerHTML+=' &nbsp; <span class="hint-text">&lt;</span> &nbsp; ';
+            }
+            row.innerHTML+='&nbsp;&nbsp;&nbsp; <span class="hint-text">비열 큼</span>';
+        }
+        const heatBtn=document.getElementById('heatBtn');
+        const eContainer=document.getElementById('experimentContainer');
+        function startHeating(){eContainer.classList.add('heating');heatInterval=setInterval(()=>{selectedBoxIds.forEach(id=>{let box=boxes[id];let tempRise=20000/box.specificHeat;box.temp+=tempRise*0.1;let displayTemp=Math.min(box.temp,100);document.getElementById('mercury-'+id).style.height=displayTemp+'%';document.getElementById('text-'+id).innerText=Math.floor(displayTemp)+' °C';});},100);}
+        function stopHeating(){eContainer.classList.remove('heating');clearInterval(heatInterval);}
+        heatBtn.addEventListener('mousedown',startHeating);heatBtn.addEventListener('mouseup',stopHeating);heatBtn.addEventListener('mouseleave',stopHeating);
+        heatBtn.addEventListener('touchstart',(e)=>{e.preventDefault();startHeating();});heatBtn.addEventListener('touchend',stopHeating);
+        function submitAnswer(){
+            let userAnswers=[];
+            for(let i=0;i<selectedBoxIds.length;i++){let val=document.getElementById('ans-'+i).value;if(!val){alert('모든 네모칸을 채워주세요!');return;}if(userAnswers.includes(val)){alert('기호를 중복해서 사용할 수 없습니다.');return;}userAnswers.push(val);}
+            let correctOrder=[...selectedBoxIds].sort((a,b)=>boxes[a].specificHeat-boxes[b].specificHeat);
+            let isCorrect=true;for(let i=0;i<correctOrder.length;i++){if(userAnswers[i]!==correctOrder[i]){isCorrect=false;break;}}
+            const modal=document.getElementById('resultModal'),overlay=document.getElementById('modalOverlay'),title=document.getElementById('modalTitle'),msg=document.getElementById('modalMessage'),reveal=document.getElementById('revealSection'),btns=document.getElementById('modalButtons');
+            if(isCorrect){title.innerText='🎉 완벽합니다! 🎉';title.style.color='#2ecc71';msg.innerHTML='온도 변화를 관찰하여 비열의 크기를 정확하게 추론해냈습니다!';let revealText='🔍 미스터리 상자의 진짜 정체<br><br>';correctOrder.forEach(id=>{revealText+='상자 '+id+' : <strong>'+boxes[id].material+'</strong> (비열 '+boxes[id].specificHeat+')<br>';});reveal.innerHTML=revealText;reveal.style.display='block';btns.innerHTML='<button class="btn-next" style="width:100%;" onclick="location.reload()">처음부터 다시하기</button>';}
+            else{title.innerText='아쉽네요! 다시 생각해볼까요?';title.style.color='#e74c3c';msg.innerHTML='온도가 빠르게 오르는 물질과 비열의 관계를 다시 한번 떠올려보세요!';reveal.style.display='none';btns.innerHTML='<button class="btn-next btn-retry" style="width:100%;" onclick="closeModal()">다시 풀어보기</button>';}
+            modal.style.display='block';overlay.style.display='block';
+        }
+        function closeModal(){document.getElementById('resultModal').style.display='none';document.getElementById('modalOverlay').style.display='none';}
+        window.onload=init;
+    <\/script>
+</body>
+</html>`;
+
+document.getElementById('game-frame').srcdoc = gameHTML;
+</script>
+</body>
+</html>
 <!-- 하단 네비게이션 -->
 <div style="margin-top:40px;text-align:center;">
   <a class="nav-btn" href="science1.html">← 과학 1 단원 목록</a>
