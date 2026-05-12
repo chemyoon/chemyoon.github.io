@@ -1104,9 +1104,12 @@ window.addEventListener('message', e => {
   <div class="sim-scene" id="exp-wrap">
     <canvas id="exp-canvas"></canvas>
   </div>
-  <div class="ctrl-row" style="margin-top:12px;">
+  <div class="ctrl-row" style="margin-top:12px;flex-wrap:wrap;gap:10px;align-items:center;">
     <button class="reset-btn" id="exp-reset">🔄 초기화</button>
-    <button class="mat-btn active" id="exp-auto-btn">자동 가열</button>
+    <span class="ctrl-label" style="margin-left:8px;">열 세기</span>
+    <input type="range" id="exp-heat-pow" min="1" max="10" value="5"
+      style="width:120px;accent-color:#ef4444;cursor:pointer;">
+    <span id="exp-heat-val" style="font-size:0.85em;font-weight:700;color:#ef4444;min-width:20px;">5</span>
   </div>
   <p class="desc" style="margin-top:10px;">🔥 열원을 캔버스 위에서 움직이세요. 입자 간 거리가 늘어나며 막이 팽창하고, 충분한 열이 가해지면 결합이 끊어집니다.</p>
 </div>
@@ -1119,25 +1122,30 @@ window.addEventListener('message', e => {
   const ctx    = canvas.getContext('2d');
   const dpr    = window.devicePixelRatio || 1;
 
-  const GRID = 4;           // 4×4
-  const BASE_GAP  = 38;    // 초기 간격 (px) — 다닥다닥
-  const MAX_GAP   = 90;    // 최대 간격 (팽창 한계)
-  const MELT_HEAT = 0.82;  // 이 heat 이상이면 결합 끊어짐
-  const R = 10;
+  const GRID = 4;
+  const BASE_GAP  = 40;    // 초기 간격 — 더 촘촘하게
+  const MAX_GAP   = 85;    // 최대 간격 — 캔버스 벗어나지 않게
+  const MELT_HEAT = 0.82;
+  const R = 15;
+  const MEMBRANE_PAD = R * 1.2; // 막과 입자 간 여백 줄임
 
-  let W, H, particles, mousePos = null, autoHeat = false, autoAngle = 0;
+  let W, H, particles, mousePos = null, autoAngle = 0;
   let melted = false;
+  let bowlProgress = 0;
+  let heatPow = 5; // 열 세기 (1~10)
 
   /* ── 초기화 ── */
   function init(){
-    W = wrap.clientWidth;
-    H = 320;
+    W = wrap.offsetWidth || wrap.clientWidth || 700;
+    H = 420;
     canvas.width  = W * dpr; canvas.height = H * dpr;
-    canvas.style.width = W+'px'; canvas.style.height = H+'px';
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    wrap.style.height = H + 'px';
     ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr,dpr);
-    canvas.style.display = 'block';
 
     melted = false;
+    bowlProgress = 0;
     const startX = W/2 - (GRID-1)*BASE_GAP/2;
     const startY = H/2 - (GRID-1)*BASE_GAP/2;
 
@@ -1194,19 +1202,15 @@ window.addEventListener('message', e => {
 
   /* ── UPDATE ── */
   function update(){
-    // 열원 위치
+    // 열원 위치 (마우스만)
     let hx = null, hy = null;
-    if(autoHeat){
-      autoAngle += 0.022;
-      hx = W/2 + Math.cos(autoAngle)*W*0.28;
-      hy = H/2 + Math.sin(autoAngle*0.8)*H*0.22;
-    } else if(mousePos){ hx = mousePos.x; hy = mousePos.y; }
+    if(mousePos){ hx = mousePos.x; hy = mousePos.y; }
 
-    // 가열
+    // 가열 (열 세기 반영)
     if(hx !== null){
       particles.forEach(p => {
         const d = Math.hypot(p.gx-hx, p.gy-hy);
-        if(d < R*5) p.heat = Math.min(1, p.heat + (1-d/(R*5))*0.006);
+        if(d < R*5) p.heat = Math.min(1, p.heat + (1-d/(R*5)) * 0.003 * heatPow);
       });
     }
 
@@ -1219,30 +1223,46 @@ window.addEventListener('message', e => {
         nh[i] += (q.heat - p.heat)*0.012;
       });
     });
-    particles.forEach((p,i)=>{ p.heat = Math.max(0, Math.min(1, nh[i]*0.9998)); });
+    particles.forEach((p,i)=>{ p.heat = Math.max(0, Math.min(1, nh[i]*0.990)); });
 
     const avg = avgHeat();
 
     // 녹는점 초과 → 결합 해제
     if(!melted && avg >= MELT_HEAT){
       melted = true;
+      bowlProgress = 0;
       particles.forEach(p=>{
         p.free = true;
         p.vx = (Math.random()-0.5)*3;
-        p.vy = (Math.random()-0.5)*3;
+        p.vy = (Math.random()-0.5)*3 - 1; // 약간 위로 튀어오름
       });
     }
 
     if(melted){
-      // 자유 입자 운동
+      // 그릇 애니메이션 진행
+      if(bowlProgress < 1) bowlProgress = Math.min(1, bowlProgress + 0.012);
+      const bowlTopY = H * (1 - bowlProgress * 0.72); // 그릇 위쪽 끝 Y
+
       particles.forEach(p=>{
         p.gx += p.vx; p.gy += p.vy;
-        p.vx *= 0.98; p.vy *= 0.98;
-        // 벽 반사
-        if(p.gx < R){ p.gx = R; p.vx *= -1; }
-        if(p.gx > W-R){ p.gx = W-R; p.vx *= -1; }
-        if(p.gy < R){ p.gy = R; p.vy *= -1; }
-        if(p.gy > H-R){ p.gy = H-R; p.vy *= -1; }
+        // 중력 방향 (그릇 안으로 모이게)
+        p.vy += 0.12;
+        p.vx *= 0.985; p.vy *= 0.985;
+
+        // 그릇 바닥 포물선: y = bowlTopY + a*(x - W/2)^2
+        const a = (H - bowlTopY) / ((W*0.42)**2);
+        const bowlFloor = bowlTopY + a * (p.gx - W/2)**2;
+
+        // 그릇 바닥 충돌
+        if(p.gy + R > bowlFloor){
+          p.gy = bowlFloor - R;
+          p.vy *= -0.35;
+          p.vx *= 0.88;
+        }
+        // 그릇 옆벽 (포물선 밖으로 못 나가게)
+        if(p.gx < R){ p.gx = R; p.vx *= -0.5; }
+        if(p.gx > W-R){ p.gx = W-R; p.vx *= -0.5; }
+        if(p.gy < R){ p.gy = R; p.vy *= -0.5; }
       });
     } else {
       recalcGrid();
@@ -1266,6 +1286,20 @@ window.addEventListener('message', e => {
     return `rgba(${r},${g},${b},${a})`;
   }
 
+  /* ── 평균 입자 간 거리 계산 ── */
+  function avgDist(){
+    let sum=0, count=0;
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const p=particles[i], q=particles[j];
+        if(Math.abs(p.r-q.r)+Math.abs(p.c-q.c)!==1) continue;
+        sum += Math.hypot(p.gx-q.gx, p.gy-q.gy);
+        count++;
+      }
+    }
+    return count>0 ? sum/count : BASE_GAP;
+  }
+
   /* ── DRAW ── */
   function draw(){
     ctx.clearRect(0,0,W,H);
@@ -1273,36 +1307,90 @@ window.addEventListener('message', e => {
 
     const avg = avgHeat();
 
-    if(!melted){
-      // ── 막(membrane) 그리기 ──
-      // 입자들의 외곽을 감싸는 둥근 사각형
-      const xs = particles.map(p=>p.gx);
-      const ys = particles.map(p=>p.gy);
-      const minX = Math.min(...xs)-R*2.2, maxX = Math.max(...xs)+R*2.2;
-      const minY = Math.min(...ys)-R*2.2, maxY = Math.max(...ys)+R*2.2;
-      const mw = maxX-minX, mh = maxY-minY;
-      const brad = R*2.5;
+    // ── 그릇 (melted 시 아래서 올라옴) ──
+    // U자형 그릇: 바닥이 아래쪽, y = bowlBottomY - a*(x-W/2)^2 (최고차항 음수 → 뒤집힌 포물선)
+    // 그릇은 bowlBottomY에서 바닥, 양쪽 위로 벌어지는 U자
+    if(melted && bowlProgress > 0){
+      const bowlHalfW = W * 0.44;                   // 그릇 반폭
+      const bowlBottomY = H - (H * 0.08 * bowlProgress); // 바닥 Y (아래서 살짝 올라옴)
+      const bowlRimY    = bowlBottomY - H * 0.55 * bowlProgress; // 그릇 위쪽 테두리 Y
+      // a: 포물선 계수 → y = bowlBottomY - a*(x-W/2)^2 이면 바닥이 bowlBottomY, 양끝이 bowlRimY
+      const a = (bowlBottomY - bowlRimY) / (bowlHalfW ** 2);
 
-      // 막 채우기
+      const steps = 120;
+      const dx = (bowlHalfW * 2) / steps;
+
+      // 그릇 내부 채우기
       ctx.beginPath();
-      ctx.roundRect(minX, minY, mw, mh, brad);
-      ctx.fillStyle = `rgba(96,165,250,${0.07 + avg*0.06})`;
+      ctx.moveTo(W/2 - bowlHalfW, H); // 왼쪽 아래
+      ctx.lineTo(W/2 - bowlHalfW, bowlRimY); // 왼쪽 위 (옆벽)
+      for(let i=0; i<=steps; i++){
+        const px = W/2 - bowlHalfW + i*dx;
+        const py = bowlBottomY - a*(px - W/2)**2;
+        ctx.lineTo(px, py);
+      }
+      ctx.lineTo(W/2 + bowlHalfW, bowlRimY); // 오른쪽 위 (옆벽)
+      ctx.lineTo(W/2 + bowlHalfW, H); // 오른쪽 아래
+      ctx.closePath();
+      const fillGrd = ctx.createLinearGradient(0, bowlRimY, 0, H);
+      fillGrd.addColorStop(0, `rgba(239,68,68,${0.05 * bowlProgress})`);
+      fillGrd.addColorStop(0.5, `rgba(239,68,68,${0.15 * bowlProgress})`);
+      fillGrd.addColorStop(1, `rgba(251,146,60,${0.08 * bowlProgress})`);
+      ctx.fillStyle = fillGrd;
       ctx.fill();
 
-      // 막 테두리
+      // 그릇 포물선 바닥 테두리
       ctx.beginPath();
-      ctx.roundRect(minX, minY, mw, mh, brad);
-      ctx.strokeStyle = `rgba(96,165,250,${0.5 + avg*0.3})`;
-      ctx.lineWidth = 1.8;
+      for(let i=0; i<=steps; i++){
+        const px = W/2 - bowlHalfW + i*dx;
+        const py = bowlBottomY - a*(px - W/2)**2;
+        i===0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.strokeStyle = `rgba(251,146,60,${0.6 + bowlProgress*0.35})`;
+      ctx.lineWidth = 2.8;
       ctx.stroke();
 
-      // 결합선 (입자 사이)
+      // 그릇 양쪽 옆벽
+      const rimAlpha = 0.4 + bowlProgress * 0.3;
+      ctx.strokeStyle = `rgba(251,146,60,${rimAlpha})`;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(W/2 - bowlHalfW, bowlRimY);
+      ctx.lineTo(W/2 - bowlHalfW, H);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(W/2 + bowlHalfW, bowlRimY);
+      ctx.lineTo(W/2 + bowlHalfW, H);
+      ctx.stroke();
+    }
+
+    if(!melted){
+      // ── 막(membrane) ──
+      const xs = particles.map(p=>p.gx);
+      const ys = particles.map(p=>p.gy);
+      const minX = Math.min(...xs)-MEMBRANE_PAD, maxX = Math.max(...xs)+MEMBRANE_PAD;
+      const minY = Math.min(...ys)-MEMBRANE_PAD, maxY = Math.max(...ys)+MEMBRANE_PAD;
+      const mw = maxX-minX, mh = maxY-minY;
+      const brad = R*1.8;
+
+      ctx.beginPath();
+      ctx.roundRect(minX, minY, mw, mh, brad);
+      ctx.fillStyle = `rgba(96,165,250,${0.06 + avg*0.07})`;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.roundRect(minX, minY, mw, mh, brad);
+      ctx.strokeStyle = `rgba(96,165,250,${0.45 + avg*0.35})`;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 결합선
       for(let i=0;i<particles.length;i++){
         for(let j=i+1;j<particles.length;j++){
           const p=particles[i], q=particles[j];
           if(Math.abs(p.r-q.r)+Math.abs(p.c-q.c)!==1) continue;
-          ctx.strokeStyle = heatColA((p.heat+q.heat)/2, 0.45);
-          ctx.lineWidth = 2;
+          ctx.strokeStyle = heatColA((p.heat+q.heat)/2, 0.5);
+          ctx.lineWidth = 2.2;
           ctx.beginPath();
           ctx.moveTo(p.gx+p.ox, p.gy+p.oy);
           ctx.lineTo(q.gx+q.ox, q.gy+q.oy);
@@ -1315,10 +1403,10 @@ window.addEventListener('message', e => {
     particles.forEach(p=>{
       const x = p.gx+p.ox, y = p.gy+p.oy;
       if(p.heat>0.04){
-        const grd = ctx.createRadialGradient(x,y,0,x,y,R*2.4);
-        grd.addColorStop(0, heatColA(p.heat, p.heat*0.5));
+        const grd = ctx.createRadialGradient(x,y,0,x,y,R*2.6);
+        grd.addColorStop(0, heatColA(p.heat, p.heat*0.55));
         grd.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.beginPath(); ctx.arc(x,y,R*2.4,0,Math.PI*2);
+        ctx.beginPath(); ctx.arc(x,y,R*2.6,0,Math.PI*2);
         ctx.fillStyle=grd; ctx.fill();
       }
       ctx.beginPath(); ctx.arc(x,y,R,0,Math.PI*2);
@@ -1326,8 +1414,8 @@ window.addEventListener('message', e => {
     });
 
     // 열원 커서
-    const hx2 = autoHeat ? W/2+Math.cos(autoAngle)*W*0.28 : (mousePos?mousePos.x:null);
-    const hy2 = autoHeat ? H/2+Math.sin(autoAngle*0.8)*H*0.22 : (mousePos?mousePos.y:null);
+    const hx2 = mousePos ? mousePos.x : null;
+    const hy2 = mousePos ? mousePos.y : null;
     if(hx2!==null){
       const grd=ctx.createRadialGradient(hx2,hy2,0,hx2,hy2,R*4);
       grd.addColorStop(0,'rgba(249,115,22,0.35)'); grd.addColorStop(1,'rgba(249,115,22,0)');
@@ -1338,41 +1426,51 @@ window.addEventListener('message', e => {
       ctx.fillText('🔥',hx2,hy2+6);
     }
 
-    // 상태 레이블
-    ctx.textAlign='left'; ctx.font='bold 12px sans-serif';
+    // 상태 레이블 + 평균 거리
+    ctx.textAlign='left';
     if(melted){
+      ctx.font='bold 12px sans-serif';
       ctx.fillStyle='rgba(239,68,68,0.9)';
-      ctx.fillText('🔴 결합 해제 — 입자들이 자유롭게 움직입니다', 12, 20);
-    } else if(avg>0.4){
-      ctx.fillStyle='rgba(251,146,60,0.9)';
-      ctx.fillText(`🟠 열팽창 중 — 평균 열 ${Math.round(avg*100)}%`, 12, 20);
-    } else if(avg>0.05){
-      ctx.fillStyle='rgba(96,165,250,0.9)';
-      ctx.fillText(`🔵 팽창 시작 — 평균 열 ${Math.round(avg*100)}%`, 12, 20);
+      ctx.fillText('🔴 결합 해제 — 입자들이 녹아 자유롭게 움직입니다', 12, 20);
     } else {
-      ctx.fillStyle='rgba(148,163,184,0.7)';
-      ctx.fillText('⚪ 열원을 가져다 대세요', 12, 20);
+      const dist = avgDist();
+      const distRatio = Math.round(dist / BASE_GAP * 100);
+      let emoji, color, label;
+      if(avg > 0.4){
+        emoji='🟠'; color='rgba(251,146,60,0.9)'; label='열팽창 중';
+      } else if(avg > 0.05){
+        emoji='🔵'; color='rgba(96,165,250,0.9)'; label='팽창 시작';
+      } else {
+        emoji='⚪'; color='rgba(148,163,184,0.7)'; label='열원을 가져다 대세요';
+      }
+      ctx.font='bold 12px sans-serif';
+      ctx.fillStyle=color;
+      if(avg > 0.05){
+        ctx.fillText(`${emoji} ${label} — 평균 열 ${Math.round(avg*100)}%`, 12, 20);
+        ctx.font='12px sans-serif';
+        ctx.fillStyle='rgba(148,163,184,0.85)';
+        ctx.fillText(`평균 입자 간 거리: ${Math.round(dist)}px (초기 대비 ${distRatio}%)`, 12, 38);
+      } else {
+        ctx.fillText(`${emoji} ${label}`, 12, 20);
+      }
     }
   }
 
   /* ── 버튼 ── */
   document.getElementById('exp-reset').addEventListener('click',()=>{
     init();
-    autoHeat=false;
-    document.getElementById('exp-auto-btn').textContent='자동 가열';
-    document.getElementById('exp-auto-btn').classList.remove('active');
   });
-  document.getElementById('exp-auto-btn').addEventListener('click',()=>{
-    autoHeat=!autoHeat;
-    document.getElementById('exp-auto-btn').textContent=autoHeat?'⏹ 자동 끄기':'자동 가열';
-    document.getElementById('exp-auto-btn').classList.toggle('active',autoHeat);
+  document.getElementById('exp-heat-pow').addEventListener('input', e => {
+    heatPow = parseInt(e.target.value);
+    document.getElementById('exp-heat-val').textContent = heatPow;
   });
 
   /* ── 루프 ── */
   function loop(){ update(); draw(); requestAnimationFrame(loop); }
-  window.addEventListener('load', ()=>{ init(); loop(); });
   window.addEventListener('resize', init);
-});
+  // DOM이 이미 준비된 시점에 실행되므로 직접 호출
+  init(); loop();
+})();
 </script>
 <!-- 하단 네비게이션 -->
 <div style="margin-top:40px;text-align:center;">
