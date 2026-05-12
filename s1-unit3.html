@@ -204,29 +204,25 @@ body{font-family:'Pretendard',sans-serif;max-width:860px;margin:40px auto;paddin
   </div>
 
   <div class="sim-stack" id="sim-stack">
-    <div class="sim-layer active" id="layer-cond"><canvas id="cond-canvas"></canvas></div>
+    <div class="sim-layer active" id="layer-cond">
+      <canvas id="cond-canvas" style="display:block;width:100%;height:100%;"></canvas>
+    </div>
     <div class="sim-layer"        id="layer-conv"><canvas id="conv-canvas"></canvas></div>
     <div class="sim-layer"        id="layer-rad" ><canvas id="rad-canvas"></canvas></div>
   </div>
 
-  <!-- 전도 컨트롤 -->
+  <!-- 전도 컨트롤 (새 입자 시뮬레이터) -->
   <div id="ctrl-cond">
     <div class="ctrl-row">
-      <span class="ctrl-label">🔥 열원 위치</span>
-      <input type="range" id="cond-slider" min="0" max="100" value="10" style="flex:1;accent-color:#ef4444;cursor:pointer;">
+      <span class="ctrl-label">전도율</span>
+      <input type="range" id="cond-rate" min="1" max="10" value="5" style="flex:1;accent-color:#ef4444;cursor:pointer;">
+      <span id="cond-rate-val" style="font-size:0.85em;font-weight:600;color:#ef4444;min-width:60px;">보통</span>
     </div>
     <div class="ctrl-row">
-      <span class="ctrl-label">물질 선택</span>
-      <button class="mat-btn active" data-mat="A">물질 A <span style="font-size:0.8em;opacity:0.7;">(낮은 전도율)</span></button>
-      <button class="mat-btn" data-mat="B">물질 B <span style="font-size:0.8em;opacity:0.7;">(보통 전도율)</span></button>
-      <button class="mat-btn" data-mat="C">물질 C <span style="font-size:0.8em;opacity:0.7;">(높은 전도율)</span></button>
-      
-      <label style="display:flex;align-items:center;gap:6px;font-size:0.85em;font-weight:600;color:#ef4444;cursor:pointer;margin-left:auto;">
-        <input type="checkbox" id="cond-toggle" style="accent-color:#ef4444;width:16px;height:16px;cursor:pointer;"> 열원 켜기
-      </label>
       <button class="reset-btn" id="cond-reset">🔄 초기화</button>
+      <button class="mat-btn active" id="cond-auto-btn">자동 가열</button>
     </div>
-    <p class="desc" id="cond-desc">물질 A: 열전도율이 낮아 열이 천천히 전달됩니다. 열원을 껐다 켜면서 열의 이동과 냉각을 관찰해보세요.</p>
+    <p class="desc">🔥 열원을 캔버스 위에서 움직이세요. 입자들이 진동하며 서로 충돌해 열이 퍼져나가는 과정을 관찰할 수 있습니다.</p>
   </div>
   <!-- 대류 컨트롤 -->
   <div id="ctrl-conv" style="display:none;">
@@ -260,200 +256,182 @@ function heatCol(t){const c=heatRGB(t);return `rgb(${c.r},${c.g},${c.b})`;}
 function heatColA(t,a){const c=heatRGB(t);return `rgba(${c.r},${c.g},${c.b},${a})`;}
 
 // ══════════════════════════════════════════════════════
-// 전도
+// 전도 (입자 시뮬레이터 — 마우스 열원)
 // ══════════════════════════════════════════════════════
-const COND=(function(){
-  let ctx,W,H;
-  const COLS=14, ROWS=3, R=8;
-  let particles=[], flames=[];
-  let heatPos=0.10;
-  let matRate=0.004;
-  let matName='A';
-  let isHeatOn=false;
+const COND = (function() {
+  let ctx, W, H;
+  const COLS = 11, ROWS = 5, R = 12;
+  let particles = [];
+  let flames = [];
+  let mousePos = null;
+  let isAutoHeat = false;
+  let autoAngle = 0;
+  let condRate = 0.012;
 
-  const MAT={
-    A:{rate:0.003, label:'물질 A',desc:'물질 A: 열전도율이 낮아 열이 천천히 전달됩니다. 열원을 껐다 켜면서 열의 이동과 냉각을 관찰해보세요.'},
-    B:{rate:0.010, label:'물질 B',desc:'물질 B: 열전도율이 보통으로 열이 일반적인 속도로 전달됩니다.'},
-    C:{rate:0.035, label:'물질 C',desc:'물질 C: 열전도율이 매우 높아 열이 빠르게 전체로 전달됩니다.'},
-  };
+  function idxC(c, r) { return r * COLS + c; }
 
-  function init(){
-    const s=makeCtx('cond-canvas'); ctx=s.ctx; W=s.W; H=s.H;
-    flames=[];
-    const padX=32, rodCenterY=H*0.46, rowGap=R*2.6;
-    const spacing=(W-padX*2)/(COLS-1);
-    particles=[];
-    for(let row=0;row<ROWS;row++){
-      for(let col=0;col<COLS;col++){
-        particles.push({col,row,
-          bx:padX+col*spacing,
-          by:rodCenterY+(row-1)*rowGap,
-          ox:0,oy:0,heat:0
+  function init() {
+    const stack = document.getElementById('sim-stack');
+    const canvas = document.getElementById('cond-canvas');
+    W = stack.clientWidth; H = stack.clientHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx = canvas.getContext('2d');
+    ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr, dpr);
+
+    const padX = 40, padY = 36;
+    const spacingX = (W - padX * 2) / (COLS - 1);
+    const spacingY = (H - padY * 2) / (ROWS - 1);
+    particles = [];
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        particles.push({
+          col, row,
+          bx: padX + col * spacingX,
+          by: padY + row * spacingY,
+          ox: 0, oy: 0, heat: 0
         });
       }
     }
+    flames = [];
+
+    // 마우스/터치 이벤트
+    const canvas2 = document.getElementById('cond-canvas');
+    canvas2.onmousemove = e => {
+      const rect = canvas2.getBoundingClientRect();
+      mousePos = { x: (e.clientX - rect.left) * (W / rect.width), y: (e.clientY - rect.top) * (H / rect.height) };
+    };
+    canvas2.onmouseleave = () => { mousePos = null; };
+    canvas2.ontouchmove = e => {
+      e.preventDefault();
+      const rect = canvas2.getBoundingClientRect();
+      mousePos = { x: (e.touches[0].clientX - rect.left) * (W / rect.width), y: (e.touches[0].clientY - rect.top) * (H / rect.height) };
+    };
+    canvas2.ontouchend = () => { mousePos = null; };
   }
 
-  function idx(col,row){return row*COLS+col;}
-
-  document.getElementById('cond-slider').addEventListener('input',e=>{
-    heatPos=parseInt(e.target.value)/100;
-  });
-  
-  document.querySelectorAll('.mat-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      document.querySelectorAll('.mat-btn').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      matName=btn.dataset.mat;
-      matRate=MAT[matName].rate;
-      document.getElementById('cond-desc').textContent=MAT[matName].desc;
-      particles.forEach(p=>p.heat=0);
-    });
+  document.getElementById('cond-rate').addEventListener('input', e => {
+    const v = parseInt(e.target.value);
+    condRate = v * 0.003;
+    const labels = ['매우 낮음','낮음','낮음','보통','보통','보통','높음','높음','매우 높음','매우 높음'];
+    document.getElementById('cond-rate-val').textContent = labels[v - 1] || '보통';
   });
 
-  const condToggle = document.getElementById('cond-toggle');
-  condToggle.addEventListener('change', e => {
-    isHeatOn = e.target.checked;
+  document.getElementById('cond-reset').addEventListener('click', () => {
+    particles.forEach(p => { p.heat = 0; p.ox = 0; p.oy = 0; });
+    flames = [];
+    isAutoHeat = false;
+    document.getElementById('cond-auto-btn').textContent = '자동 가열';
+    document.getElementById('cond-auto-btn').classList.remove('active');
   });
 
-  document.getElementById('cond-reset').addEventListener('click',()=>{
-    particles.forEach(p=>p.heat=0);
-    flames=[];
-    isHeatOn = false;
-    condToggle.checked = false;
+  document.getElementById('cond-auto-btn').addEventListener('click', () => {
+    isAutoHeat = !isAutoHeat;
+    document.getElementById('cond-auto-btn').textContent = isAutoHeat ? '⏹ 자동 끄기' : '자동 가열';
+    document.getElementById('cond-auto-btn').classList.toggle('active', isAutoHeat);
   });
 
-  function update(){
-    const padX=32;
-    const hx=padX+heatPos*(W-padX*2);
-
-    let minD=Infinity, minC=-1;
-    for(let c=0;c<COLS;c++){
-      const d=Math.abs(particles[idx(c,2)].bx-hx);
-      if(d<minD){minD=d;minC=c;}
-    }
-    
-    // 열원이 켜져 있을 때만 가열
-    if(isHeatOn && minC>=0){
-      particles[idx(minC,0)].heat=1;
-      particles[idx(minC,1)].heat=1;
-      particles[idx(minC,2)].heat=1;
+  function update() {
+    let heatSrcX = null, heatSrcY = null;
+    if (isAutoHeat) {
+      autoAngle += 0.025;
+      heatSrcX = W / 2 + Math.cos(autoAngle) * W * 0.3;
+      heatSrcY = H / 2 + Math.sin(autoAngle * 0.7) * H * 0.25;
+    } else if (mousePos) {
+      heatSrcX = mousePos.x;
+      heatSrcY = mousePos.y;
     }
 
-    const nh=particles.map(p=>p.heat);
-    for(let row=0;row<ROWS;row++){
-      for(let col=0;col<COLS;col++){
-        const h=particles[idx(col,row)].heat;
-        const r=matRate;
-        if(col>0)      nh[idx(col-1,row)]+=Math.max(0,(h-particles[idx(col-1,row)].heat)*r);
-        if(col<COLS-1) nh[idx(col+1,row)]+=Math.max(0,(h-particles[idx(col+1,row)].heat)*r);
-        if(row>0)      nh[idx(col,row-1)]+=Math.max(0,(h-particles[idx(col,row-1)].heat)*r);
-        if(row<ROWS-1) nh[idx(col,row+1)]+=Math.max(0,(h-particles[idx(col,row+1)].heat)*r);
-      }
-    }
-    
-    particles.forEach((p,i)=>{
-      // 열원이 켜져있고 열원 위치면 1로 유지, 아니면 계산된 열 적용
-      if(isHeatOn && p.col===minC){
-        p.heat=1;
-      } else {
-        let currentHeat = nh[i];
-        
-        // 추가된 부분: 열원이 꺼져있으면 서서히 식어감 (자연 냉각)
-        if(!isHeatOn) {
-          // 온도가 높을 땐 빨리 식고(0.99), 낮을 땐 확실하게 0이 되도록(-0.002) 조치
-          currentHeat = currentHeat * 0.99 - 0.002; 
+    if (heatSrcX !== null) {
+      particles.forEach(p => {
+        const d = Math.hypot(p.bx - heatSrcX, p.by - heatSrcY);
+        if (d < R * 3.5) {
+          p.heat = Math.min(1, p.heat + 0.08);
+          for (let i = 0; i < 2; i++) flames.push({
+            x: p.bx + (Math.random() - 0.5) * 16, y: p.by,
+            vy: -(1 + Math.random() * 2), vx: (Math.random() - 0.5) * 0.8,
+            life: 1, size: 4 + Math.random() * 6
+          });
         }
-        
-        p.heat=Math.max(0,Math.min(1,currentHeat));
-      }
-      
-      const v=p.heat*4.5;
-      p.ox=(Math.random()-0.5)*v;
-      p.oy=(Math.random()-0.5)*v;
-    });
-
-    if(isHeatOn) {
-      for(let i=0;i<3;i++) flames.push({
-        x:hx+(Math.random()-0.5)*22,y:H*0.86,
-        vy:-(1.5+Math.random()*2.5),vx:(Math.random()-0.5)*1.2,
-        life:1,size:5+Math.random()*10
       });
     }
-    flames.forEach(f=>{f.y+=f.vy;f.x+=f.vx;f.life-=0.032;});
-    flames=flames.filter(f=>f.life>0);
-  }
 
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle='#0f172a'; ctx.fillRect(0,0,W,H);
-
-    if(particles.length===0) return;
-
-    const p0=particles[0], pE=particles[COLS-1];
-    const p2b=particles[idx(0,2)], pE2b=particles[idx(COLS-1,2)];
-
-    ctx.strokeStyle='rgba(148,163,184,0.35)'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
-    ctx.beginPath();
-    ctx.roundRect(p0.bx-R-6, p0.by-R-6, (pE.bx-p0.bx)+R*2+12, (p2b.by-p0.by)+R*2+12, 10);
-    ctx.stroke(); ctx.setLineDash([]);
-
-    ctx.fillStyle='rgba(148,163,184,0.6)';
-    ctx.font='bold 12px sans-serif'; ctx.textAlign='left';
-    ctx.fillText(MAT[matName].label, p0.bx-R-4, p0.by-R-10);
-
-    ctx.fillStyle='rgba(71,85,105,0.3)';
-    ctx.beginPath();
-    ctx.roundRect(p0.bx-R-2, p0.by-R-2, (pE.bx-p0.bx)+R*2+4, (p2b.by-p0.by)+R*2+4, 8);
-    ctx.fill();
-
-    for(let row=0;row<ROWS;row++){
-      for(let col=0;col<COLS-1;col++){
-        const a=particles[idx(col,row)], b=particles[idx(col+1,row)];
-        ctx.strokeStyle=heatColA((a.heat+b.heat)/2,0.45); ctx.lineWidth=2.5; ctx.setLineDash([]);
-        ctx.beginPath();ctx.moveTo(a.bx+a.ox,a.by+a.oy);ctx.lineTo(b.bx+b.ox,b.by+b.oy);ctx.stroke();
-      }
-    }
-    for(let col=0;col<COLS;col++){
-      for(let row=0;row<ROWS-1;row++){
-        const a=particles[idx(col,row)], b=particles[idx(col,row+1)];
-        ctx.strokeStyle=heatColA((a.heat+b.heat)/2,0.45); ctx.lineWidth=2.5;
-        ctx.beginPath();ctx.moveTo(a.bx+a.ox,a.by+a.oy);ctx.lineTo(b.bx+b.ox,b.by+b.oy);ctx.stroke();
+    const nh = particles.map(p => p.heat);
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        const h = particles[idxC(col, row)].heat;
+        const spread = (other) => { nh[other] += Math.max(0, (h - particles[other].heat) * condRate); };
+        if (col > 0) spread(idxC(col - 1, row));
+        if (col < COLS - 1) spread(idxC(col + 1, row));
+        if (row > 0) spread(idxC(col, row - 1));
+        if (row < ROWS - 1) spread(idxC(col, row + 1));
       }
     }
 
-    particles.forEach(p=>{
-      const x=p.bx+p.ox, y=p.by+p.oy;
-      if(p.heat>0.04){
-        const grd=ctx.createRadialGradient(x,y,0,x,y,R*2.2);
-        grd.addColorStop(0,heatColA(p.heat,p.heat*0.45));
-        grd.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.beginPath();ctx.arc(x,y,R*2.2,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
-      }
-      ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fillStyle=heatCol(p.heat);ctx.fill();
+    particles.forEach((p, i) => {
+      p.heat = Math.max(0, Math.min(1, nh[i] * 0.998));
+      const v = p.heat * 5;
+      p.ox = (Math.random() - 0.5) * v;
+      p.oy = (Math.random() - 0.5) * v;
     });
 
-    flames.forEach(f=>{
-      ctx.beginPath();ctx.arc(f.x,f.y,f.size*f.life,0,Math.PI*2);
-      ctx.fillStyle=`rgba(255,${Math.round(80+f.life*140)},0,${f.life*0.85})`;ctx.fill();
+    flames.forEach(f => { f.y += f.vy; f.x += f.vx; f.life -= 0.04; });
+    flames = flames.filter(f => f.life > 0);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, W, H);
+
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS - 1; col++) {
+        const a = particles[idxC(col, row)], b = particles[idxC(col + 1, row)];
+        ctx.strokeStyle = heatColA((a.heat + b.heat) / 2, 0.4);
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(a.bx + a.ox, a.by + a.oy); ctx.lineTo(b.bx + b.ox, b.by + b.oy); ctx.stroke();
+      }
+    }
+    for (let col = 0; col < COLS; col++) {
+      for (let row = 0; row < ROWS - 1; row++) {
+        const a = particles[idxC(col, row)], b = particles[idxC(col, row + 1)];
+        ctx.strokeStyle = heatColA((a.heat + b.heat) / 2, 0.4);
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(a.bx + a.ox, a.by + a.oy); ctx.lineTo(b.bx + b.ox, b.by + b.oy); ctx.stroke();
+      }
+    }
+
+    particles.forEach(p => {
+      const x = p.bx + p.ox, y = p.by + p.oy;
+      if (p.heat > 0.05) {
+        const grd = ctx.createRadialGradient(x, y, 0, x, y, R * 2.5);
+        grd.addColorStop(0, heatColA(p.heat, p.heat * 0.5));
+        grd.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.beginPath(); ctx.arc(x, y, R * 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = grd; ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2);
+      ctx.fillStyle = heatCol(p.heat); ctx.fill();
     });
 
-    const padX=32, hx=padX+heatPos*(W-padX*2);
-    
-    if(isHeatOn) {
-      ctx.fillStyle='rgba(255,150,0,0.15)';
-      ctx.beginPath();ctx.ellipse(hx,H*0.9,20,9,0,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
-      ctx.fillText('열원(ON)',hx,H-6);
-    } else {
-      ctx.fillStyle='rgba(148,163,184,0.15)';
-      ctx.beginPath();ctx.ellipse(hx,H*0.9,20,9,0,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='rgba(148,163,184,0.5)';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
-      ctx.fillText('열원(OFF)',hx,H-6);
+    flames.forEach(f => {
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.size * f.life, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,${Math.round(80 + f.life * 140)},0,${f.life * 0.8})`;
+      ctx.fill();
+    });
+
+    if (mousePos) {
+      ctx.beginPath(); ctx.arc(mousePos.x, mousePos.y, R * 2.5, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(249,115,22,0.5)'; ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(249,115,22,0.18)';
+      ctx.beginPath(); ctx.arc(mousePos.x, mousePos.y, R * 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(249,115,22,0.9)';
+      ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('🔥', mousePos.x, mousePos.y + 5);
     }
   }
 
-  return {init,update,draw};
+  return { init, update, draw };
 })();
 
 // ══════════════════════════════════════════════════════
@@ -598,81 +576,160 @@ const CONV=(function(){
 // ══════════════════════════════════════════════════════
 const RAD=(function(){
   let ctx,W,H;
-  const ZONES=['매우 낮음','낮음','보통','높음','매우 높음'];
-  let rings=[],timer=0,flames=[];
-  let FX,FY;
+  let flames=[], time=0;
+  let FX, FY;
+
+  // 사인파 파동: 각 파동은 열원에서 바깥으로 퍼져나감
+  // phase: 파동의 현재 위상 오프셋 (열원에서 멀어질수록 위상 지연)
+  const WAVE_SPEED   = 0.6;   // 파동 전파 속도 (px/frame)
+  const WAVE_INTERVAL = 90;   // 새 파동 생성 주기 (frame)
+  const WAVELENGTH   = 60;    // 파장 (px)
+  const AMPLITUDE    = 10;    // 사인파 진폭 (px)
+  const SEGMENTS     = 80;    // 파동 선을 몇 개 점으로 나눌지
+
+  let waves = []; // { front: 파동 선두 반지름, born: 생성 시각 }
 
   function init(){
     const s=makeCtx('rad-canvas'); ctx=s.ctx; W=s.W; H=s.H;
-    FX=70; FY=H*0.62;
-    rings=[]; flames=[]; timer=0;
+    FX = W * 0.12; FY = H * 0.65;
+    flames=[]; waves=[]; time=0;
   }
 
   function update(){
-    timer++;
-    if(timer%18===0) rings.push({r:18,maxR:W*0.96,alpha:0.65,speed:2.6});
-    rings.forEach(r=>{r.r+=r.speed;r.alpha=0.65*(1-r.r/r.maxR);});
-    rings=rings.filter(r=>r.r<r.maxR);
+    time++;
+
+    // 일정 주기마다 새 파동 발생
+    if(time % WAVE_INTERVAL === 0){
+      waves.push({ front: 20, born: time });
+    }
+
+    // 파동 전파
+    waves.forEach(w => { w.front += WAVE_SPEED; });
+    // 화면 밖으로 나간 파동 제거
+    waves = waves.filter(w => w.front < W * 1.4);
+
+    // 불꽃
     for(let i=0;i<3;i++) flames.push({
-      x:FX+(Math.random()-0.5)*22,y:FY,
-      vy:-(1.2+Math.random()*2.8),vx:(Math.random()-0.5)*0.8,
-      life:1,size:5+Math.random()*10
+      x: FX+(Math.random()-0.5)*22, y: FY-10,
+      vy:-(1.0+Math.random()*2.2), vx:(Math.random()-0.5)*0.7,
+      life:1, size:5+Math.random()*9
     });
-    flames.forEach(f=>{f.y+=f.vy;f.x+=f.vx;f.life-=0.03;});
+    flames.forEach(f=>{f.y+=f.vy; f.x+=f.vx; f.life-=0.028;});
     flames=flames.filter(f=>f.life>0);
   }
 
   function draw(){
     ctx.clearRect(0,0,W,H);
-    const sky=ctx.createLinearGradient(0,0,0,H*0.65);
-    sky.addColorStop(0,'#0f172a');sky.addColorStop(1,'#1e293b');
-    ctx.fillStyle=sky; ctx.fillRect(0,0,W,H*0.65);
-    const groundY=H*0.65;
+
+    // 배경
+    const sky=ctx.createLinearGradient(0,0,0,H*0.7);
+    sky.addColorStop(0,'#0f172a'); sky.addColorStop(1,'#1e293b');
+    ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
+
+    const groundY = H * 0.78;
     const gnd=ctx.createLinearGradient(0,groundY,0,H);
-    gnd.addColorStop(0,'#374151');gnd.addColorStop(1,'#1f2937');
+    gnd.addColorStop(0,'#374151'); gnd.addColorStop(1,'#1f2937');
     ctx.fillStyle=gnd; ctx.fillRect(0,groundY,W,H-groundY);
-    ctx.strokeStyle='rgba(107,114,128,0.5)'; ctx.lineWidth=1.5;
+    ctx.strokeStyle='rgba(107,114,128,0.45)'; ctx.lineWidth=1.2;
     ctx.beginPath();ctx.moveTo(0,groundY);ctx.lineTo(W,groundY);ctx.stroke();
-    const bg=ctx.createRadialGradient(FX,FY,10,FX,FY,W*0.9);
-    bg.addColorStop(0,'rgba(239,68,68,0.2)');
-    bg.addColorStop(0.2,'rgba(251,146,60,0.10)');
-    bg.addColorStop(0.45,'rgba(250,204,21,0.06)');
-    bg.addColorStop(0.7,'rgba(96,165,250,0.03)');
+
+    // 배경 열기 그라디언트
+    const bg=ctx.createRadialGradient(FX,FY,5,FX,FY,W*0.85);
+    bg.addColorStop(0,'rgba(239,68,68,0.18)');
+    bg.addColorStop(0.15,'rgba(251,146,60,0.10)');
+    bg.addColorStop(0.4,'rgba(250,204,21,0.05)');
     bg.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-    rings.forEach(ring=>{
-      ctx.beginPath();
-      ctx.arc(FX,FY,ring.r,-Math.PI*0.75,Math.PI*0.25);
-      ctx.strokeStyle=`rgba(251,146,60,${ring.alpha.toFixed(2)})`;
-      ctx.lineWidth=1.8; ctx.stroke();
+
+    // ── 사인파 파동 그리기 (5방향: 0°, ±15°, ±30°) ──────
+    const RAY_ANGLES = [-30, -15, 0, 15, 30].map(deg => deg * Math.PI / 180);
+    const RAY_ALPHA_SCALE = [0.5, 0.7, 1.0, 0.7, 0.5];
+
+    waves.forEach(w => {
+      const maxR = w.front;
+      const distRatio = maxR / (W * 1.2);
+      const baseAlpha = Math.max(0, 0.75 * (1 - distRatio));
+
+      const cr = Math.round(239 - distRatio * 143);
+      const cg = Math.round(68  + distRatio * 132);
+      const cb = Math.round(68  + distRatio * 178);
+
+      RAY_ANGLES.forEach((angle, ai) => {
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
+        // 사인파 진폭 방향: 진행 방향에 수직
+        const perpX = -sinA;
+        const perpY =  cosA;
+
+        const step = maxR / SEGMENTS;
+        ctx.beginPath();
+        let started = false;
+
+        for(let i = 0; i <= SEGMENTS; i++){
+          const dist = i * step;
+          if(dist < 15) continue;
+
+          const phase = (dist / WAVELENGTH) * Math.PI * 2
+                      - (time * WAVE_SPEED / WAVELENGTH) * Math.PI * 2;
+          const amp = AMPLITUDE * (1 - dist / (W * 1.2));
+          const sine = Math.sin(phase) * amp;
+
+          const bx = FX + cosA * dist;
+          const by = (FY - 30) + sinA * dist;
+          const px = bx + perpX * sine;
+          const py = by + perpY * sine;
+
+          if(!started){ ctx.moveTo(px, py); started = true; }
+          else { ctx.lineTo(px, py); }
+        }
+
+        const alpha = baseAlpha * RAY_ALPHA_SCALE[ai];
+        ctx.strokeStyle = `rgba(${cr},${cg},${cb},${alpha.toFixed(2)})`;
+        ctx.lineWidth = ai === 2 ? 2.4 : 1.8;
+        ctx.stroke();
+      });
     });
-    const zoneW=(W-FX-20)/ZONES.length;
-    const zColors=['rgba(96,165,250,0.85)','rgba(134,239,172,0.85)','rgba(250,204,21,0.85)','rgba(251,146,60,0.85)','rgba(239,68,68,0.85)'];
-    ZONES.slice().reverse().forEach((label,i)=>{
-      const zx=FX+10+i*zoneW;
-      if(i>0){
-        ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
-        ctx.beginPath();ctx.moveTo(zx,28);ctx.lineTo(zx,groundY-10);ctx.stroke();ctx.setLineDash([]);
+    // 온도 구간 라벨 (열원에서 멀어질수록 차가워짐)
+    const ZONES=['매우 높음','높음','보통','낮음','매우 낮음'];
+    const zColors=['rgba(239,68,68,0.85)','rgba(251,146,60,0.85)','rgba(250,204,21,0.85)','rgba(134,239,172,0.85)','rgba(96,165,250,0.85)'];
+    const zoneW = (W - FX - 24) / ZONES.length;
+    ZONES.forEach((label, i) => {
+      const zx = FX + 12 + i * zoneW;
+      if(i > 0){
+        ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+        ctx.beginPath(); ctx.moveTo(zx, 22); ctx.lineTo(zx, groundY-8); ctx.stroke(); ctx.setLineDash([]);
       }
-      ctx.fillStyle=zColors[i];ctx.font='bold 11px sans-serif';ctx.textAlign='center';
-      ctx.fillText(label,zx+zoneW/2,18);
+      ctx.fillStyle=zColors[i]; ctx.font='bold 10px sans-serif'; ctx.textAlign='center';
+      ctx.fillText(label, zx + zoneW/2, 14);
     });
+
+    // 장작
     ctx.fillStyle='#78350f';
-    ctx.beginPath();ctx.roundRect(FX-22,FY+2,18,8,3);ctx.fill();
-    ctx.beginPath();ctx.roundRect(FX+4,FY,20,8,3);ctx.fill();
-    ctx.save();ctx.translate(FX,FY+6);ctx.rotate(0.4);
-    ctx.fillStyle='#92400e';ctx.beginPath();ctx.roundRect(-22,0,44,6,3);ctx.fill();
+    ctx.beginPath();ctx.roundRect(FX-20,FY,16,7,3);ctx.fill();
+    ctx.beginPath();ctx.roundRect(FX+4,FY-2,18,7,3);ctx.fill();
+    ctx.save();ctx.translate(FX,FY+4);ctx.rotate(0.35);
+    ctx.fillStyle='#92400e';ctx.beginPath();ctx.roundRect(-20,0,40,5,3);ctx.fill();
     ctx.restore();
+
+    // 불꽃
     flames.forEach(f=>{
       ctx.beginPath();ctx.arc(f.x,f.y,f.size*f.life,0,Math.PI*2);
       ctx.fillStyle=`rgba(255,${Math.round(60+f.life*160)},0,${f.life*0.85})`;ctx.fill();
     });
-    const fg=ctx.createRadialGradient(FX,FY,2,FX,FY,45);
+
+    // 불꽃 글로우
+    const fg=ctx.createRadialGradient(FX,FY-5,2,FX,FY-5,40);
     fg.addColorStop(0,'rgba(255,180,30,0.5)');
     fg.addColorStop(0.5,'rgba(239,68,68,0.2)');
     fg.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.beginPath();ctx.arc(FX,FY,45,0,Math.PI*2);ctx.fillStyle=fg;ctx.fill();
+    ctx.beginPath();ctx.arc(FX,FY-5,40,0,Math.PI*2);ctx.fillStyle=fg;ctx.fill();
+
+    // 설명 텍스트
+    ctx.fillStyle='rgba(148,163,184,0.7)';
+    ctx.font='11px sans-serif'; ctx.textAlign='left';
+    ctx.fillText('← 열원에서 멀어질수록 복사 에너지 감소', FX+10, groundY+16);
   }
+
   return {init,update,draw};
 })();
 
@@ -811,7 +868,7 @@ h2{color:#1e40af;margin-bottom:16px;}
   <!-- 비열 달리기 게임 -->
   <div class="game-wrap">
     <div class="game-title">🏃 비열 달리기 — 실험으로 비열을 직접 비교해보세요!</div>
-    <iframe class="game-frame" id="game-frame" height="1100" srcdoc=""></iframe>
+    <iframe class="game-frame" id="game-frame" height="520" srcdoc=""></iframe>
   </div>
 </div>
 
@@ -881,22 +938,22 @@ const gameHTML = `<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>미스터리 비열 탐구</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; text-align: center; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
-        h1 { color: #2c3e50; }
+        body { font-family: 'Malgun Gothic', sans-serif; text-align: center; background-color: #f4f6f9; margin: 0; padding: 12px 16px 12px; color: #333; }
+        h1 { color: #2c3e50; font-size: 20px; margin: 0 0 10px; }
         .page { display: none; }
         .page.active { display: block; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .intro-container { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 30px; }
-        .info-box { background-color: #fff; padding: 15px 25px; border-left: 5px solid #3498db; border-radius: 5px; width: 80%; max-width: 700px; text-align: left; box-shadow: 0 2px 5px rgba(0,0,0,0.05); line-height: 1.6; }
-        .material-pool { background-color: #fff9c4; border-left: 5px solid #f1c40f; padding: 15px 25px; border-radius: 5px; width: 80%; max-width: 700px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 18px; }
-        .pool-list { font-weight: bold; color: #d35400; margin-top: 10px; word-break: keep-all; }
-        .box-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 700px; margin: 0 auto 30px auto; }
+        .intro-container { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .info-box { background-color: #fff; padding: 10px 18px; border-left: 5px solid #3498db; border-radius: 5px; width: 90%; max-width: 700px; text-align: left; box-shadow: 0 2px 5px rgba(0,0,0,0.05); line-height: 1.5; font-size: 14px; }
+        .material-pool { background-color: #fff9c4; border-left: 5px solid #f1c40f; padding: 8px 18px; border-radius: 5px; width: 90%; max-width: 700px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 15px; }
+        .pool-list { font-weight: bold; color: #d35400; margin-top: 5px; word-break: keep-all; font-size: 14px; }
+        .box-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 700px; margin: 0 auto 14px auto; }
         .mystery-item { display: flex; flex-direction: column; align-items: center; }
-        .mystery-box { background-color: #7f8c8d; color: white; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 30px; font-weight: bold; box-shadow: inset 0 -5px 0 rgba(0,0,0,0.2), 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s; margin-bottom: 10px; }
+        .mystery-box { background-color: #7f8c8d; color: white; width: 75px; height: 75px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 24px; font-weight: bold; box-shadow: inset 0 -5px 0 rgba(0,0,0,0.2), 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s; margin-bottom: 6px; }
         .mystery-item.selected .mystery-box { background-color: #e74c3c; box-shadow: inset 0 -5px 0 rgba(0,0,0,0.2), 0 4px 15px rgba(231,76,60,0.5); transform: scale(1.05); }
-        .checkbox-container { font-size: 18px; font-weight: bold; cursor: pointer; }
+        .checkbox-container { font-size: 14px; font-weight: bold; cursor: pointer; }
         .checkbox-container input { transform: scale(1.5); margin-right: 8px; cursor: pointer; }
-        .btn-next { padding: 15px 40px; font-size: 18px; font-weight: bold; background-color: #2ecc71; color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-next { padding: 10px 32px; font-size: 16px; font-weight: bold; background-color: #2ecc71; color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-next:hover { background-color: #27ae60; }
         .btn-retry { background-color: #f39c12; }
         .btn-retry:hover { background-color: #d68910; }
@@ -977,10 +1034,28 @@ const gameHTML = `<!DOCTYPE html>
             if(checkbox.checked){if(selectedBoxIds.length>=4){alert('최대 4개까지만 선택할 수 있습니다.');checkbox.checked=false;return;}selectedBoxIds.push(label);itemDiv.classList.add('selected');}
             else{selectedBoxIds=selectedBoxIds.filter(id=>id!==label);itemDiv.classList.remove('selected');}
         }
+        function sendHeight(){
+            const h = document.body.scrollHeight;
+            window.parent.postMessage({iframeHeight: h}, '*');
+        }
+        function resetGame(){
+            // 상태 초기화
+            selectedBoxIds = [];
+            boxes = {};
+            // page 전환
+            document.getElementById('page2').classList.remove('active');
+            document.getElementById('page1').classList.add('active');
+            // 박스 그리드 재생성
+            document.getElementById('boxGrid').innerHTML = '';
+            init();
+            // 부모에게 초기 높이로 줄이라고 알림
+            setTimeout(sendHeight, 50);
+        }
         function goToPage2(){
             if(selectedBoxIds.length<3||selectedBoxIds.length>4){alert('비열을 비교할 상자를 3개 또는 4개 선택해주세요!');return;}
             document.getElementById('page1').classList.remove('active');document.getElementById('page2').classList.add('active');
             setupExperiment();setupQuiz();
+            setTimeout(sendHeight, 100);
         }
         function setupExperiment(){
             const container=document.getElementById('experimentContainer');container.innerHTML='';
@@ -1013,7 +1088,7 @@ const gameHTML = `<!DOCTYPE html>
             let correctOrder=[...selectedBoxIds].sort((a,b)=>boxes[a].specificHeat-boxes[b].specificHeat);
             let isCorrect=true;for(let i=0;i<correctOrder.length;i++){if(userAnswers[i]!==correctOrder[i]){isCorrect=false;break;}}
             const modal=document.getElementById('resultModal'),overlay=document.getElementById('modalOverlay'),title=document.getElementById('modalTitle'),msg=document.getElementById('modalMessage'),reveal=document.getElementById('revealSection'),btns=document.getElementById('modalButtons');
-            if(isCorrect){title.innerText='🎉 완벽합니다! 🎉';title.style.color='#2ecc71';msg.innerHTML='온도 변화를 관찰하여 비열의 크기를 정확하게 추론해냈습니다!';let revealText='🔍 미스터리 상자의 진짜 정체<br><br>';correctOrder.forEach(id=>{revealText+='상자 '+id+' : <strong>'+boxes[id].material+'</strong> (비열 '+boxes[id].specificHeat+')<br>';});reveal.innerHTML=revealText;reveal.style.display='block';btns.innerHTML='<button class="btn-next" style="width:100%;" onclick="location.reload()">처음부터 다시하기</button>';}
+            if(isCorrect){title.innerText='🎉 완벽합니다! 🎉';title.style.color='#2ecc71';msg.innerHTML='온도 변화를 관찰하여 비열의 크기를 정확하게 추론해냈습니다!';let revealText='🔍 미스터리 상자의 진짜 정체<br><br>';correctOrder.forEach(id=>{revealText+='상자 '+id+' : <strong>'+boxes[id].material+'</strong> (비열 '+boxes[id].specificHeat+')<br>';});reveal.innerHTML=revealText;reveal.style.display='block';btns.innerHTML='<button class="btn-next" style="width:100%;" onclick="closeModal();resetGame()">처음부터 다시하기</button>';}
             else{title.innerText='아쉽네요! 다시 생각해볼까요?';title.style.color='#e74c3c';msg.innerHTML='온도가 빠르게 오르는 물질과 비열의 관계를 다시 한번 떠올려보세요!';reveal.style.display='none';btns.innerHTML='<button class="btn-next btn-retry" style="width:100%;" onclick="closeModal()">다시 풀어보기</button>';}
             modal.style.display='block';overlay.style.display='block';
         }
@@ -1024,6 +1099,11 @@ const gameHTML = `<!DOCTYPE html>
 </html>`;
 
 document.getElementById('game-frame').srcdoc = gameHTML;
+window.addEventListener('message', e => {
+  if(e.data && e.data.iframeHeight){
+    document.getElementById('game-frame').height = e.data.iframeHeight + 20;
+  }
+});
 </script>
 </body>
 </html>
