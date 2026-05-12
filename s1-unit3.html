@@ -1223,7 +1223,7 @@ window.addEventListener('message', e => {
         nh[i] += (q.heat - p.heat)*0.012;
       });
     });
-    particles.forEach((p,i)=>{ p.heat = Math.max(0, Math.min(1, nh[i]*0.990)); });
+    particles.forEach((p,i)=>{ p.heat = Math.max(0, Math.min(1, nh[i]*0.9983)); });
 
     const avg = avgHeat();
 
