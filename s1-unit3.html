@@ -1027,6 +1027,591 @@ document.getElementById('game-frame').srcdoc = gameHTML;
 </script>
 </body>
 </html>
+  <!-- ⑤ 종합 탐구 — 전도·비열·열평형 통합 시뮬레이터 -->
+<!-- 하단 내비게이션 바로 위에 이 블록 전체를 붙여넣으세요 -->
+
+<h2>⑤ 종합 탐구 — 전도·비열·열평형</h2>
+<div class="card">
+  <p>지금까지 배운 열 전도, 비열, 열평형을 하나의 시뮬레이터에서 직접 확인해보세요.</p>
+
+  <style>
+    /* ── 시뮬레이터 전용 CSS (sim5_ 네임스페이스) ── */
+    .sim5-wrap {
+      border-radius: 12px;
+      overflow: hidden;
+      background: #0d1117;
+      margin-top: 14px;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+    }
+    .sim5-hdr {
+      padding: 12px 18px;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: #161b22;
+    }
+    .sim5-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #7d8590;
+      letter-spacing: 0.04em;
+    }
+    .sim5-title span { color: #f97316; }
+    .sim5-legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .sim5-leg {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      color: #7d8590;
+    }
+    .sim5-leg-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sim5-hint {
+      font-size: 0.72rem;
+      color: #7d8590;
+      width: 100%;
+      padding-top: 3px;
+    }
+    .sim5-hint strong { color: #e6edf3; }
+    .sim5-canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 340px;
+      background: #0a0e14;
+      cursor: crosshair;
+    }
+    #sim5-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .sim5-eq-overlay {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(34,197,94,0.12);
+      border: 2px solid #22c55e;
+      border-radius: 12px;
+      padding: 10px 24px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #22c55e;
+      pointer-events: none;
+      display: none;
+      white-space: nowrap;
+      animation: sim5pop 0.4s ease;
+    }
+    @keyframes sim5pop {
+      0%   { transform: translate(-50%,-50%) scale(0.7); opacity:0; }
+      70%  { transform: translate(-50%,-50%) scale(1.08); }
+      100% { transform: translate(-50%,-50%) scale(1); opacity:1; }
+    }
+    .sim5-panel {
+      background: #161b22;
+      border-top: 1px solid #30363d;
+      padding: 14px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .sim5-sec { display: flex; flex-direction: column; gap: 6px; }
+    .sim5-sec-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #7d8590;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .sim5-mat-grid { display: flex; gap: 5px; flex-wrap: wrap; }
+    .sim5-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border: 1.5px solid #30363d;
+      border-radius: 7px;
+      background: #1c2128;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #e6edf3;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .sim5-chip:hover { border-color: #7d8590; }
+    .sim5-chip.active { border-color: #f97316; color: #f97316; }
+    .sim5-chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sim5-chip-sh { font-size: 0.65rem; color: #7d8590; }
+    .sim5-ctrl { display: flex; align-items: center; gap: 8px; }
+    .sim5-ctrl-lbl { font-size: 0.72rem; color: #7d8590; font-weight: 600; min-width: 48px; }
+    input.sim5-range {
+      -webkit-appearance: none;
+      width: 100px; height: 4px;
+      background: #30363d;
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+    }
+    input.sim5-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 13px; height: 13px;
+      border-radius: 50%;
+      background: #f97316;
+      cursor: pointer;
+    }
+    .sim5-ctrl-val { font-size: 0.7rem; color: #f97316; min-width: 24px; }
+    .sim5-wall-toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 12px;
+      border: 1.5px solid #30363d;
+      border-radius: 7px;
+      background: #1c2128;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #e6edf3;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .sim5-wall-toggle:hover { border-color: #22c55e; }
+    .sim5-wall-toggle.open { border-color: #22c55e; color: #22c55e; }
+    .sim5-wall-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #30363d; transition: background 0.2s;
+    }
+    .sim5-wall-toggle.open .sim5-wall-dot { background: #22c55e; }
+    .sim5-btn {
+      padding: 7px 14px;
+      border-radius: 7px;
+      border: 1.5px solid #30363d;
+      background: #1c2128;
+      color: #e6edf3;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .sim5-btn:hover { border-color: #f97316; color: #f97316; }
+    .sim5-btn.red { border-color: #ef4444; color: #ef4444; }
+    .sim5-btn.red:hover { background: rgba(239,68,68,0.08); }
+    .sim5-status { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 180px; }
+    .sim5-sbar-row { display: flex; align-items: center; gap: 7px; }
+    .sim5-sbar-name { font-size: 0.72rem; font-weight: 600; min-width: 60px; white-space: nowrap; }
+    .sim5-sbar-track { flex: 1; height: 5px; background: #30363d; border-radius: 3px; overflow: hidden; }
+    .sim5-sbar-fill { height: 100%; border-radius: 3px; transition: width 0.15s; }
+    .sim5-sbar-val { font-size: 0.68rem; color: #7d8590; min-width: 38px; text-align: right; }
+    .sim5-log {
+      font-size: 0.72rem;
+      color: #7d8590;
+      line-height: 1.7;
+      min-height: 40px;
+      margin-top: 4px;
+    }
+    .sim5-log .em { color: #f97316; font-weight: 700; }
+    .sim5-log .ok { color: #22c55e; font-weight: 700; }
+  </style>
+
+  <div class="sim5-wrap">
+    <!-- 헤더 -->
+    <div class="sim5-hdr">
+      <div class="sim5-title">열 통합 시뮬레이터 &nbsp;|&nbsp; <span>전도 · 비열 · 열평형</span></div>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+        <div class="sim5-legend">
+          <div class="sim5-leg"><div class="sim5-leg-dot" style="background:#3b82f6"></div>차가움</div>
+          <div class="sim5-leg"><div class="sim5-leg-dot" style="background:#22c55e"></div>미지근</div>
+          <div class="sim5-leg"><div class="sim5-leg-dot" style="background:#f97316"></div>따뜻함</div>
+          <div class="sim5-leg"><div class="sim5-leg-dot" style="background:#ef4444"></div>뜨거움</div>
+        </div>
+        <div class="sim5-hint"><strong>🔥 열원</strong>을 캔버스 위에서 움직이세요 &nbsp;|&nbsp; <strong>칸막이 제거</strong>시 전도·열평형 시작</div>
+      </div>
+    </div>
+
+    <!-- 캔버스 -->
+    <div class="sim5-canvas-wrap" id="sim5-cwrap">
+      <canvas id="sim5-canvas"></canvas>
+      <div class="sim5-eq-overlay" id="sim5-eq">⚖️ 열평형 달성!</div>
+    </div>
+
+    <!-- 하단 패널 -->
+    <div class="sim5-panel">
+      <!-- 물질 선택 -->
+      <div class="sim5-sec">
+        <div class="sim5-sec-label">물질 배치 (클릭으로 교체)</div>
+        <div class="sim5-mat-grid" id="sim5-matgrid"></div>
+      </div>
+
+      <!-- 컨트롤 -->
+      <div class="sim5-sec">
+        <div class="sim5-sec-label">열원 세기</div>
+        <div class="sim5-ctrl">
+          <span class="sim5-ctrl-lbl">세기</span>
+          <input class="sim5-range" type="range" id="sim5-pow" min="1" max="10" value="5">
+          <span class="sim5-ctrl-val" id="sim5-powval">5</span>
+        </div>
+        <div class="sim5-sec-label" style="margin-top:6px;">칸막이</div>
+        <div class="sim5-wall-toggle" id="sim5-walltoggle">
+          <div class="sim5-wall-dot" id="sim5-walldot"></div>
+          <span id="sim5-walllabel">🧱 칸막이 있음</span>
+        </div>
+      </div>
+
+      <!-- 버튼 -->
+      <div class="sim5-sec" style="justify-content:center;gap:6px;">
+        <button class="sim5-btn red" id="sim5-reset">🔄 초기화</button>
+        <button class="sim5-btn" id="sim5-auto">🔁 자동 열원</button>
+      </div>
+
+      <!-- 온도 현황 -->
+      <div class="sim5-status">
+        <div class="sim5-sec-label">물질별 평균 온도</div>
+        <div id="sim5-sbars"></div>
+        <div class="sim5-log" id="sim5-log">캔버스 위에 마우스를 올려 열을 공급하세요.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  /* ── 물질 ── */
+  const S5_MATS = [
+    { name: '금',       sh: 130,  color: '#fbbf24', pc: '#fde68a', emoji: '🥇' },
+    { name: '철',       sh: 450,  color: '#9ca3af', pc: '#d1d5db', emoji: '⚙️' },
+    { name: '알루미늄', sh: 900,  color: '#7dd3fc', pc: '#bae6fd', emoji: '🔩' },
+    { name: '모래',     sh: 800,  color: '#d97706', pc: '#fcd34d', emoji: '🏖️' },
+    { name: '물',       sh: 4200, color: '#60a5fa', pc: '#93c5fd', emoji: '💧' },
+  ];
+
+  let s5blocks = [
+    { matIdx: 0 }, { matIdx: 2 }, { matIdx: 4 }, { matIdx: 1 }
+  ];
+
+  const DPR = window.devicePixelRatio || 1;
+  const cwrap  = document.getElementById('sim5-cwrap');
+  const canvas = document.getElementById('sim5-canvas');
+  const ctx    = canvas.getContext('2d');
+
+  let S5W = 0, S5H = 0;
+  let s5parts = [], s5flames = [];
+  let s5walls = true, s5mouse = null;
+  let s5auto = false, s5angle = 0;
+  let s5pow = 5, s5eqDone = false, s5eqTimer = 0;
+  const S5_COLS = 7, S5_ROWS = 5, S5_R = 10;
+
+  /* ── 색상 ── */
+  function s5col(t) {
+    if (t < 0.33) { const f=t/0.33; return `rgb(${Math.round(59+f*50)},${Math.round(130+f*70)},${Math.round(246-f*100)})`; }
+    if (t < 0.66) { const f=(t-0.33)/0.33; return `rgb(${Math.round(109+f*146)},${Math.round(200-f*110)},${Math.round(146-f*100)})`; }
+    const f=(t-0.66)/0.34; return `rgb(255,${Math.round(90-f*50)},${Math.round(46-f*40)})`;
+  }
+  function s5colA(t, a) {
+    if (t < 0.33) { const f=t/0.33; return `rgba(${Math.round(59+f*50)},${Math.round(130+f*70)},${Math.round(246-f*100)},${a})`; }
+    if (t < 0.66) { const f=(t-0.33)/0.33; return `rgba(${Math.round(109+f*146)},${Math.round(200-f*110)},${Math.round(146-f*100)},${a})`; }
+    const f=(t-0.66)/0.34; return `rgba(255,${Math.round(90-f*50)},${Math.round(46-f*40)},${a})`;
+  }
+
+  /* ── 입자 생성 ── */
+  function s5build() {
+    if (S5W === 0) return;
+    s5parts = [];
+    const bW = S5W / s5blocks.length;
+    const padX = 18, padY = 24;
+    s5blocks.forEach((blk, bi) => {
+      const spX = (bW - padX*2) / (S5_COLS-1);
+      const spY = (S5H - padY*2) / (S5_ROWS-1);
+      for (let r = 0; r < S5_ROWS; r++)
+        for (let c = 0; c < S5_COLS; c++)
+          s5parts.push({ bx: bi*bW+padX+c*spX, by: padY+r*spY, ox:0, oy:0, heat:0, bi });
+      blk.avg = 20;
+    });
+    s5eqDone = false;
+    document.getElementById('sim5-eq').style.display = 'none';
+    s5renderBars();
+    s5log('캔버스 위에 마우스를 올려 열을 공급하세요.');
+  }
+
+  function s5resize() {
+    S5W = cwrap.clientWidth;
+    S5H = cwrap.clientHeight;
+    canvas.width  = S5W * DPR; canvas.height = S5H * DPR;
+    canvas.style.width  = S5W + 'px'; canvas.style.height = S5H + 'px';
+    ctx.setTransform(1,0,0,1,0,0); ctx.scale(DPR, DPR);
+    s5build();
+  }
+
+  /* ── 칩 ── */
+  const grid = document.getElementById('sim5-matgrid');
+  S5_MATS.forEach((m, mi) => {
+    const chip = document.createElement('div');
+    chip.className = 'sim5-chip';
+    chip.dataset.mi = mi;
+    chip.innerHTML = `<div class="sim5-chip-dot" style="background:${m.color}"></div>${m.emoji} ${m.name}<span class="sim5-chip-sh">${m.sh}</span>`;
+    chip.addEventListener('click', () => {
+      const t = (parseInt(chip.dataset.lb ?? -1) + 1) % s5blocks.length;
+      chip.dataset.lb = t;
+      s5blocks[t].matIdx = mi;
+      s5build(); s5renderBars(); s5updateChips();
+    });
+    grid.appendChild(chip);
+  });
+  function s5updateChips() {
+    const used = new Set(s5blocks.map(b => b.matIdx));
+    document.querySelectorAll('.sim5-chip').forEach(c =>
+      c.classList.toggle('active', used.has(parseInt(c.dataset.mi))));
+  }
+  s5updateChips();
+
+  /* ── 상태 바 ── */
+  function s5renderBars() {
+    const el = document.getElementById('sim5-sbars');
+    el.innerHTML = '';
+    s5blocks.forEach((blk, bi) => {
+      const m = S5_MATS[blk.matIdx];
+      const t = Math.max(0, Math.min(1, ((blk.avg||20)-20)/180));
+      el.innerHTML += `<div class="sim5-sbar-row">
+        <span class="sim5-sbar-name" style="color:${m.color}">${m.emoji} ${m.name}</span>
+        <div class="sim5-sbar-track"><div class="sim5-sbar-fill" id="sim5-sb${bi}" style="width:${t*100}%;background:${s5col(t)}"></div></div>
+        <span class="sim5-sbar-val" id="sim5-sv${bi}">${Math.round(blk.avg||20)}°C</span>
+      </div>`;
+    });
+  }
+  function s5updateBars() {
+    s5blocks.forEach((blk, bi) => {
+      const t = Math.max(0, Math.min(1, ((blk.avg||20)-20)/180));
+      const ef = document.getElementById('sim5-sb'+bi);
+      const ev = document.getElementById('sim5-sv'+bi);
+      if (ef) { ef.style.width=(t*100)+'%'; ef.style.background=s5col(t); }
+      if (ev) ev.textContent = Math.round(blk.avg||20)+'°C';
+    });
+  }
+
+  /* ── 로그 ── */
+  function s5log(msg) { document.getElementById('sim5-log').innerHTML = msg; }
+
+  /* ── 마우스 ── */
+  function s5pos(e) {
+    const r = canvas.getBoundingClientRect();
+    if (e.touches) return { x:(e.touches[0].clientX-r.left)*(S5W/r.width), y:(e.touches[0].clientY-r.top)*(S5H/r.height) };
+    return { x:(e.clientX-r.left)*(S5W/r.width), y:(e.clientY-r.top)*(S5H/r.height) };
+  }
+  canvas.addEventListener('mousemove', e => { s5mouse = s5pos(e); });
+  canvas.addEventListener('mouseleave', () => { s5mouse = null; });
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); s5mouse = s5pos(e); }, { passive:false });
+  canvas.addEventListener('touchend', () => { s5mouse = null; });
+
+  /* ── 이벤트 ── */
+  document.getElementById('sim5-walltoggle').addEventListener('click', () => {
+    s5walls = !s5walls;
+    const wt = document.getElementById('sim5-walltoggle');
+    wt.classList.toggle('open', !s5walls);
+    document.getElementById('sim5-walllabel').textContent = s5walls ? '🧱 칸막이 있음' : '🟢 칸막이 제거됨';
+    s5eqDone = false;
+    document.getElementById('sim5-eq').style.display = 'none';
+    if (!s5walls) s5log('<span class="em">칸막이 제거!</span> 물질 간 열 전도가 시작됩니다...');
+    else s5log('칸막이를 다시 설치했습니다.');
+  });
+
+  document.getElementById('sim5-pow').addEventListener('input', e => {
+    s5pow = parseInt(e.target.value);
+    document.getElementById('sim5-powval').textContent = s5pow;
+  });
+
+  document.getElementById('sim5-reset').addEventListener('click', () => {
+    s5walls = true;
+    document.getElementById('sim5-walltoggle').classList.remove('open');
+    document.getElementById('sim5-walllabel').textContent = '🧱 칸막이 있음';
+    s5auto = false;
+    document.getElementById('sim5-auto').textContent = '🔁 자동 열원';
+    s5build(); s5log('초기화했습니다.');
+  });
+
+  document.getElementById('sim5-auto').addEventListener('click', () => {
+    s5auto = !s5auto;
+    document.getElementById('sim5-auto').textContent = s5auto ? '⏹ 자동 끄기' : '🔁 자동 열원';
+  });
+
+  /* ── UPDATE ── */
+  function s5update() {
+    let hx = null, hy = null;
+    if (s5auto) {
+      s5angle += 0.022;
+      hx = S5W*0.5 + Math.cos(s5angle)*S5W*0.38;
+      hy = S5H*0.5 + Math.sin(s5angle*0.8)*S5H*0.3;
+    } else if (s5mouse) { hx = s5mouse.x; hy = s5mouse.y; }
+
+    if (hx !== null) {
+      s5parts.forEach(p => {
+        const d = Math.hypot(p.bx-hx, p.by-hy);
+        if (d < S5_R*3.5) {
+          p.heat = Math.min(1, p.heat + (1-d/(S5_R*3.5))*s5pow*0.012);
+          if (Math.random()<0.3) s5flames.push({ x:p.bx+(Math.random()-0.5)*14, y:p.by, vy:-(0.8+Math.random()*2.2), vx:(Math.random()-0.5)*0.7, life:1, size:3+Math.random()*7 });
+        }
+      });
+    }
+
+    const n = s5parts.length;
+    const nh = new Float32Array(n);
+    for (let i=0; i<n; i++) nh[i] = s5parts[i].heat;
+    const bW = S5W / s5blocks.length;
+
+    for (let i=0; i<n; i++) {
+      const p = s5parts[i];
+      for (let j=i+1; j<n; j++) {
+        const q = s5parts[j];
+        if (p.bi !== q.bi && s5walls) continue;
+        const dx = Math.abs(p.bx-q.bx), dy = Math.abs(p.by-q.by);
+        if (dx > bW*0.45 || dy > S5H*0.35) continue;
+        if (Math.hypot(dx,dy) > S5_R*3.2) continue;
+        const cA = 1200/S5_MATS[s5blocks[p.bi].matIdx].sh;
+        const cB = 1200/S5_MATS[s5blocks[q.bi].matIdx].sh;
+        const cond = Math.sqrt(cA*cB)*0.0018;
+        const diff = p.heat - q.heat;
+        nh[i] -= diff*cond; nh[j] += diff*cond;
+      }
+    }
+
+    s5parts.forEach((p,i) => {
+      p.heat = Math.max(0, Math.min(1, nh[i]*0.9995));
+      const v = p.heat*6; p.ox=(Math.random()-0.5)*v; p.oy=(Math.random()-0.5)*v;
+    });
+
+    s5blocks.forEach((blk, bi) => {
+      const ps = s5parts.filter(p=>p.bi===bi);
+      if (!ps.length) return;
+      blk.avg = 20 + ps.reduce((s,p)=>s+p.heat,0)/ps.length*180;
+    });
+
+    if (!s5walls && !s5eqDone) {
+      const temps = s5blocks.map(b=>b.avg);
+      if (temps.some(t=>t>25) && Math.max(...temps)-Math.min(...temps)<3) {
+        s5eqDone = true; s5eqTimer = 180;
+        document.getElementById('sim5-eq').style.display = 'block';
+        s5log('<span class="ok">⚖️ 열평형 달성!</span> 모든 물질의 온도가 같아졌습니다.');
+      }
+    }
+    if (s5eqTimer>0 && --s5eqTimer===0) document.getElementById('sim5-eq').style.display='none';
+
+    s5flames.forEach(f=>{f.y+=f.vy;f.x+=f.vx;f.life-=0.038;});
+    s5flames = s5flames.filter(f=>f.life>0);
+
+    s5updateBars();
+
+    if (hx!==null && Math.random()<0.02) {
+      const bi = Math.floor(hx/bW);
+      if (bi>=0 && bi<s5blocks.length) {
+        const m = S5_MATS[s5blocks[bi].matIdx];
+        s5log(`<span class="em">🔥 ${m.emoji} ${m.name}</span> 가열 중... ${Math.round(s5blocks[bi].avg)}°C<br>비열 ${m.sh} — ${m.sh<500?'<span class="em">낮아</span> 빠르게':m.sh>2000?'높아 천천히':'보통 속도로'} 온도가 오릅니다.`);
+      }
+    }
+  }
+
+  /* ── DRAW ── */
+  function s5draw() {
+    ctx.clearRect(0,0,S5W,S5H);
+    ctx.fillStyle='#0a0e14'; ctx.fillRect(0,0,S5W,S5H);
+    const bW = S5W/s5blocks.length;
+
+    s5blocks.forEach((blk,bi)=>{
+      const t=Math.max(0,Math.min(1,(blk.avg-20)/180));
+      if(t>0.03){
+        const g=ctx.createLinearGradient(bi*bW,0,(bi+1)*bW,0);
+        g.addColorStop(0,s5colA(t,t*0.15)); g.addColorStop(0.5,s5colA(t,t*0.2)); g.addColorStop(1,s5colA(t,t*0.15));
+        ctx.fillStyle=g; ctx.fillRect(bi*bW,0,bW,S5H);
+      }
+    });
+
+    for(let i=0;i<s5parts.length;i++){
+      const p=s5parts[i];
+      for(let j=i+1;j<s5parts.length;j++){
+        const q=s5parts[j];
+        if(p.bi!==q.bi) continue;
+        const dx=Math.abs(p.bx-q.bx),dy=Math.abs(p.by-q.by);
+        if(dx>bW*0.45||dy>S5H*0.3||Math.hypot(dx,dy)>S5_R*2.8) continue;
+        ctx.strokeStyle=s5colA((p.heat+q.heat)/2,0.35); ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.moveTo(p.bx+p.ox,p.by+p.oy); ctx.lineTo(q.bx+q.ox,q.by+q.oy); ctx.stroke();
+      }
+    }
+
+    if(s5walls){
+      for(let bi=1;bi<s5blocks.length;bi++){
+        ctx.strokeStyle='rgba(96,165,250,0.55)'; ctx.lineWidth=2.5; ctx.setLineDash([6,5]);
+        ctx.beginPath(); ctx.moveTo(bi*bW,0); ctx.lineTo(bi*bW,S5H); ctx.stroke(); ctx.setLineDash([]);
+      }
+    } else {
+      for(let bi=1;bi<s5blocks.length;bi++){
+        const diff=s5blocks[bi-1].avg-s5blocks[bi].avg;
+        if(Math.abs(diff)>1){
+          const a=Math.min(0.9,Math.abs(diff)/60);
+          ctx.fillStyle=`rgba(249,115,22,${a})`; ctx.font=`bold ${12+Math.min(10,Math.abs(diff)/8)}px sans-serif`; ctx.textAlign='center';
+          ctx.fillText(diff>0?'→':'←', bi*bW, S5H/2);
+        }
+        ctx.strokeStyle='rgba(48,54,61,0.4)'; ctx.lineWidth=1; ctx.setLineDash([3,6]);
+        ctx.beginPath(); ctx.moveTo(bi*bW,0); ctx.lineTo(bi*bW,S5H); ctx.stroke(); ctx.setLineDash([]);
+      }
+    }
+
+    s5parts.forEach(p=>{
+      const x=p.bx+p.ox, y=p.by+p.oy;
+      if(p.heat>0.04){
+        const g=ctx.createRadialGradient(x,y,0,x,y,S5_R*2.4);
+        g.addColorStop(0,s5colA(p.heat,p.heat*0.5)); g.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.beginPath(); ctx.arc(x,y,S5_R*2.4,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(x,y,S5_R,0,Math.PI*2); ctx.fillStyle=s5col(p.heat); ctx.fill();
+      ctx.beginPath(); ctx.arc(x,y,S5_R*0.36,0,Math.PI*2);
+      ctx.fillStyle=S5_MATS[s5blocks[p.bi].matIdx].pc+'88'; ctx.fill();
+    });
+
+    s5flames.forEach(f=>{
+      ctx.beginPath(); ctx.arc(f.x,f.y,f.size*f.life,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,${Math.round(60+f.life*150)},0,${f.life*0.8})`; ctx.fill();
+    });
+
+    s5blocks.forEach((blk,bi)=>{
+      const m=S5_MATS[blk.matIdx], cx=bi*bW+bW/2;
+      ctx.fillStyle=m.color; ctx.font='bold 12px "Pretendard","Noto Sans KR",sans-serif'; ctx.textAlign='center';
+      ctx.fillText(m.emoji+' '+m.name, cx, 16);
+      ctx.fillStyle='rgba(125,133,144,0.8)'; ctx.font='10px monospace';
+      ctx.fillText('비열 '+m.sh, cx, 28);
+    });
+
+    const hx2 = s5auto ? S5W*0.5+Math.cos(s5angle)*S5W*0.38 : (s5mouse?s5mouse.x:null);
+    const hy2 = s5auto ? S5H*0.5+Math.sin(s5angle*0.8)*S5H*0.3 : (s5mouse?s5mouse.y:null);
+    if(hx2!==null){
+      const g=ctx.createRadialGradient(hx2,hy2,0,hx2,hy2,S5_R*4);
+      g.addColorStop(0,'rgba(249,115,22,0.35)'); g.addColorStop(1,'rgba(249,115,22,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(hx2,hy2,S5_R*4,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(249,115,22,0.7)'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+      ctx.beginPath(); ctx.arc(hx2,hy2,S5_R*3.5,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+      ctx.font='16px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='rgba(255,255,255,0.9)';
+      ctx.fillText('🔥',hx2,hy2+6);
+    }
+  }
+
+  function s5loop() { s5update(); s5draw(); requestAnimationFrame(s5loop); }
+
+  s5resize();
+  s5renderBars();
+  s5loop();
+  window.addEventListener('resize', () => { s5resize(); s5renderBars(); });
+})();
+</script>
 <!-- 하단 네비게이션 -->
 <div style="margin-top:40px;text-align:center;">
   <a class="nav-btn" href="science1.html">← 과학 1 단원 목록</a>
