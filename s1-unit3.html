@@ -1214,16 +1214,18 @@ window.addEventListener('message', e => {
       });
     }
 
-    // 열 전도 (격자 이웃끼리)
+    // 열 전도 + 냉각 (녹은 후엔 냉각 없음)
     const nh = particles.map(p=>p.heat);
-    particles.forEach((p,i)=>{
-      particles.forEach((q,j)=>{
-        if(i===j || p.free || q.free) return;
-        if(Math.abs(p.r-q.r)+Math.abs(p.c-q.c)!==1) return;
-        nh[i] += (q.heat - p.heat)*0.012;
+    if(!melted){
+      particles.forEach((p,i)=>{
+        particles.forEach((q,j)=>{
+          if(i===j || p.free || q.free) return;
+          if(Math.abs(p.r-q.r)+Math.abs(p.c-q.c)!==1) return;
+          nh[i] += (q.heat - p.heat)*0.012;
+        });
       });
-    });
-    particles.forEach((p,i)=>{ p.heat = Math.max(0, Math.min(1, nh[i]*0.9993)); });
+      particles.forEach((p,i)=>{ p.heat = Math.max(0, Math.min(1, nh[i]*0.9993)); });
+    }
 
     const avg = avgHeat();
 
@@ -1233,46 +1235,62 @@ window.addEventListener('message', e => {
       bowlProgress = 0;
       particles.forEach(p=>{
         p.free = true;
-        p.vx = (Math.random()-0.5)*3;
-        p.vy = (Math.random()-0.5)*3 - 1; // 약간 위로 튀어오름
+        p.vx = (Math.random()-0.5)*2.5;
+        p.vy = (Math.random()-0.5)*2.5 - 0.5;
       });
     }
 
     if(melted){
-      // 그릇 애니메이션 진행
-      if(bowlProgress < 1) bowlProgress = Math.min(1, bowlProgress + 0.012);
-      const bowlTopY = H * (1 - bowlProgress * 0.72); // 그릇 위쪽 끝 Y
+      const floor = H - R; // 평평한 바닥
 
       particles.forEach(p=>{
         p.gx += p.vx; p.gy += p.vy;
-        // 중력 방향 (그릇 안으로 모이게)
-        p.vy += 0.12;
-        p.vx *= 0.985; p.vy *= 0.985;
+        p.vy += 0.18; // 중력
+        p.vx *= 0.980; p.vy *= 0.980;
 
-        // 그릇 바닥 포물선: y = bowlTopY + a*(x - W/2)^2
-        const a = (H - bowlTopY) / ((W*0.42)**2);
-        const bowlFloor = bowlTopY + a * (p.gx - W/2)**2;
-
-        // 그릇 바닥 충돌
-        if(p.gy + R > bowlFloor){
-          p.gy = bowlFloor - R;
-          p.vy *= -0.35;
-          p.vx *= 0.88;
-        }
-        // 그릇 옆벽 (포물선 밖으로 못 나가게)
-        if(p.gx < R){ p.gx = R; p.vx *= -0.5; }
-        if(p.gx > W-R){ p.gx = W-R; p.vx *= -0.5; }
-        if(p.gy < R){ p.gy = R; p.vy *= -0.5; }
+        // 바닥 충돌
+        if(p.gy > floor){ p.gy = floor; p.vy *= -0.22; p.vx *= 0.80; }
+        // 옆벽
+        if(p.gx < R)    { p.gx = R;     p.vx *= -0.4; }
+        if(p.gx > W - R){ p.gx = W - R; p.vx *= -0.4; }
+        if(p.gy < R)    { p.gy = R;     p.vy *= -0.4; }
       });
+
+      // 입자 간 충돌 (솔리드)
+      for(let i=0; i<particles.length; i++){
+        for(let j=i+1; j<particles.length; j++){
+          const pi=particles[i], pj=particles[j];
+          const dx=pj.gx-pi.gx, dy=pj.gy-pi.gy;
+          const dist=Math.hypot(dx,dy);
+          const minD=R*2.05;
+          if(dist<minD && dist>0.01){
+            const overlap=(minD-dist)/2;
+            const nx=dx/dist, ny=dy/dist;
+            pi.gx-=nx*overlap; pi.gy-=ny*overlap;
+            pj.gx+=nx*overlap; pj.gy+=ny*overlap;
+            const dvx=pi.vx-pj.vx, dvy=pi.vy-pj.vy;
+            const dot=dvx*nx+dvy*ny;
+            if(dot>0){
+              pi.vx-=dot*nx*0.6; pi.vy-=dot*ny*0.6;
+              pj.vx+=dot*nx*0.6; pj.vy+=dot*ny*0.6;
+            }
+          }
+        }
+      }
+
     } else {
       recalcGrid();
     }
 
-    // 진동 오프셋
+    // 진동 오프셋 (녹은 후엔 진동 없음)
     particles.forEach(p=>{
-      const v = p.heat * (melted ? 8 : 5);
-      p.ox = (Math.random()-0.5)*v;
-      p.oy = (Math.random()-0.5)*v;
+      if(!melted){
+        const v = p.heat * 5;
+        p.ox = (Math.random()-0.5)*v;
+        p.oy = (Math.random()-0.5)*v;
+      } else {
+        p.ox = 0; p.oy = 0;
+      }
     });
   }
 
@@ -1307,62 +1325,7 @@ window.addEventListener('message', e => {
 
     const avg = avgHeat();
 
-    // ── 그릇 (melted 시 아래서 올라옴) ──
-    // U자형 그릇: 바닥이 아래쪽, y = bowlBottomY - a*(x-W/2)^2 (최고차항 음수 → 뒤집힌 포물선)
-    // 그릇은 bowlBottomY에서 바닥, 양쪽 위로 벌어지는 U자
-    if(melted && bowlProgress > 0){
-      const bowlHalfW = W * 0.44;                   // 그릇 반폭
-      const bowlBottomY = H - (H * 0.08 * bowlProgress); // 바닥 Y (아래서 살짝 올라옴)
-      const bowlRimY    = bowlBottomY - H * 0.55 * bowlProgress; // 그릇 위쪽 테두리 Y
-      // a: 포물선 계수 → y = bowlBottomY - a*(x-W/2)^2 이면 바닥이 bowlBottomY, 양끝이 bowlRimY
-      const a = (bowlBottomY - bowlRimY) / (bowlHalfW ** 2);
 
-      const steps = 120;
-      const dx = (bowlHalfW * 2) / steps;
-
-      // 그릇 내부 채우기
-      ctx.beginPath();
-      ctx.moveTo(W/2 - bowlHalfW, H); // 왼쪽 아래
-      ctx.lineTo(W/2 - bowlHalfW, bowlRimY); // 왼쪽 위 (옆벽)
-      for(let i=0; i<=steps; i++){
-        const px = W/2 - bowlHalfW + i*dx;
-        const py = bowlBottomY - a*(px - W/2)**2;
-        ctx.lineTo(px, py);
-      }
-      ctx.lineTo(W/2 + bowlHalfW, bowlRimY); // 오른쪽 위 (옆벽)
-      ctx.lineTo(W/2 + bowlHalfW, H); // 오른쪽 아래
-      ctx.closePath();
-      const fillGrd = ctx.createLinearGradient(0, bowlRimY, 0, H);
-      fillGrd.addColorStop(0, `rgba(239,68,68,${0.05 * bowlProgress})`);
-      fillGrd.addColorStop(0.5, `rgba(239,68,68,${0.15 * bowlProgress})`);
-      fillGrd.addColorStop(1, `rgba(251,146,60,${0.08 * bowlProgress})`);
-      ctx.fillStyle = fillGrd;
-      ctx.fill();
-
-      // 그릇 포물선 바닥 테두리
-      ctx.beginPath();
-      for(let i=0; i<=steps; i++){
-        const px = W/2 - bowlHalfW + i*dx;
-        const py = bowlBottomY - a*(px - W/2)**2;
-        i===0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-      }
-      ctx.strokeStyle = `rgba(251,146,60,${0.6 + bowlProgress*0.35})`;
-      ctx.lineWidth = 2.8;
-      ctx.stroke();
-
-      // 그릇 양쪽 옆벽
-      const rimAlpha = 0.4 + bowlProgress * 0.3;
-      ctx.strokeStyle = `rgba(251,146,60,${rimAlpha})`;
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.moveTo(W/2 - bowlHalfW, bowlRimY);
-      ctx.lineTo(W/2 - bowlHalfW, H);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(W/2 + bowlHalfW, bowlRimY);
-      ctx.lineTo(W/2 + bowlHalfW, H);
-      ctx.stroke();
-    }
 
     if(!melted){
       // ── 막(membrane) ──
