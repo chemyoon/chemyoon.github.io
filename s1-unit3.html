@@ -1210,7 +1210,7 @@ window.addEventListener('message', e => {
     if(hx !== null){
       particles.forEach(p => {
         const d = Math.hypot(p.gx-hx, p.gy-hy);
-        if(d < R*5) p.heat = Math.min(1, p.heat + (1-d/(R*3)) * 0.003 * heatPow);
+        if(d < R*3) p.heat = Math.min(1, p.heat + (1-d/(R*3)) * 0.003 * heatPow);
       });
     }
 
