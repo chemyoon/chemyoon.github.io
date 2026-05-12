@@ -490,18 +490,36 @@ const CONV=(function(){
   }
 
   function getPosFromT(t, isLeft, padX, padY, botY, midX){
-    const w2 = midX - padX;
-    const h  = botY - padY;
-    const cx = isLeft ? padX + w2/2 : midX + w2/2;
-    const rx = w2/2 - R;
-    const ry = h/2 - R;
-    const cy = padY + h/2;
-    const angle = isLeft
-      ? -Math.PI/2 + t * Math.PI*2
-      : -Math.PI/2 - t * Math.PI*2;
+    // 사각형 루프: 4개의 변을 각각 0~0.25, 0.25~0.5, 0.5~0.75, 0.75~1 구간으로 나눔
+    // 왼쪽: 반시계 (하단중앙→하단왼쪽→상단왼쪽→상단중앙→하단중앙)
+    // 오른쪽: 시계 (하단중앙→하단오른쪽→상단오른쪽→상단중앙→하단중앙)
+    const margin = R + 2;
+    const x0 = isLeft ? padX + margin       : midX + margin;
+    const x1 = isLeft ? midX - margin       : W - padX - margin;
+    const y0 = padY + margin;
+    const y1 = botY - margin;
+
+    // 왼쪽: 반시계 → 하단왼→상단왼→상단우→하단우 순
+    // 오른쪽: 시계 → 하단우→상단우→상단좌→하단좌 순 (방향 반전)
+    let seg, frac;
+    const tt = isLeft ? t : (1 - t + 1) % 1; // 오른쪽은 방향 반전
+    if(tt < 0.25){      seg=0; frac=tt/0.25; }
+    else if(tt < 0.5){  seg=1; frac=(tt-0.25)/0.25; }
+    else if(tt < 0.75){ seg=2; frac=(tt-0.5)/0.25; }
+    else{               seg=3; frac=(tt-0.75)/0.25; }
+
+    // 반시계 사각형: 하단좌→상단좌→상단우→하단우→하단좌
+    const corners = [
+      {x:x0, y:y1}, // 하단 왼
+      {x:x0, y:y0}, // 상단 왼
+      {x:x1, y:y0}, // 상단 우
+      {x:x1, y:y1}, // 하단 우
+    ];
+    const from = corners[seg];
+    const to   = corners[(seg+1)%4];
     return {
-      x: cx + rx * Math.cos(angle),
-      y: cy + ry * Math.sin(angle),
+      x: from.x + (to.x - from.x) * frac,
+      y: from.y + (to.y - from.y) * frac,
     };
   }
 
