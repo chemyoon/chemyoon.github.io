@@ -61,8 +61,81 @@ h3{color:#374151;margin-top:20px;}
 .modal-close{position:absolute;top:12px;right:14px;width:32px;height:32px;border:none;background:#f3f4f6;border-radius:50%;font-size:18px;cursor:pointer;color:#6b7280;}
 .modal-close:hover{background:#ef4444;color:white;}
 </style>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Pretendard',sans-serif;max-width:860px;margin:40px auto;padding:20px;background:#f9fafb;color:#1f2937;}
+.card{border:1px solid #ddd;border-radius:10px;padding:20px 24px;margin:18px 0;background:white;}
+.tab-group{display:flex;gap:8px;margin-bottom:16px;}
+.tab-btn{padding:9px 22px;border:2px solid #d1d5db;background:#f3f4f6;border-radius:8px;font-size:0.9em;font-weight:600;color:#374151;cursor:pointer;transition:all 0.18s;}
+.tab-btn:hover{background:#e5e7eb;}
+.tab-btn.active{background:#2563eb;border-color:#2563eb;color:white;}
+.sim-stack{position:relative;width:100%;border-radius:12px;overflow:hidden;background:#0f172a;}
+.sim-stack::before{content:'';display:block;padding-top:48%;}
+.sim-layer{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;pointer-events:none;}
+.sim-layer.active{opacity:1;pointer-events:auto;}
+.sim-layer canvas{display:block;width:100%;height:100%;}
+.ctrl-row{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;}
+.ctrl-label{font-size:0.85em;font-weight:600;color:#374151;}
+.reset-btn{padding:6px 18px;background:#ef4444;color:white;border:none;border-radius:7px;font-size:0.85em;font-weight:600;cursor:pointer;}
+.reset-btn:hover{background:#dc2626;}
+.mat-btn{padding:6px 18px;border:2px solid #d1d5db;background:#f3f4f6;border-radius:7px;font-size:0.85em;font-weight:600;color:#374151;cursor:pointer;transition:all 0.15s;}
+.mat-btn:hover{background:#e5e7eb;}
+.mat-btn.active{background:#2563eb;border-color:#2563eb;color:white;}
+.desc{font-size:0.88em;color:#6b7280;margin-top:10px;line-height:1.6;}
+
+</head>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Pretendard',sans-serif;max-width:860px;margin:40px auto;padding:20px;background:#f9fafb;color:#1f2937;}
+.card{border:1px solid #ddd;border-radius:10px;padding:20px 24px;margin:18px 0;background:white;}
+h2{color:#1e40af;margin-bottom:16px;}
+
+/* 비열 정의 */
+.def-text{font-size:1.05em;line-height:2;color:#1f2937;}
+.block{display:inline-block;background:#2563eb;color:white;font-weight:700;padding:2px 10px;border-radius:6px;margin:0 2px;}
+
+/* 인터랙티브 문장 */
+.interactive-section{margin-top:22px;border-top:1.5px dashed #e5e7eb;padding-top:18px;}
+.interactive-title{font-size:0.88em;font-weight:600;color:#6b7280;margin-bottom:14px;}
+.sentence{font-size:1.02em;line-height:2.6;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:16px 20px;border-radius:10px;border:1.5px solid #e5e7eb;background:#f9fafb;transition:all 0.3s;}
+.sentence.wrong{background:#fff5f5;border-color:#fca5a5;}
+.sentence.correct{background:#f0fdf4;border-color:#86efac;}
+
+/* 토글 드롭다운 */
+.toggle-wrap{position:relative;display:inline-block;}
+.toggle-box{
+  display:inline-flex;align-items:center;gap:6px;
+  min-width:72px;height:36px;
+  border:2px solid #d1d5db;background:white;border-radius:8px;
+  padding:0 10px;cursor:pointer;font-size:0.92em;font-weight:600;color:#9ca3af;
+  transition:all 0.18s;user-select:none;
+}
+.toggle-box.filled{color:#1f2937;border-color:#6b7280;}
+.toggle-box.correct{background:#dcfce7;border-color:#16a34a;color:#15803d;}
+.toggle-box.wrong{background:#fee2e2;border-color:#ef4444;color:#b91c1c;}
+.toggle-box .arrow{font-size:0.7em;margin-left:auto;opacity:0.5;}
+.dropdown{
+  display:none;position:absolute;top:calc(100% + 4px);left:0;
+  background:white;border:1.5px solid #d1d5db;border-radius:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:50;min-width:100%;overflow:hidden;
+}
+.dropdown.open{display:block;}
+.dropdown-item{padding:8px 16px;font-size:0.92em;font-weight:600;cursor:pointer;color:#374151;white-space:nowrap;}
+.dropdown-item:hover{background:#eff6ff;color:#1d4ed8;}
+
+.feedback{margin-top:10px;font-size:0.88em;font-weight:600;min-height:22px;transition:all 0.3s;}
+.feedback.wrong{color:#ef4444;}
+.feedback.correct{color:#16a34a;}
+
+/* 비열 달리기 iframe */
+.game-wrap{margin-top:22px;border-top:1.5px dashed #e5e7eb;padding-top:18px;}
+.game-title{font-size:0.88em;font-weight:600;color:#6b7280;margin-bottom:12px;}
+.game-frame{width:100%;border:none;border-radius:10px;overflow:hidden;}
+
+</head>
+</style>
 </head>
 <body>
+
 
 <div>
   <a class="nav-btn" href="index.html">🏠 홈</a>
@@ -167,36 +240,9 @@ h3{color:#374151;margin-top:20px;}
   </div>
 </div>
   <!-- 열의 전달 -->
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Pretendard',sans-serif;max-width:860px;margin:40px auto;padding:20px;background:#f9fafb;color:#1f2937;}
-.card{border:1px solid #ddd;border-radius:10px;padding:20px 24px;margin:18px 0;background:white;}
-.tab-group{display:flex;gap:8px;margin-bottom:16px;}
-.tab-btn{padding:9px 22px;border:2px solid #d1d5db;background:#f3f4f6;border-radius:8px;font-size:0.9em;font-weight:600;color:#374151;cursor:pointer;transition:all 0.18s;}
-.tab-btn:hover{background:#e5e7eb;}
-.tab-btn.active{background:#2563eb;border-color:#2563eb;color:white;}
-.sim-stack{position:relative;width:100%;border-radius:12px;overflow:hidden;background:#0f172a;}
-.sim-stack::before{content:'';display:block;padding-top:48%;}
-.sim-layer{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;pointer-events:none;}
-.sim-layer.active{opacity:1;pointer-events:auto;}
-.sim-layer canvas{display:block;width:100%;height:100%;}
-.ctrl-row{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;}
-.ctrl-label{font-size:0.85em;font-weight:600;color:#374151;}
-.reset-btn{padding:6px 18px;background:#ef4444;color:white;border:none;border-radius:7px;font-size:0.85em;font-weight:600;cursor:pointer;}
-.reset-btn:hover{background:#dc2626;}
-.mat-btn{padding:6px 18px;border:2px solid #d1d5db;background:#f3f4f6;border-radius:7px;font-size:0.85em;font-weight:600;color:#374151;cursor:pointer;transition:all 0.15s;}
-.mat-btn:hover{background:#e5e7eb;}
-.mat-btn.active{background:#2563eb;border-color:#2563eb;color:white;}
-.desc{font-size:0.88em;color:#6b7280;margin-top:10px;line-height:1.6;}
-</style>
-</head>
-<body>
+
+<h2>③ 열의 이동</h2>
 <div class="card">
-  <h2 style="color:#1e40af;margin-bottom:16px;">③ 열의 이동</h2>
   <div class="tab-group">
     <button class="tab-btn active" data-tab="cond">🔥 전도</button>
     <button class="tab-btn" data-tab="conv">🌊 대류</button>
@@ -581,7 +627,7 @@ const RAD=(function(){
 
   // 사인파 파동: 각 파동은 열원에서 바깥으로 퍼져나감
   // phase: 파동의 현재 위상 오프셋 (열원에서 멀어질수록 위상 지연)
-  const WAVE_SPEED   = 1.5;   // 파동 전파 속도 (px/frame)
+  const WAVE_SPEED   = 0.6;   // 파동 전파 속도 (px/frame)
   const WAVE_INTERVAL = 90;   // 새 파동 생성 주기 (frame)
   const WAVELENGTH   = 60;    // 파장 (px)
   const AMPLITUDE    = 10;    // 사인파 진폭 (px)
@@ -761,62 +807,7 @@ window.addEventListener('load',()=>{
 });
 window.addEventListener('resize',()=>{COND.init();CONV.init();RAD.init();});
 </script>
-</body>
-</html>
-  <!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Pretendard',sans-serif;max-width:860px;margin:40px auto;padding:20px;background:#f9fafb;color:#1f2937;}
-.card{border:1px solid #ddd;border-radius:10px;padding:20px 24px;margin:18px 0;background:white;}
-h2{color:#1e40af;margin-bottom:16px;}
 
-/* 비열 정의 */
-.def-text{font-size:1.05em;line-height:2;color:#1f2937;}
-.block{display:inline-block;background:#2563eb;color:white;font-weight:700;padding:2px 10px;border-radius:6px;margin:0 2px;}
-
-/* 인터랙티브 문장 */
-.interactive-section{margin-top:22px;border-top:1.5px dashed #e5e7eb;padding-top:18px;}
-.interactive-title{font-size:0.88em;font-weight:600;color:#6b7280;margin-bottom:14px;}
-.sentence{font-size:1.02em;line-height:2.6;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:16px 20px;border-radius:10px;border:1.5px solid #e5e7eb;background:#f9fafb;transition:all 0.3s;}
-.sentence.wrong{background:#fff5f5;border-color:#fca5a5;}
-.sentence.correct{background:#f0fdf4;border-color:#86efac;}
-
-/* 토글 드롭다운 */
-.toggle-wrap{position:relative;display:inline-block;}
-.toggle-box{
-  display:inline-flex;align-items:center;gap:6px;
-  min-width:72px;height:36px;
-  border:2px solid #d1d5db;background:white;border-radius:8px;
-  padding:0 10px;cursor:pointer;font-size:0.92em;font-weight:600;color:#9ca3af;
-  transition:all 0.18s;user-select:none;
-}
-.toggle-box.filled{color:#1f2937;border-color:#6b7280;}
-.toggle-box.correct{background:#dcfce7;border-color:#16a34a;color:#15803d;}
-.toggle-box.wrong{background:#fee2e2;border-color:#ef4444;color:#b91c1c;}
-.toggle-box .arrow{font-size:0.7em;margin-left:auto;opacity:0.5;}
-.dropdown{
-  display:none;position:absolute;top:calc(100% + 4px);left:0;
-  background:white;border:1.5px solid #d1d5db;border-radius:8px;
-  box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:50;min-width:100%;overflow:hidden;
-}
-.dropdown.open{display:block;}
-.dropdown-item{padding:8px 16px;font-size:0.92em;font-weight:600;cursor:pointer;color:#374151;white-space:nowrap;}
-.dropdown-item:hover{background:#eff6ff;color:#1d4ed8;}
-
-.feedback{margin-top:10px;font-size:0.88em;font-weight:600;min-height:22px;transition:all 0.3s;}
-.feedback.wrong{color:#ef4444;}
-.feedback.correct{color:#16a34a;}
-
-/* 비열 달리기 iframe */
-.game-wrap{margin-top:22px;border-top:1.5px dashed #e5e7eb;padding-top:18px;}
-.game-title{font-size:0.88em;font-weight:600;color:#6b7280;margin-bottom:12px;}
-.game-frame{width:100%;border:none;border-radius:10px;overflow:hidden;}
-</style>
-</head>
-<body>
 <h2>④ 비열</h2>
 <div class="card">
 
@@ -981,7 +972,6 @@ const gameHTML = `<!DOCTYPE html>
         #modalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 99; }
     </style>
 </head>
-<body>
     <div id="page1" class="page active">
         <h1>📦 미스터리 박스: 비열을 찾아라!</h1>
         <div class="intro-container">
@@ -1012,7 +1002,7 @@ const gameHTML = `<!DOCTYPE html>
         <div id="revealSection" style="display: none; margin-top: 20px; font-weight: bold; font-size: 18px; color: #34495e; background: #ecf0f1; padding: 15px; border-radius: 10px;"></div>
         <div id="modalButtons" style="margin-top: 25px;"></div>
     </div>
-    <script>
+    ${'<'}script>
         const materialData=[{name:'금',specificHeat:129},{name:'구리',specificHeat:385},{name:'철',specificHeat:450},{name:'모래',specificHeat:800},{name:'유리',specificHeat:840},{name:'알루미늄',specificHeat:900},{name:'나무',specificHeat:1700},{name:'물',specificHeat:4184}];
         let boxes={},selectedBoxIds=[],heatInterval;
         function init(){
@@ -1094,7 +1084,7 @@ const gameHTML = `<!DOCTYPE html>
         }
         function closeModal(){document.getElementById('resultModal').style.display='none';document.getElementById('modalOverlay').style.display='none';}
         window.onload=init;
-    <\/script>
+    ${'<'}/script>
 </body>
 </html>`;
 
@@ -1104,16 +1094,294 @@ window.addEventListener('message', e => {
     document.getElementById('game-frame').height = e.data.iframeHeight + 20;
   }
 });
-</script>
-</body>
-</html>
 
+</script>
+
+<!-- ⑤ 열팽창 -->
+<h2>⑤ 열팽창</h2>
+<div class="card">
+  <p style="margin-bottom:14px;">물질에 열을 가하면 입자들 사이의 거리가 멀어지며 물질이 팽창합니다. 열이 충분히 지속되면 입자들이 결합력을 잃게 됩니다.</p>
+  <div class="sim-scene" id="exp-wrap">
+    <canvas id="exp-canvas"></canvas>
+  </div>
+  <div class="ctrl-row" style="margin-top:12px;">
+    <button class="reset-btn" id="exp-reset">🔄 초기화</button>
+    <button class="mat-btn active" id="exp-auto-btn">자동 가열</button>
+  </div>
+  <p class="desc" style="margin-top:10px;">🔥 열원을 캔버스 위에서 움직이세요. 입자 간 거리가 늘어나며 막이 팽창하고, 충분한 열이 가해지면 결합이 끊어집니다.</p>
+</div>
+
+<script>
+// ══ ⑤ 열팽창 시뮬레이션 ══════════════════════════════════
+(function(){
+  const wrap   = document.getElementById('exp-wrap');
+  const canvas = document.getElementById('exp-canvas');
+  const ctx    = canvas.getContext('2d');
+  const dpr    = window.devicePixelRatio || 1;
+
+  const GRID = 4;           // 4×4
+  const BASE_GAP  = 38;    // 초기 간격 (px) — 다닥다닥
+  const MAX_GAP   = 90;    // 최대 간격 (팽창 한계)
+  const MELT_HEAT = 0.82;  // 이 heat 이상이면 결합 끊어짐
+  const R = 10;
+
+  let W, H, particles, mousePos = null, autoHeat = false, autoAngle = 0;
+  let melted = false;
+
+  /* ── 초기화 ── */
+  function init(){
+    W = wrap.clientWidth;
+    H = 320;
+    canvas.width  = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W+'px'; canvas.style.height = H+'px';
+    ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr,dpr);
+    canvas.style.display = 'block';
+
+    melted = false;
+    const startX = W/2 - (GRID-1)*BASE_GAP/2;
+    const startY = H/2 - (GRID-1)*BASE_GAP/2;
+
+    particles = [];
+    for(let r=0; r<GRID; r++){
+      for(let c=0; c<GRID; c++){
+        particles.push({
+          r, c,
+          // 기준 격자 위치 (열팽창에 따라 이 값이 변함)
+          gx: startX + c*BASE_GAP,
+          gy: startY + r*BASE_GAP,
+          // 실제 그리기 위치 (진동 오프셋 포함)
+          ox: 0, oy: 0,
+          heat: 0,
+          // 결합 끊긴 후 자유 운동용
+          vx: 0, vy: 0,
+          free: false
+        });
+      }
+    }
+
+    // 마우스/터치
+    canvas.onmousemove = e => {
+      const rect = canvas.getBoundingClientRect();
+      mousePos = { x:(e.clientX-rect.left)*(W/rect.width), y:(e.clientY-rect.top)*(H/rect.height) };
+    };
+    canvas.onmouseleave = () => { mousePos = null; };
+    canvas.ontouchmove  = e => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      mousePos = { x:(e.touches[0].clientX-rect.left)*(W/rect.width), y:(e.touches[0].clientY-rect.top)*(H/rect.height) };
+    };
+    canvas.ontouchend = () => { mousePos = null; };
+  }
+
+  /* ── 평균 heat ── */
+  function avgHeat(){ return particles.reduce((s,p)=>s+p.heat,0)/particles.length; }
+
+  /* ── 격자 기준점 재계산 (팽창) ── */
+  function recalcGrid(){
+    const avg = avgHeat();
+    // 0→BASE_GAP, MELT_HEAT→MAX_GAP 선형 보간
+    const gap = BASE_GAP + (MAX_GAP - BASE_GAP) * Math.min(avg / MELT_HEAT, 1);
+    const startX = W/2 - (GRID-1)*gap/2;
+    const startY = H/2 - (GRID-1)*gap/2;
+    particles.forEach(p => {
+      if(!p.free){
+        p.gx = startX + p.c * gap;
+        p.gy = startY + p.r * gap;
+      }
+    });
+    return gap;
+  }
+
+  /* ── UPDATE ── */
+  function update(){
+    // 열원 위치
+    let hx = null, hy = null;
+    if(autoHeat){
+      autoAngle += 0.022;
+      hx = W/2 + Math.cos(autoAngle)*W*0.28;
+      hy = H/2 + Math.sin(autoAngle*0.8)*H*0.22;
+    } else if(mousePos){ hx = mousePos.x; hy = mousePos.y; }
+
+    // 가열
+    if(hx !== null){
+      particles.forEach(p => {
+        const d = Math.hypot(p.gx-hx, p.gy-hy);
+        if(d < R*5) p.heat = Math.min(1, p.heat + (1-d/(R*5))*0.006);
+      });
+    }
+
+    // 열 전도 (격자 이웃끼리)
+    const nh = particles.map(p=>p.heat);
+    particles.forEach((p,i)=>{
+      particles.forEach((q,j)=>{
+        if(i===j || p.free || q.free) return;
+        if(Math.abs(p.r-q.r)+Math.abs(p.c-q.c)!==1) return;
+        nh[i] += (q.heat - p.heat)*0.012;
+      });
+    });
+    particles.forEach((p,i)=>{ p.heat = Math.max(0, Math.min(1, nh[i]*0.9998)); });
+
+    const avg = avgHeat();
+
+    // 녹는점 초과 → 결합 해제
+    if(!melted && avg >= MELT_HEAT){
+      melted = true;
+      particles.forEach(p=>{
+        p.free = true;
+        p.vx = (Math.random()-0.5)*3;
+        p.vy = (Math.random()-0.5)*3;
+      });
+    }
+
+    if(melted){
+      // 자유 입자 운동
+      particles.forEach(p=>{
+        p.gx += p.vx; p.gy += p.vy;
+        p.vx *= 0.98; p.vy *= 0.98;
+        // 벽 반사
+        if(p.gx < R){ p.gx = R; p.vx *= -1; }
+        if(p.gx > W-R){ p.gx = W-R; p.vx *= -1; }
+        if(p.gy < R){ p.gy = R; p.vy *= -1; }
+        if(p.gy > H-R){ p.gy = H-R; p.vy *= -1; }
+      });
+    } else {
+      recalcGrid();
+    }
+
+    // 진동 오프셋
+    particles.forEach(p=>{
+      const v = p.heat * (melted ? 8 : 5);
+      p.ox = (Math.random()-0.5)*v;
+      p.oy = (Math.random()-0.5)*v;
+    });
+  }
+
+  /* ── 색상 ── */
+  function heatCol(t){
+    const r=Math.round(59+t*196), g=Math.round(130-t*100), b=Math.round(246-t*216);
+    return `rgb(${r},${g},${b})`;
+  }
+  function heatColA(t,a){
+    const r=Math.round(59+t*196), g=Math.round(130-t*100), b=Math.round(246-t*216);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  /* ── DRAW ── */
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#0f172a'; ctx.fillRect(0,0,W,H);
+
+    const avg = avgHeat();
+
+    if(!melted){
+      // ── 막(membrane) 그리기 ──
+      // 입자들의 외곽을 감싸는 둥근 사각형
+      const xs = particles.map(p=>p.gx);
+      const ys = particles.map(p=>p.gy);
+      const minX = Math.min(...xs)-R*2.2, maxX = Math.max(...xs)+R*2.2;
+      const minY = Math.min(...ys)-R*2.2, maxY = Math.max(...ys)+R*2.2;
+      const mw = maxX-minX, mh = maxY-minY;
+      const brad = R*2.5;
+
+      // 막 채우기
+      ctx.beginPath();
+      ctx.roundRect(minX, minY, mw, mh, brad);
+      ctx.fillStyle = `rgba(96,165,250,${0.07 + avg*0.06})`;
+      ctx.fill();
+
+      // 막 테두리
+      ctx.beginPath();
+      ctx.roundRect(minX, minY, mw, mh, brad);
+      ctx.strokeStyle = `rgba(96,165,250,${0.5 + avg*0.3})`;
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      // 결합선 (입자 사이)
+      for(let i=0;i<particles.length;i++){
+        for(let j=i+1;j<particles.length;j++){
+          const p=particles[i], q=particles[j];
+          if(Math.abs(p.r-q.r)+Math.abs(p.c-q.c)!==1) continue;
+          ctx.strokeStyle = heatColA((p.heat+q.heat)/2, 0.45);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(p.gx+p.ox, p.gy+p.oy);
+          ctx.lineTo(q.gx+q.ox, q.gy+q.oy);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // 입자
+    particles.forEach(p=>{
+      const x = p.gx+p.ox, y = p.gy+p.oy;
+      if(p.heat>0.04){
+        const grd = ctx.createRadialGradient(x,y,0,x,y,R*2.4);
+        grd.addColorStop(0, heatColA(p.heat, p.heat*0.5));
+        grd.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.beginPath(); ctx.arc(x,y,R*2.4,0,Math.PI*2);
+        ctx.fillStyle=grd; ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(x,y,R,0,Math.PI*2);
+      ctx.fillStyle = heatCol(p.heat); ctx.fill();
+    });
+
+    // 열원 커서
+    const hx2 = autoHeat ? W/2+Math.cos(autoAngle)*W*0.28 : (mousePos?mousePos.x:null);
+    const hy2 = autoHeat ? H/2+Math.sin(autoAngle*0.8)*H*0.22 : (mousePos?mousePos.y:null);
+    if(hx2!==null){
+      const grd=ctx.createRadialGradient(hx2,hy2,0,hx2,hy2,R*4);
+      grd.addColorStop(0,'rgba(249,115,22,0.35)'); grd.addColorStop(1,'rgba(249,115,22,0)');
+      ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(hx2,hy2,R*4,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(249,115,22,0.7)'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+      ctx.beginPath(); ctx.arc(hx2,hy2,R*3.5,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+      ctx.font='16px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='rgba(255,255,255,0.9)';
+      ctx.fillText('🔥',hx2,hy2+6);
+    }
+
+    // 상태 레이블
+    ctx.textAlign='left'; ctx.font='bold 12px sans-serif';
+    if(melted){
+      ctx.fillStyle='rgba(239,68,68,0.9)';
+      ctx.fillText('🔴 결합 해제 — 입자들이 자유롭게 움직입니다', 12, 20);
+    } else if(avg>0.4){
+      ctx.fillStyle='rgba(251,146,60,0.9)';
+      ctx.fillText(`🟠 열팽창 중 — 평균 열 ${Math.round(avg*100)}%`, 12, 20);
+    } else if(avg>0.05){
+      ctx.fillStyle='rgba(96,165,250,0.9)';
+      ctx.fillText(`🔵 팽창 시작 — 평균 열 ${Math.round(avg*100)}%`, 12, 20);
+    } else {
+      ctx.fillStyle='rgba(148,163,184,0.7)';
+      ctx.fillText('⚪ 열원을 가져다 대세요', 12, 20);
+    }
+  }
+
+  /* ── 버튼 ── */
+  document.getElementById('exp-reset').addEventListener('click',()=>{
+    init();
+    autoHeat=false;
+    document.getElementById('exp-auto-btn').textContent='자동 가열';
+    document.getElementById('exp-auto-btn').classList.remove('active');
+  });
+  document.getElementById('exp-auto-btn').addEventListener('click',()=>{
+    autoHeat=!autoHeat;
+    document.getElementById('exp-auto-btn').textContent=autoHeat?'⏹ 자동 끄기':'자동 가열';
+    document.getElementById('exp-auto-btn').classList.toggle('active',autoHeat);
+  });
+
+  /* ── 루프 ── */
+  function loop(){ update(); draw(); requestAnimationFrame(loop); }
+  window.addEventListener('load', ()=>{ init(); loop(); });
+  window.addEventListener('resize', init);
+});
+</script>
 <!-- 하단 네비게이션 -->
 <div style="margin-top:40px;text-align:center;">
   <a class="nav-btn" href="science1.html">← 과학 1 단원 목록</a>
   <a class="nav-btn" href="s1-unit2.html">← 2단원</a>
   <a class="nav-btn" href="s1-unit4.html">4단원 →</a>
 </div>
+
+
 
 <!-- 팝업 -->
 <div class="modal-overlay" id="termModal">
