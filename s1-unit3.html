@@ -1100,7 +1100,7 @@ window.addEventListener('message', e => {
 <!-- ⑤ 열팽창 -->
 <h2>⑤ 열팽창</h2>
 <div class="card">
-  <p style="margin-bottom:18px;">물질에 열을 가하면 입자들 사이의 거리가 멀어지며 물질이 팽창합니다. 열이 충분히 지속되면 입자들이 결합력을 잃게 됩니다.</p>
+  <p style="margin-bottom:18px;">입자 간 거리는 온도에 비례합니다. 온도가 높아질수록 입자 간 거리가 멀어지며 팽창합니다.</p>
 
   <!-- 고체 열팽창 -->
   <div class="sim-scene" id="exp-wrap">
@@ -1119,7 +1119,7 @@ window.addEventListener('message', e => {
   <div style="border-top:1.5px solid rgba(255,255,255,0.08);margin:24px 0;"></div>
 
   <!-- 액체 열팽창 -->
-  <p style="margin-bottom:14px;">액체도 열을 받으면 팽창합니다. 삼각플라스크에 액체를 담고 빨대를 꽂아 가열하면, 액체가 팽창하면서 빨대 속 수면이 높아집니다.</p>
+  <p style="margin-bottom:14px;">플라스크 속 액체가 열팽창하여, 수면의 높이가 변화하는 과정을 살펴봅시다.</p>
   <div style="display:flex;gap:12px;align-items:flex-start;width:100%;">
     <div style="flex:1;min-width:0;">
       <canvas id="flask-canvas" style="display:block;width:100%;"></canvas>
@@ -1133,7 +1133,6 @@ window.addEventListener('message', e => {
     <button class="reset-btn" id="flask-reset">🔄 초기화</button>
     <span style="font-size:0.8rem;color:#7b8fa1;" id="flask-temp-label">온도: 20°C</span>
   </div>
-  <p class="desc" style="margin-top:10px;">🔥 가열 버튼을 누르면 액체가 팽창하며 빨대 수면이 올라갑니다. 오른쪽에서 입자 간 거리와 속도 변화를 관찰하세요.</p>
 </div>
 
 
