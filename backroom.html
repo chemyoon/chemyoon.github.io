@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elemental Battle</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f172a;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 100vh;
+    font-family: 'Fredoka One', cursive;
+    overflow: hidden;
+  }
+
+  /* ── Character Select ── */
+  #select-screen {
+    display: flex; flex-direction: column; align-items: center; gap: 32px;
+    width: 100%;
+  }
+  #select-screen h1 {
+    font-size: 2.4rem; color: #fff; letter-spacing: 3px;
+    text-shadow: 0 0 30px rgba(255,255,255,0.3);
+  }
+  .select-row {
+    display: flex; gap: 40px; align-items: flex-start;
+  }
+  .player-select { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .player-label {
+    font-size: 1.1rem; color: #94a3b8;
+    font-family: 'Nunito', sans-serif; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+  .char-cards { display: flex; gap: 14px; }
+  .char-card {
+    width: 120px; cursor: pointer;
+    background: #1e293b; border: 3px solid #334155;
+    border-radius: 16px; padding: 16px 10px 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    user-select: none;
+  }
+  .char-card:hover { transform: translateY(-4px); }
+  .char-card.selected-p1 { border-color: #60a5fa; box-shadow: 0 0 20px #3b82f666; }
+  .char-card.selected-p2 { border-color: #f87171; box-shadow: 0 0 20px #ef444466; }
+  .char-card.selected-p1.selected-p2 { border-color: #a78bfa; box-shadow: 0 0 20px #8b5cf666; }
+  .char-icon { font-size: 2.6rem; line-height: 1; }
+  .char-name { font-size: 1rem; color: #e2e8f0; }
+  .char-desc { font-size: 0.68rem; color: #64748b; font-family: 'Nunito', sans-serif; text-align: center; line-height: 1.4; }
+
+  .vs-divider {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 6px; padding-top: 48px;
+  }
+  .vs-divider span { font-size: 1.6rem; color: #475569; }
+
+  #start-btn {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: #fff; border: none; border-radius: 12px;
+    padding: 14px 48px; font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem; cursor: pointer;
+    box-shadow: 0 4px 24px rgba(139,92,246,0.4);
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  #start-btn:hover { opacity: 0.9; transform: scale(1.03); }
+  #start-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+  .select-hint {
+    font-size: 0.8rem; color: #475569;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  /* ── Battle Screen ── */
+  #battle-screen { display: none; flex-direction: column; align-items: center; gap: 0; }
+  #battle-screen.active { display: flex; }
+
+  #battle-title { font-size: 1.6rem; color: #fff; margin-bottom: 10px; letter-spacing: 2px; }
+
+  #arena-wrapper {
+    background: #f8fafc; border: 6px solid #334155; border-radius: 12px;
+    box-shadow: 0 0 40px rgba(0,0,0,0.6); position: relative; overflow: hidden;
+  }
+  canvas { display: block; }
+
+  #stats { display: flex; justify-content: space-between; width: 100%; margin-top: 10px; padding: 0 4px; }
+  .stat-box {
+    background: #0f172a; border-radius: 8px; padding: 8px 16px;
+    font-size: 0.85rem; border: 2px solid #334155;
+  }
+  .stat-box span { display: block; font-family: 'Nunito', sans-serif; font-size: 0.72rem; color: #94a3b8; }
+  #p1-stat { text-align: left; }
+  #p2-stat { text-align: right; }
+
+  .battle-btns { display: flex; gap: 12px; margin-top: 12px; }
+  .battle-btn {
+    background: #334155; color: #fff; border: none; border-radius: 8px;
+    padding: 10px 28px; font-family: 'Fredoka One', cursive;
+    font-size: 1rem; cursor: pointer; transition: background 0.2s;
+  }
+  .battle-btn:hover { background: #475569; }
+
+  #winner-overlay {
+    position: absolute; inset: 0; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.6); border-radius: 8px; flex-direction: column; gap: 8px;
+  }
+  #winner-overlay.show { display: flex; }
+  #winner-text { font-size: 2.8rem; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+  #winner-sub  { font-size: 1rem; color: #e2e8f0; font-family: 'Nunito', sans-serif; }
+</style>
+</head>
+<body>
+
+<!-- ── Character Select ── -->
+<div id="select-screen">
+  <h1>⚔️ ELEMENTAL BATTLE</h1>
+  <div class="select-row">
+    <!-- Player 1 -->
+    <div class="player-select">
+      <div class="player-label">🔵 Player 1</div>
+      <div class="char-cards" id="p1-cards"></div>
+    </div>
+
+    <div class="vs-divider"><span>VS</span></div>
+
+    <!-- Player 2 -->
+    <div class="player-select">
+      <div class="player-label">🔴 Player 2</div>
+      <div class="char-cards" id="p2-cards"></div>
+    </div>
+  </div>
+  <div class="select-hint">Click to select a character for each player</div>
+  <button id="start-btn" disabled onclick="startBattle()">⚔️ START BATTLE</button>
+</div>
+
+<!-- ── Battle Screen ── -->
+<div id="battle-screen">
+  <div id="battle-title"></div>
+  <div id="arena-wrapper">
+    <canvas id="gameCanvas"></canvas>
+    <div id="winner-overlay">
+      <div id="winner-text"></div>
+      <div id="winner-sub">Choose your next move</div>
+    </div>
+  </div>
+  <div id="stats">
+    <div class="stat-box" id="p1-stat">
+      <span id="p1-name-hp"></span>
+      <span id="p1-stat-desc"></span>
+    </div>
+    <div class="stat-box" id="p2-stat">
+      <span id="p2-name-hp"></span>
+      <span id="p2-stat-desc"></span>
+    </div>
+  </div>
+  <div class="battle-btns">
+    <button class="battle-btn" onclick="restartBattle()">🔄 Rematch</button>
+    <button class="battle-btn" onclick="goSelect()">🏠 Character Select</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  CHARACTER DEFINITIONS
+// ════════════════════════════════════════════════
+const CHARACTERS = {
+  ice: {
+    id: 'ice', name: 'ICE', icon: '❄️',
+    desc: 'Slows enemies\nwith a frost axe',
+    color: '#7dd3fc', glowColor: '#bae6fd', shadowColor: '#0ea5e9',
+    weaponType: 'axe',
+    weaponSize: 52,
+    orbitSpeed: 0.09,
+    statDesc: () => `Axe DMG: ${ICE_DAMAGE} | Slow: ${(SLOW_FRAMES/60).toFixed(1)}s`,
+  },
+  wind: {
+    id: 'wind', name: 'WIND', icon: '🌪️',
+    desc: 'Throws shuriken\n& teleports',
+    color: '#d4a843', glowColor: '#fcd34d', shadowColor: '#92400e',
+    weaponType: 'shuriken',
+    weaponSize: 24,
+    orbitSpeed: 0.076,
+    statDesc: () => `Orbit: 4 | Shuriken: 7 | Tornado: ${TORNADO_DAMAGE} | CD: ${(TORNADO_CD/60).toFixed(1)}s`,
+  },
+  fire: {
+    id: 'fire', name: 'FIRE', icon: '🔥',
+    desc: 'Sword + burn\ndot on hit',
+    color: '#fb923c', glowColor: '#fdba74', shadowColor: '#c2410c',
+    weaponType: 'sword',
+    weaponSize: 42,   // axe 52 * 0.8
+    orbitSpeed: 0.08,
+    statDesc: () => `Sword DMG: ${FIRE_DIRECT_DMG} | Burn: ${FIRE_BURN_TOTAL} over ${(FIRE_BURN_FRAMES/60).toFixed(1)}s`,
+  },
+  earth: {
+    id: 'earth', name: 'EARTH', icon: '🪨',
+    desc: 'No weapon\nBut quakes nearby',
+    color: '#a3a3a3', glowColor: '#d4d4d4', shadowColor: '#525252',
+    weaponType: 'none',
+    weaponSize: 0,
+    orbitSpeed: 0,
+    statDesc: () => `Quake: ${QUAKE_DAMAGE} DMG | Radius: ${(BALL_R*1.8).toFixed(0)}px | CD: ${(QUAKE_CD/60).toFixed(1)}s`,
+  },
+};
+
+// ════════════════════════════════════════════════
+//  CANVAS + CONSTANTS
+// ════════════════════════════════════════════════
+const canvas = document.getElementById('gameCanvas');
+const ctx    = canvas.getContext('2d');
+const W = 650, H = 650;
+canvas.width = W; canvas.height = H;
+
+const BALL_R           = 28;
+const BASE_SPEED       = 9.6;
+const SLOW_FACTOR      = 0.38;
+const WEAPON_ORBIT_R   = 68;
+
+// Ice
+const ICE_DAMAGE   = 8;
+const SLOW_FRAMES  = 117;
+
+// Wind
+const TORNADO_DAMAGE = 11;
+const TORNADO_CD     = 210;
+const TORNADO_TRAVEL = 450;
+const TORNADO_RADIUS = 131;
+const TORNADO_FRAMES = 28;
+const PROJ_SPEED     = 5.25;
+
+// Fire
+const FIRE_DIRECT_DMG  = 6;
+const FIRE_BURN_TOTAL  = 3;
+const FIRE_BURN_FRAMES = 72;   // 1.2s @60fps
+const FIRE_SWORD_HIT_CD = 50;
+
+// Earth
+const QUAKE_DAMAGE  = 25;
+const QUAKE_CD      = 420;   // 7s @60fps — starts AFTER quake ends
+const QUAKE_RADIUS  = Math.round(BALL_R * 1.8 * 3 * 3 / 2);  // halved
+const QUAKE_FRAMES  = 72;    // 1.2s @60fps
+
+// ════════════════════════════════════════════════
+//  SELECT SCREEN STATE
+// ════════════════════════════════════════════════
+let selectedP1 = null, selectedP2 = null;
+
+function buildSelectScreen() {
+  const charList = Object.values(CHARACTERS);
+  ['p1-cards', 'p2-cards'].forEach((containerId, pi) => {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    charList.forEach(ch => {
+      const card = document.createElement('div');
+      card.className = 'char-card';
+      card.dataset.id = ch.id;
+      card.innerHTML = `
+        <div class="char-icon">${ch.icon}</div>
+        <div class="char-name">${ch.name}</div>
+        <div class="char-desc">${ch.desc.replace('\n','<br>')}</div>`;
+      card.onclick = () => selectChar(pi + 1, ch.id);
+      container.appendChild(card);
+    });
+  });
+}
+
+function selectChar(player, charId) {
+  if (player === 1) selectedP1 = charId;
+  else              selectedP2 = charId;
+  updateCardHighlights();
+  document.getElementById('start-btn').disabled = !(selectedP1 && selectedP2);
+}
+
+function updateCardHighlights() {
+  document.querySelectorAll('.char-card').forEach(card => {
+    card.classList.remove('selected-p1', 'selected-p2');
+  });
+  // p1 cards
+  document.querySelectorAll('#p1-cards .char-card').forEach(card => {
+    if (card.dataset.id === selectedP1) card.classList.add('selected-p1');
+  });
+  // p2 cards
+  document.querySelectorAll('#p2-cards .char-card').forEach(card => {
+    if (card.dataset.id === selectedP2) card.classList.add('selected-p2');
+  });
+}
+
+function goSelect() {
+  gameOver = true;
+  document.getElementById('battle-screen').classList.remove('active');
+  document.getElementById('select-screen').style.display = 'flex';
+}
+
+function startBattle() {
+  document.getElementById('select-screen').style.display = 'none';
+  document.getElementById('battle-screen').classList.add('active');
+  document.getElementById('battle-title').textContent =
+    `${CHARACTERS[selectedP1].icon} ${CHARACTERS[selectedP1].name} vs ${CHARACTERS[selectedP2].name} ${CHARACTERS[selectedP2].icon}`;
+  initGame(selectedP1, selectedP2);
+}
+
+function restartBattle() {
+  document.getElementById('winner-overlay').classList.remove('show');
+  initGame(selectedP1, selectedP2);
+}
+
+// ════════════════════════════════════════════════
+//  GAME STATE
+// ════════════════════════════════════════════════
+let balls, projectiles, particles, gameOver;
+
+function spd(b) { return Math.hypot(b.vx, b.vy); }
+function setSpd(b, s) {
+  const cur = spd(b);
+  if (cur < 0.001) { b.vx = s; b.vy = 0; return; }
+  b.vx = b.vx / cur * s; b.vy = b.vy / cur * s;
+}
+
+function makeBall(charId, x, y, vx, vy) {
+  const ch = CHARACTERS[charId];
+  const base = {
+    id: charId, name: ch.name, icon: ch.icon,
+    x, y, vx, vy,
+    hp: 100, maxHp: 100,
+    color: ch.color, glowColor: ch.glowColor, shadowColor: ch.shadowColor,
+    orbitAngle: 0, orbitSpeed: ch.orbitSpeed,
+    weaponType: ch.weaponType,
+    weaponSize: ch.weaponSize,
+    slowFrames: 0,
+    // per-type cooldowns (undefined if unused)
+    axeHitCd:      0,
+    swordHitCd:    0,
+    shurikenHitCd: 0,
+    shurikenOut:   false,
+    tornadoCd:     ch.weaponType === 'shuriken' ? TORNADO_CD : undefined,
+    burnFrames:    0,   // fire: frames remaining of burn on this ball
+    quakeCd:       ch.weaponType === 'none'     ? QUAKE_CD   : undefined,
+    quakeFrames:   0,
+    quakeDamageDone: false,
+  };
+  return base;
+}
+
+function initGame(c1, c2) {
+  gameOver = false;
+  document.getElementById('winner-overlay').classList.remove('show');
+  const a1 = Math.random() * Math.PI * 2;
+  const a2 = Math.random() * Math.PI * 2;
+  balls = [
+    makeBall(c1, W * 0.28, H * 0.3,  Math.cos(a1) * BASE_SPEED, Math.sin(a1) * BASE_SPEED),
+    makeBall(c2, W * 0.72, H * 0.65, Math.cos(a2) * BASE_SPEED, Math.sin(a2) * BASE_SPEED),
+  ];
+  projectiles = [];
+  particles   = [];
+  updateStatUI();
+}
+
+// ════════════════════════════════════════════════
+//  PARTICLES
+// ════════════════════════════════════════════════
+function spawnParticles(x, y, color, count) {
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2, s = 2.5 + Math.random() * 4.5;
+    particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s,
+                     r: 3.5 + Math.random()*4, color, life: 1,
+                     decay: 0.018 + Math.random()*0.02 });
+  }
+}
+
+// ════════════════════════════════════════════════
+//  UPDATE
+// ════════════════════════════════════════════════
+function update() {
+  if (gameOver) return;
+
+  const [b0, b1] = balls;
+
+  for (const b of balls) {
+    // Orbit
+    b.orbitAngle += b.orbitSpeed * (b.slowFrames > 0 ? 0.5 : 1);
+
+    // Cooldowns
+    if (b.axeHitCd      > 0) b.axeHitCd--;
+    if (b.swordHitCd    > 0) b.swordHitCd--;
+    if (b.shurikenHitCd > 0) b.shurikenHitCd--;
+    if (b.tornadoCd     > 0) b.tornadoCd--;
+    if (b.quakeCd       > 0) b.quakeCd--;
+    if (b.quakeFrames   > 0) b.quakeFrames--;
+
+    // Burn tick (fire debuff on any ball)
+    if (b.burnFrames > 0) {
+      b.burnFrames--;
+      // Distribute FIRE_BURN_TOTAL evenly over FIRE_BURN_FRAMES
+      b.hp -= FIRE_BURN_TOTAL / FIRE_BURN_FRAMES;
+      if (b.burnFrames % 8 === 0) spawnParticles(b.x, b.y, '#fb923c', 2);
+    }
+
+    // Slow
+    if (b.slowFrames > 0) {
+      b.slowFrames--;
+      if (Math.abs(spd(b) - BASE_SPEED * SLOW_FACTOR) > 0.05) setSpd(b, BASE_SPEED * SLOW_FACTOR);
+    } else {
+      if (spd(b) < BASE_SPEED * 0.95) setSpd(b, BASE_SPEED);
+    }
+
+    // Move
+    b.x += b.vx; b.y += b.vy;
+
+    // Wall bounce
+    let bounced = false;
+    if (b.x - BALL_R < 0)   { b.x = BALL_R;     b.vx =  Math.abs(b.vx); bounced = true; }
+    if (b.x + BALL_R > W)   { b.x = W - BALL_R; b.vx = -Math.abs(b.vx); bounced = true; }
+    if (b.y - BALL_R < 0)   { b.y = BALL_R;     b.vy =  Math.abs(b.vy); bounced = true; }
+    if (b.y + BALL_R > H)   { b.y = H - BALL_R; b.vy = -Math.abs(b.vy); bounced = true; }
+    if (bounced) {
+      setSpd(b, b.slowFrames > 0 ? BASE_SPEED * SLOW_FACTOR : BASE_SPEED);
+      spawnParticles(b.x, b.y, b.glowColor, 3);
+    }
+
+    // Wind: launch shuriken
+    if (b.weaponType === 'shuriken' && b.tornadoCd === 0) {
+      b.tornadoCd   = TORNADO_CD;
+      b.shurikenOut = true;
+      launchShuriken(b);
+    }
+
+    // Earth: trigger quake (only when CD=0 AND no active quake)
+    if (b.weaponType === 'none' && b.quakeCd === 0 && b.quakeFrames === 0) {
+      b.quakeFrames     = QUAKE_FRAMES;
+      b.quakeDamageDone = false;
+      b.quakeCd         = 99999; // sentinel: prevents re-trigger, allows reduceEarthCd to work
+      spawnParticles(b.x, b.y, '#a3a3a3', 8);
+    }
+
+    // Damage check every frame using current visual radius (matches drawQuakeRing)
+    if (b.weaponType === 'none' && b.quakeFrames > 0 && !b.quakeDamageDone) {
+      const prog    = 1 - b.quakeFrames / QUAKE_FRAMES;
+      const visualR = QUAKE_RADIUS * prog;
+      const enemy   = balls.find(e => e !== b);
+      if (enemy && Math.hypot(b.x - enemy.x, b.y - enemy.y) < visualR + BALL_R) {
+        enemy.hp -= QUAKE_DAMAGE;
+        b.quakeDamageDone = true;
+        spawnParticles(b.x, b.y, '#a3a3a3', 16);
+      }
+    }
+
+    // CD starts only after quake animation ends
+    if (b.weaponType === 'none' && b.quakeFrames === 1) {
+      b.quakeCd = QUAKE_CD;
+    }
+  }
+
+  // Ball–ball collision
+  const dx = b1.x - b0.x, dy = b1.y - b0.y;
+  const d  = Math.hypot(dx, dy);
+  if (d < BALL_R * 2 && d > 0.001) {
+    const nx = dx / d, ny = dy / d;
+    const overlap = BALL_R * 2 - d;
+    b0.x -= nx * (overlap / 2 + 0.5); b0.y -= ny * (overlap / 2 + 0.5);
+    b1.x += nx * (overlap / 2 + 0.5); b1.y += ny * (overlap / 2 + 0.5);
+    const vi = b0.vx*nx + b0.vy*ny, vw = b1.vx*nx + b1.vy*ny;
+    if (vi - vw > 0) {
+      b0.vx += (vw-vi)*nx; b0.vy += (vw-vi)*ny;
+      b1.vx += (vi-vw)*nx; b1.vy += (vi-vw)*ny;
+    }
+    setSpd(b0, b0.slowFrames > 0 ? BASE_SPEED * SLOW_FACTOR : BASE_SPEED);
+    setSpd(b1, b1.slowFrames > 0 ? BASE_SPEED * SLOW_FACTOR : BASE_SPEED);
+    spawnParticles((b0.x+b1.x)/2, (b0.y+b1.y)/2, '#ffffff', 10);
+  }
+
+  // Weapon hit checks
+  weaponHitChecks(b0, b1);
+  weaponHitChecks(b1, b0);
+
+  updateProjectiles();
+  updateParticles();
+  checkGameOver();
+  updateStatUI();
+}
+
+function weaponHitChecks(attacker, target) {
+  const wx = attacker.x + Math.cos(attacker.orbitAngle) * WEAPON_ORBIT_R;
+  const wy = attacker.y + Math.sin(attacker.orbitAngle) * WEAPON_ORBIT_R;
+  const dist = Math.hypot(wx - target.x, wy - target.y);
+
+  function reduceEarthCd() {
+    if (target.weaponType === 'none' && target.quakeCd > 0)
+      target.quakeCd = Math.max(0, target.quakeCd - 90); // 1.5s @60fps
+  }
+
+  if (attacker.weaponType === 'axe' && attacker.axeHitCd === 0) {
+    if (dist < attacker.weaponSize + BALL_R) {
+      target.hp         -= ICE_DAMAGE;
+      target.slowFrames  = SLOW_FRAMES;
+      attacker.axeHitCd  = 50;
+      setSpd(target, BASE_SPEED * SLOW_FACTOR);
+      spawnParticles(target.x, target.y, '#7dd3fc', 8);
+      reduceEarthCd();
+    }
+  }
+
+  if (attacker.weaponType === 'sword' && attacker.swordHitCd === 0) {
+    if (dist < attacker.weaponSize + BALL_R) {
+      target.hp           -= FIRE_DIRECT_DMG;
+      target.burnFrames    = FIRE_BURN_FRAMES;
+      attacker.swordHitCd  = FIRE_SWORD_HIT_CD;
+      spawnParticles(target.x, target.y, '#fb923c', 10);
+      reduceEarthCd();
+    }
+  }
+
+  if (attacker.weaponType === 'shuriken' && !attacker.shurikenOut && attacker.shurikenHitCd === 0) {
+    if (dist < attacker.weaponSize + BALL_R) {
+      target.hp              -= 4;
+      attacker.shurikenHitCd  = 50;
+      spawnParticles(target.x, target.y, '#fcd34d', 6);
+      reduceEarthCd();
+    }
+  }
+}
+
+// ════════════════════════════════════════════════
+//  PROJECTILES (Wind shuriken)
+// ════════════════════════════════════════════════
+function launchShuriken(owner) {
+  const angle = owner.orbitAngle;
+  projectiles.push({
+    x: owner.x + Math.cos(angle) * WEAPON_ORBIT_R,
+    y: owner.y + Math.sin(angle) * WEAPON_ORBIT_R,
+    vx: Math.cos(angle) * PROJ_SPEED,
+    vy: Math.sin(angle) * PROJ_SPEED,
+    size: owner.weaponSize,
+    spinAngle: 0, traveled: 0,
+    ownerId: owner.id,
+    phase: 'flying',
+    tornadoFrames: 0, tx: 0, ty: 0,
+    damageDone: false, flyingHitCd: 0, done: false,
+  });
+}
+
+function updateProjectiles() {
+  for (const p of projectiles) {
+    if (p.done) continue;
+    if (p.phase === 'flying') {
+      p.spinAngle += 0.2;
+      if (p.flyingHitCd > 0) p.flyingHitCd--;
+      const px = p.x, py = p.y;
+      p.x += p.vx; p.y += p.vy;
+      p.traveled += Math.hypot(p.x-px, p.y-py);
+      if (p.x < 8)     { p.x = 8;     p.vx =  Math.abs(p.vx); }
+      if (p.x > W-8)   { p.x = W-8;   p.vx = -Math.abs(p.vx); }
+      if (p.y < 8)     { p.y = 8;     p.vy =  Math.abs(p.vy); }
+      if (p.y > H-8)   { p.y = H-8;   p.vy = -Math.abs(p.vy); }
+      if (p.flyingHitCd === 0) {
+        const target = balls.find(b => b.id !== p.ownerId);
+        if (target && Math.hypot(p.x-target.x, p.y-target.y) < BALL_R + p.size*0.5) {
+          target.hp -= 7;
+          p.flyingHitCd = 30;
+          spawnParticles(target.x, target.y, '#fcd34d', 6);
+          if (target.weaponType === 'none' && target.quakeCd > 0)
+            target.quakeCd = Math.max(0, target.quakeCd - 90);
+        }
+      }
+      if (p.traveled >= TORNADO_TRAVEL) {
+        p.phase = 'exploding'; p.tornadoFrames = TORNADO_FRAMES; p.tx = p.x; p.ty = p.y;
+      }
+    } else if (p.phase === 'exploding') {
+      if (!p.damageDone) {
+        p.damageDone = true;
+        const target = balls.find(b => b.id !== p.ownerId);
+        if (target && Math.hypot(p.tx-target.x, p.ty-target.y) < TORNADO_RADIUS+BALL_R) {
+          target.hp -= TORNADO_DAMAGE;
+          if (target.weaponType === 'none' && target.quakeCd > 0)
+            target.quakeCd = Math.max(0, target.quakeCd - 90);
+          spawnParticles(target.x, target.y, '#fcd34d', 14);
+        }
+        const owner = balls.find(b => b.id === p.ownerId);
+        if (owner) {
+          owner.x = Math.max(BALL_R, Math.min(W-BALL_R, p.tx));
+          owner.y = Math.max(BALL_R, Math.min(H-BALL_R, p.ty));
+          spawnParticles(owner.x, owner.y, '#fcd34d', 12);
+        }
+      }
+      p.tornadoFrames--;
+      if (p.tornadoFrames <= 0) {
+        p.done = true;
+        const owner = balls.find(b => b.id === p.ownerId);
+        if (owner) owner.shurikenOut = false;
+      }
+    }
+  }
+  for (let i = projectiles.length-1; i >= 0; i--) {
+    if (projectiles[i].done) projectiles.splice(i, 1);
+  }
+}
+
+function updateParticles() {
+  for (let i = particles.length-1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy;
+    p.vx *= 0.92; p.vy *= 0.92;
+    p.life -= p.decay;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+}
+
+function checkGameOver() {
+  for (const b of balls) {
+    if (b.hp <= 0) {
+      b.hp = 0; gameOver = true;
+      const winner = balls.find(bb => bb !== b);
+      const el = document.getElementById('winner-text');
+      el.textContent = `${winner.icon} ${winner.name} WINS!`;
+      el.style.color = winner.glowColor;
+      document.getElementById('winner-overlay').classList.add('show');
+    }
+  }
+}
+
+function updateStatUI() {
+  const [b0, b1] = balls;
+  const ch0 = CHARACTERS[b0.id], ch1 = CHARACTERS[b1.id];
+  document.getElementById('p1-name-hp').textContent = `${b0.icon} ${b0.name}  HP: ${Math.max(0,Math.ceil(b0.hp))}`;
+  document.getElementById('p2-name-hp').textContent = `${b1.icon} ${b1.name}  HP: ${Math.max(0,Math.ceil(b1.hp))}`;
+  document.getElementById('p1-stat-desc').textContent = ch0.statDesc();
+  document.getElementById('p2-stat-desc').textContent = ch1.statDesc();
+  document.getElementById('p1-stat').style.color = b0.glowColor;
+  document.getElementById('p2-stat').style.color = b1.glowColor;
+  document.getElementById('p1-stat').style.borderColor = b0.glowColor + '44';
+  document.getElementById('p2-stat').style.borderColor = b1.glowColor + '44';
+}
+
+// ════════════════════════════════════════════════
+//  DRAW
+// ════════════════════════════════════════════════
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#f8fafc'; ctx.fillRect(0, 0, W, H);
+
+  // Grid
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,0,0,0.04)'; ctx.lineWidth = 1;
+  for (let x = 0; x <= W; x += 50) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y <= H; y += 50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.restore();
+
+  // Particles
+  for (const p of particles) {
+    ctx.save(); ctx.globalAlpha = p.life;
+    ctx.shadowColor = p.color; ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fillStyle = p.color; ctx.fill(); ctx.restore();
+  }
+
+  // Projectiles
+  for (const p of projectiles) {
+    if (p.phase === 'exploding') drawTornado(p);
+    if (p.phase === 'flying')    drawFlyingShuriken(p);
+  }
+
+  // Balls + weapons + HP bars
+  for (const b of balls) {
+    drawQuakeRing(b);
+    drawBall(b);
+    if (b.weaponType === 'axe')      drawIceAxe(b);
+    if (b.weaponType === 'shuriken') drawShuriken(b);
+    if (b.weaponType === 'sword')    drawFireSword(b);
+    drawEarthCooldown(b);
+    drawHpBar(b);
+  }
+}
+
+function drawBall(b) {
+  // Slow rings
+  if (b.slowFrames > 0) {
+    ctx.save();
+    ctx.beginPath(); ctx.arc(b.x, b.y, BALL_R+10, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(56,189,248,0.35)'; ctx.lineWidth = 6; ctx.stroke(); ctx.restore();
+    ctx.save();
+    ctx.beginPath(); ctx.arc(b.x, b.y, BALL_R+5, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(147,210,255,0.95)'; ctx.lineWidth = 2.5;
+    ctx.setLineDash([5,4]); ctx.shadowColor = '#38bdf8'; ctx.shadowBlur = 10; ctx.stroke(); ctx.restore();
+  }
+  // Burn ring
+  if (b.burnFrames > 0) {
+    ctx.save();
+    ctx.beginPath(); ctx.arc(b.x, b.y, BALL_R+8, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(251,146,60,0.8)'; ctx.lineWidth = 3;
+    ctx.setLineDash([4,4]); ctx.shadowColor = '#fb923c'; ctx.shadowBlur = 12; ctx.stroke(); ctx.restore();
+  }
+  // Halo
+  ctx.save();
+  const halo = ctx.createRadialGradient(b.x, b.y, BALL_R*0.6, b.x, b.y, BALL_R+18);
+  halo.addColorStop(0, b.glowColor+'99'); halo.addColorStop(1, b.glowColor+'00');
+  ctx.beginPath(); ctx.arc(b.x, b.y, BALL_R+18, 0, Math.PI*2);
+  ctx.fillStyle = halo; ctx.fill(); ctx.restore();
+  // Body
+  ctx.save();
+  const g = ctx.createRadialGradient(b.x-8, b.y-8, 4, b.x, b.y, BALL_R);
+  g.addColorStop(0, '#ffffff'); g.addColorStop(0.3, b.glowColor); g.addColorStop(1, b.shadowColor);
+  ctx.beginPath(); ctx.arc(b.x, b.y, BALL_R, 0, Math.PI*2);
+  ctx.fillStyle = g; ctx.shadowColor = b.glowColor; ctx.shadowBlur = 22; ctx.fill(); ctx.restore();
+  // Number
+  ctx.save();
+  ctx.font = 'bold 15px Fredoka One, cursive';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#1e293b';
+  ctx.fillText(Math.ceil(Math.max(0, b.hp)), b.x, b.y); ctx.restore();
+}
+
+function drawHpBar(b) {
+  const bw = BALL_R*2, bx = b.x-BALL_R, by = b.y-BALL_R-12;
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, 6, 3); ctx.fill();
+  ctx.fillStyle = b.glowColor;
+  ctx.beginPath(); ctx.roundRect(bx, by, bw * Math.max(0, b.hp/b.maxHp), 6, 3); ctx.fill();
+}
+
+function drawIceAxe(b) {
+  const S = b.weaponSize;
+  const wx = b.x + Math.cos(b.orbitAngle) * WEAPON_ORBIT_R;
+  const wy = b.y + Math.sin(b.orbitAngle) * WEAPON_ORBIT_R;
+  ctx.save(); ctx.translate(wx, wy); ctx.rotate(b.orbitAngle + Math.PI/4);
+  ctx.beginPath();
+  ctx.moveTo(0,-S); ctx.lineTo(S*0.7,0); ctx.lineTo(0,S*0.4); ctx.lineTo(-S*0.4,S*0.1); ctx.closePath();
+  const ag = ctx.createLinearGradient(-S,-S,S,S);
+  ag.addColorStop(0,'#e0f2fe'); ag.addColorStop(0.5,'#7dd3fc'); ag.addColorStop(1,'#0284c7');
+  ctx.fillStyle = ag; ctx.shadowColor = '#7dd3fc'; ctx.shadowBlur = 22; ctx.fill();
+  ctx.strokeStyle = '#e0f2fe'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,S*0.4); ctx.lineTo(-S*0.7,S*1.2);
+  ctx.strokeStyle = '#92400e'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.shadowBlur = 0; ctx.stroke();
+  ctx.restore();
+}
+
+function drawFireSword(b) {
+  const S = b.weaponSize;
+  const wx = b.x + Math.cos(b.orbitAngle) * WEAPON_ORBIT_R;
+  const wy = b.y + Math.sin(b.orbitAngle) * WEAPON_ORBIT_R;
+  ctx.save(); ctx.translate(wx, wy); ctx.rotate(b.orbitAngle + Math.PI/4);
+  // Blade
+  ctx.beginPath();
+  ctx.moveTo(0, -S*1.2); ctx.lineTo(S*0.18, 0); ctx.lineTo(0, S*0.15); ctx.lineTo(-S*0.18, 0); ctx.closePath();
+  const sg = ctx.createLinearGradient(0, -S*1.2, 0, S*0.15);
+  sg.addColorStop(0, '#ffffff'); sg.addColorStop(0.3, '#fdba74'); sg.addColorStop(1, '#dc2626');
+  ctx.fillStyle = sg; ctx.shadowColor = '#fb923c'; ctx.shadowBlur = 24; ctx.fill();
+  ctx.strokeStyle = '#fef2f2'; ctx.lineWidth = 1.5; ctx.stroke();
+  // Guard
+  ctx.beginPath(); ctx.moveTo(-S*0.35, 0); ctx.lineTo(S*0.35, 0);
+  ctx.strokeStyle = '#92400e'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.shadowBlur = 0; ctx.stroke();
+  // Handle
+  ctx.beginPath(); ctx.moveTo(0, S*0.15); ctx.lineTo(0, S*0.7);
+  ctx.strokeStyle = '#78350f'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.stroke();
+  ctx.restore();
+}
+
+function drawShuriken(b) {
+  if (b.shurikenOut) return;
+  const S = b.weaponSize;
+  const wx = b.x + Math.cos(b.orbitAngle) * WEAPON_ORBIT_R;
+  const wy = b.y + Math.sin(b.orbitAngle) * WEAPON_ORBIT_R;
+  ctx.save(); ctx.translate(wx, wy); ctx.rotate(b.orbitAngle * 2);
+  for (let i = 0; i < 4; i++) {
+    ctx.save(); ctx.rotate(Math.PI/2*i);
+    ctx.beginPath();
+    ctx.moveTo(0,0); ctx.lineTo(S*0.5,-S*0.2); ctx.lineTo(S,0); ctx.lineTo(S*0.5,S*0.2); ctx.closePath();
+    const sg = ctx.createLinearGradient(0,0,S,0);
+    sg.addColorStop(0,'#fef3c7'); sg.addColorStop(1,'#d97706');
+    ctx.fillStyle = sg; ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 16; ctx.fill(); ctx.restore();
+  }
+  ctx.restore();
+}
+
+function drawFlyingShuriken(p) {
+  const S = p.size;
+  ctx.save(); ctx.globalAlpha = 0.25; ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 20;
+  ctx.beginPath(); ctx.arc(p.x-p.vx*3, p.y-p.vy*3, S*0.35, 0, Math.PI*2);
+  ctx.fillStyle = '#fcd34d'; ctx.fill(); ctx.restore();
+  ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.spinAngle);
+  ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 20;
+  for (let i = 0; i < 4; i++) {
+    ctx.save(); ctx.rotate(Math.PI/2*i);
+    ctx.beginPath();
+    ctx.moveTo(0,0); ctx.lineTo(S*0.5,-S*0.2); ctx.lineTo(S,0); ctx.lineTo(S*0.5,S*0.2); ctx.closePath();
+    const sg = ctx.createLinearGradient(0,0,S,0);
+    sg.addColorStop(0,'#fff7e0'); sg.addColorStop(1,'#f59e0b');
+    ctx.fillStyle = sg; ctx.fill(); ctx.restore();
+  }
+  ctx.restore();
+}
+
+function drawTornado(p) {
+  const prog  = 1 - p.tornadoFrames / TORNADO_FRAMES;
+  const alpha = prog < 0.4 ? prog/0.4 : (1-prog)/0.6;
+  const r     = TORNADO_RADIUS * (0.2 + 0.8 * Math.min(prog*2.5, 1));
+  ctx.save(); ctx.globalAlpha = Math.min(alpha, 1);
+  const core = ctx.createRadialGradient(p.tx, p.ty, 0, p.tx, p.ty, r*0.55);
+  core.addColorStop(0,'rgba(253,230,138,0.55)'); core.addColorStop(0.5,'rgba(251,191,36,0.22)'); core.addColorStop(1,'rgba(251,191,36,0)');
+  ctx.beginPath(); ctx.arc(p.tx, p.ty, r*0.55, 0, Math.PI*2); ctx.fillStyle = core; ctx.fill();
+  for (const rg of [{rf:1.0,a:0.9,lw:4.5},{rf:0.75,a:0.75,lw:3.5},{rf:0.5,a:0.6,lw:2.5},{rf:0.28,a:0.5,lw:2}]) {
+    ctx.beginPath(); ctx.arc(p.tx, p.ty, r*rg.rf, 0, Math.PI*2);
+    ctx.strokeStyle = `rgba(251,191,36,${rg.a})`; ctx.lineWidth = rg.lw;
+    ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 18; ctx.stroke();
+  }
+  ctx.save(); ctx.translate(p.tx, p.ty);
+  for (let i = 0; i < 8; i++) {
+    ctx.rotate(Math.PI/4); ctx.beginPath(); ctx.moveTo(0,0);
+    ctx.quadraticCurveTo(r*0.55, r*0.35, r*0.9, 0);
+    ctx.strokeStyle = 'rgba(253,230,138,0.7)'; ctx.lineWidth = 2.5; ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 12; ctx.stroke();
+  }
+  ctx.restore(); ctx.globalAlpha = 1; ctx.restore();
+}
+
+function drawQuakeRing(b) {
+  if (b.quakeFrames <= 0) return;
+  const prog  = 1 - b.quakeFrames / QUAKE_FRAMES;
+  const alpha = prog < 0.4 ? prog / 0.4 : (1 - prog) / 0.6;
+  const r     = QUAKE_RADIUS * prog;
+
+  ctx.save(); ctx.globalAlpha = Math.min(alpha, 1);
+
+  // Filled dusty core
+  const core = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r * 0.7);
+  core.addColorStop(0, 'rgba(163,120,60,0.65)');
+  core.addColorStop(1, 'rgba(163,120,60,0)');
+  ctx.beginPath(); ctx.arc(b.x, b.y, r * 0.7, 0, Math.PI*2);
+  ctx.fillStyle = core; ctx.fill();
+
+  // Concentric crack rings
+  const ringsData = [
+    { rf: 1.0, a: 1.0, lw: 6 },
+    { rf: 0.7, a: 0.85, lw: 4 },
+    { rf: 0.42, a: 0.65, lw: 3 },
+  ];
+  for (const rg of ringsData) {
+    ctx.beginPath(); ctx.arc(b.x, b.y, r * rg.rf, 0, Math.PI*2);
+    ctx.strokeStyle = `rgba(120,70,20,${rg.a})`;
+    ctx.lineWidth = rg.lw;
+    ctx.shadowColor = '#78350f'; ctx.shadowBlur = 22;
+    ctx.stroke();
+  }
+
+  // Jagged crack lines radiating outward
+  ctx.save(); ctx.translate(b.x, b.y);
+  for (let i = 0; i < 8; i++) {
+    ctx.rotate(Math.PI / 4);
+    ctx.beginPath(); ctx.moveTo(BALL_R * 0.5, 0);
+    ctx.lineTo(r * 0.5, r * 0.12);
+    ctx.lineTo(r * 0.78, -r * 0.08);
+    ctx.lineTo(r * 0.95, 0);
+    ctx.strokeStyle = 'rgba(92,50,10,0.9)';
+    ctx.lineWidth = 3; ctx.shadowColor = '#92400e'; ctx.shadowBlur = 10;
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  ctx.globalAlpha = 1; ctx.restore();
+}
+
+function drawEarthCooldown(b) {
+  if (b.weaponType !== 'none') return;
+  const isQuaking = b.quakeFrames > 0;
+  const isReady   = b.quakeCd === 0 && !isQuaking;
+  const displayCd = Math.min(b.quakeCd, QUAKE_CD); // clamp sentinel
+  const cdSec     = (displayCd / 60).toFixed(1);
+  const label     = isQuaking ? '🌋 QUAKING' : isReady ? '💥 READY' : `⏱ ${cdSec}s`;
+
+  ctx.save();
+  ctx.font = 'bold 11px Nunito, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const tx = b.x, ty = b.y - BALL_R - 22;
+  const tw = ctx.measureText(label).width + 12;
+  ctx.fillStyle = isQuaking ? 'rgba(80,40,10,0.9)' : isReady ? 'rgba(120,70,20,0.85)' : 'rgba(30,30,30,0.75)';
+  ctx.beginPath(); ctx.roundRect(tx - tw/2, ty - 8, tw, 16, 8); ctx.fill();
+  ctx.fillStyle = isQuaking ? '#fde68a' : isReady ? '#fde68a' : '#d4d4d4';
+  ctx.shadowColor = (isQuaking || isReady) ? '#f59e0b' : 'transparent';
+  ctx.shadowBlur  = (isQuaking || isReady) ? 8 : 0;
+  ctx.fillText(label, tx, ty);
+  ctx.restore();
+}
+
+// ════════════════════════════════════════════════
+//  LOOP
+// ════════════════════════════════════════════════
+function loop() {
+  if (balls) { update(); draw(); }
+  requestAnimationFrame(loop);
+}
+
+// ════════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════════
+buildSelectScreen();
+loop();
+</script>
+</body>
+</html>
