@@ -202,6 +202,24 @@ const CHARACTERS = {
     orbitSpeed: 0,
     statDesc: () => `Quake: ${QUAKE_DAMAGE} DMG | Radius: ${(BALL_R*1.8).toFixed(0)}px | CD: ${(QUAKE_CD/60).toFixed(1)}s`,
   },
+  plant: {
+    id: 'plant', name: 'PLANT', icon: '🌿',
+    desc: 'Branch + seeds:\n3 damage, 1 heal',
+    color: '#4ade80', glowColor: '#86efac', shadowColor: '#15803d',
+    weaponType: 'branch',
+    weaponSize: 44,
+    orbitSpeed: 0.07,
+    statDesc: () => `Seed DMG: ${PLANT_SEED_DMG} | Heal: ${PLANT_SEED_HEAL} | CD: ${(PLANT_SEED_CD/60).toFixed(1)}s`,
+  },
+  thunder: {
+    id: 'thunder', name: 'THUNDER', icon: '⚡',
+    desc: 'Hammer knockback\n+ lightning strikes',
+    color: '#a78bfa', glowColor: '#c4b5fd', shadowColor: '#6d28d9',
+    weaponType: 'hammer',
+    weaponSize: 46,
+    orbitSpeed: 0.075,
+    statDesc: () => `Hammer DMG: ${THUNDER_DMG} | Lightning: ${THUNDER_BOLT_DMG} DMG | CD: ${(THUNDER_BOLT_CD/60).toFixed(1)}s`,
+  },
 };
 
 // ════════════════════════════════════════════════
@@ -240,6 +258,23 @@ const QUAKE_DAMAGE  = 25;
 const QUAKE_CD      = 420;   // 7s @60fps — starts AFTER quake ends
 const QUAKE_RADIUS  = Math.round(BALL_R * 1.8 * 3 * 3 / 2);  // halved
 const QUAKE_FRAMES  = 72;    // 1.2s @60fps
+
+// Plant
+const PLANT_SEED_DMG  = 6;
+const PLANT_SEED_HEAL = 2;
+const PLANT_SEED_CD   = 168;   // 2.8s @60fps
+const PLANT_SEED_SPEED = 5.0;
+
+// Thunder
+const THUNDER_DMG        = 4;
+const THUNDER_HIT_CD     = 40;
+const THUNDER_KNOCKBACK  = BASE_SPEED * 1.5;
+const THUNDER_KB_RESTORE = 60;   // 1s @60fps to restore speed
+const THUNDER_BOLT_CD    = 300;  // 5s @60fps
+const THUNDER_BOLT_COUNT = 5;
+const THUNDER_BOLT_DMG   = 8;
+const THUNDER_BOLT_FRAMES = 48;  // 0.8s @60fps
+const THUNDER_STUN_FRAMES = 24;  // 0.4s @60fps
 
 // ════════════════════════════════════════════════
 //  SELECT SCREEN STATE
@@ -335,9 +370,20 @@ function makeBall(charId, x, y, vx, vy) {
     shurikenOut:   false,
     tornadoCd:     ch.weaponType === 'shuriken' ? TORNADO_CD : undefined,
     burnFrames:    0,   // fire: frames remaining of burn on this ball
-    quakeCd:       ch.weaponType === 'none'     ? QUAKE_CD   : undefined,
+    quakeCd:       ch.weaponType === 'none'     ? QUAKE_CD      : undefined,
     quakeFrames:   0,
     quakeDamageDone: false,
+    seedCd:        ch.weaponType === 'branch'   ? PLANT_SEED_CD : undefined,
+    hammerHitCd:   0,
+    // knockback state (any ball can receive)
+    kbFrames:      0,    // frames remaining of knockback speed restoration
+    kbTargetSpd:   0,    // speed to restore to after knockback
+    // stun state (any ball can receive from lightning)
+    stunFrames:    0,    // frames remaining of stun (vx/vy saved, zeroed during stun)
+    stunVx:        0,
+    stunVy:        0,
+    // thunder: lightning cooldown (owner only)
+    boltCd:        ch.weaponType === 'hammer' ? THUNDER_BOLT_CD : undefined,
   };
   return base;
 }
@@ -384,9 +430,30 @@ function update() {
     if (b.axeHitCd      > 0) b.axeHitCd--;
     if (b.swordHitCd    > 0) b.swordHitCd--;
     if (b.shurikenHitCd > 0) b.shurikenHitCd--;
+    if (b.hammerHitCd   > 0) b.hammerHitCd--;
     if (b.tornadoCd     > 0) b.tornadoCd--;
     if (b.quakeCd       > 0) b.quakeCd--;
     if (b.quakeFrames   > 0) b.quakeFrames--;
+    if (b.boltCd        > 0) b.boltCd--;
+
+    // Stun: freeze ball, save momentum
+    if (b.stunFrames > 0) {
+      b.stunFrames--;
+      b.vx = 0; b.vy = 0;
+      if (b.stunFrames === 0) {
+        // Restore momentum after stun
+        b.vx = b.stunVx; b.vy = b.stunVy;
+      }
+    }
+
+    // Knockback speed restoration (linear lerp back to normal)
+    if (b.kbFrames > 0 && b.stunFrames === 0) {
+      b.kbFrames--;
+      const progress  = 1 - b.kbFrames / THUNDER_KB_RESTORE;
+      const targetSpd = b.slowFrames > 0 ? BASE_SPEED * SLOW_FACTOR : BASE_SPEED;
+      const curSpd    = b.kbTargetSpd + (targetSpd - b.kbTargetSpd) * progress;
+      setSpd(b, Math.max(curSpd, targetSpd));
+    }
 
     // Burn tick (fire debuff on any ball)
     if (b.burnFrames > 0) {
@@ -400,22 +467,24 @@ function update() {
     if (b.slowFrames > 0) {
       b.slowFrames--;
       if (Math.abs(spd(b) - BASE_SPEED * SLOW_FACTOR) > 0.05) setSpd(b, BASE_SPEED * SLOW_FACTOR);
-    } else {
+    } else if (b.kbFrames === 0) {
       if (spd(b) < BASE_SPEED * 0.95) setSpd(b, BASE_SPEED);
     }
 
-    // Move
-    b.x += b.vx; b.y += b.vy;
+    // Move (skip if stunned)
+    if (b.stunFrames === 0) {
+      b.x += b.vx; b.y += b.vy;
 
-    // Wall bounce
-    let bounced = false;
-    if (b.x - BALL_R < 0)   { b.x = BALL_R;     b.vx =  Math.abs(b.vx); bounced = true; }
-    if (b.x + BALL_R > W)   { b.x = W - BALL_R; b.vx = -Math.abs(b.vx); bounced = true; }
-    if (b.y - BALL_R < 0)   { b.y = BALL_R;     b.vy =  Math.abs(b.vy); bounced = true; }
-    if (b.y + BALL_R > H)   { b.y = H - BALL_R; b.vy = -Math.abs(b.vy); bounced = true; }
-    if (bounced) {
-      setSpd(b, b.slowFrames > 0 ? BASE_SPEED * SLOW_FACTOR : BASE_SPEED);
-      spawnParticles(b.x, b.y, b.glowColor, 3);
+      // Wall bounce
+      let bounced = false;
+      if (b.x - BALL_R < 0)   { b.x = BALL_R;     b.vx =  Math.abs(b.vx); bounced = true; }
+      if (b.x + BALL_R > W)   { b.x = W - BALL_R; b.vx = -Math.abs(b.vx); bounced = true; }
+      if (b.y - BALL_R < 0)   { b.y = BALL_R;     b.vy =  Math.abs(b.vy); bounced = true; }
+      if (b.y + BALL_R > H)   { b.y = H - BALL_R; b.vy = -Math.abs(b.vy); bounced = true; }
+      if (bounced) {
+        if (b.kbFrames === 0) setSpd(b, b.slowFrames > 0 ? BASE_SPEED * SLOW_FACTOR : BASE_SPEED);
+        spawnParticles(b.x, b.y, b.glowColor, 3);
+      }
     }
 
     // Wind: launch shuriken
@@ -423,6 +492,19 @@ function update() {
       b.tornadoCd   = TORNADO_CD;
       b.shurikenOut = true;
       launchShuriken(b);
+    }
+
+    // Plant: fire seeds
+    if (b.weaponType === 'branch' && b.seedCd === 0) {
+      b.seedCd = PLANT_SEED_CD;
+      launchSeeds(b);
+    }
+    if (b.seedCd > 0) b.seedCd--;
+
+    // Thunder: fire bolts
+    if (b.weaponType === 'hammer' && b.boltCd === 0) {
+      b.boltCd = THUNDER_BOLT_CD;
+      launchBolts(b);
     }
 
     // Earth: trigger quake (only when CD=0 AND no active quake)
@@ -510,7 +592,22 @@ function weaponHitChecks(attacker, target) {
     }
   }
 
-  if (attacker.weaponType === 'shuriken' && !attacker.shurikenOut && attacker.shurikenHitCd === 0) {
+  if (attacker.weaponType === 'hammer' && attacker.hammerHitCd === 0) {
+    if (dist < attacker.weaponSize + BALL_R) {
+      // Knockback direction: from weapon toward target (i.e. away from attacker)
+      const nx = (target.x - wx) / Math.max(dist, 0.001);
+      const ny = (target.y - wy) / Math.max(dist, 0.001);
+      target.hp          -= THUNDER_DMG;
+      attacker.hammerHitCd = THUNDER_HIT_CD;
+      // Apply knockback
+      target.vx = nx * THUNDER_KNOCKBACK;
+      target.vy = ny * THUNDER_KNOCKBACK;
+      target.kbFrames    = THUNDER_KB_RESTORE;
+      target.kbTargetSpd = THUNDER_KNOCKBACK;
+      spawnParticles(target.x, target.y, '#c4b5fd', 10);
+      reduceEarthCd();
+    }
+  }
     if (dist < attacker.weaponSize + BALL_R) {
       target.hp              -= 4;
       attacker.shurikenHitCd  = 50;
@@ -523,7 +620,40 @@ function weaponHitChecks(attacker, target) {
 // ════════════════════════════════════════════════
 //  PROJECTILES (Wind shuriken)
 // ════════════════════════════════════════════════
-function launchShuriken(owner) {
+function launchBolts(owner) {
+  for (let i = 0; i < THUNDER_BOLT_COUNT; i++) {
+    const x = BALL_R + Math.random() * (W - BALL_R * 2);
+    projectiles.push({
+      type: 'bolt',
+      x,
+      frames: THUNDER_BOLT_FRAMES,
+      ownerId: owner.id,
+      hitBalls: new Set(), // track which balls already hit
+      done: false,
+    });
+  }
+}
+
+function launchSeeds(owner) {
+  // 4 seeds spread around branch direction, one random one is the heal seed
+  const baseAngle = owner.orbitAngle;
+  const healIdx   = Math.floor(Math.random() * 4);
+  for (let i = 0; i < 4; i++) {
+    const angle = baseAngle + (Math.PI / 2) * i;
+    projectiles.push({
+      type: 'seed',
+      x: owner.x + Math.cos(angle) * WEAPON_ORBIT_R,
+      y: owner.y + Math.sin(angle) * WEAPON_ORBIT_R,
+      vx: Math.cos(angle) * PLANT_SEED_SPEED,
+      vy: Math.sin(angle) * PLANT_SEED_SPEED,
+      ownerId: owner.id,
+      isHeal: i === healIdx,
+      hitCd: 0,
+      traveled: 0,
+      done: false,
+    });
+  }
+}
   const angle = owner.orbitAngle;
   projectiles.push({
     x: owner.x + Math.cos(angle) * WEAPON_ORBIT_R,
@@ -542,6 +672,59 @@ function launchShuriken(owner) {
 function updateProjectiles() {
   for (const p of projectiles) {
     if (p.done) continue;
+
+    // ── Bolt projectile ──
+    if (p.type === 'bolt') {
+      p.frames--;
+      if (p.frames <= 0) { p.done = true; continue; }
+      // Check all balls for hit (both attacker and target take damage)
+      for (const b of balls) {
+        if (p.hitBalls.has(b.id)) continue;
+        if (Math.abs(b.x - p.x) < BALL_R + 10) {
+          p.hitBalls.add(b.id);
+          b.hp -= THUNDER_BOLT_DMG;
+          // Save momentum and stun
+          b.stunVx    = b.vx;
+          b.stunVy    = b.vy;
+          b.vx = 0; b.vy = 0;
+          b.stunFrames = THUNDER_STUN_FRAMES;
+          b.kbFrames   = 0; // cancel any knockback
+          spawnParticles(b.x, b.y, '#fde68a', 12);
+        }
+      }
+      continue;
+    }
+      p.x += p.vx; p.y += p.vy;
+      p.traveled += Math.hypot(p.vx, p.vy);
+      if (p.hitCd > 0) p.hitCd--;
+      // Wall bounce
+      if (p.x < 6)     { p.x = 6;     p.vx =  Math.abs(p.vx); }
+      if (p.x > W - 6) { p.x = W - 6; p.vx = -Math.abs(p.vx); }
+      if (p.y < 6)     { p.y = 6;     p.vy =  Math.abs(p.vy); }
+      if (p.y > H - 6) { p.y = H - 6; p.vy = -Math.abs(p.vy); }
+      // Expire after crossing map diagonally (~1.5x)
+      if (p.traveled > Math.hypot(W, H) * 0.9) { p.done = true; continue; }
+      if (p.hitCd === 0) {
+        if (p.isHeal) {
+          // Heal seed: heals owner
+          const owner = balls.find(b => b.id === p.ownerId);
+          if (owner && Math.hypot(p.x - owner.x, p.y - owner.y) < BALL_R + 6) {
+            owner.hp = Math.min(owner.maxHp, owner.hp + PLANT_SEED_HEAL);
+            spawnParticles(owner.x, owner.y, '#4ade80', 6);
+            p.done = true;
+          }
+        } else {
+          // Damage seed: hits enemy
+          const target = balls.find(b => b.id !== p.ownerId);
+          if (target && Math.hypot(p.x - target.x, p.y - target.y) < BALL_R + 6) {
+            target.hp -= PLANT_SEED_DMG;
+            spawnParticles(target.x, target.y, '#4ade80', 6);
+            p.done = true;
+          }
+        }
+      }
+      continue;
+    }
     if (p.phase === 'flying') {
       p.spinAngle += 0.2;
       if (p.flyingHitCd > 0) p.flyingHitCd--;
@@ -655,8 +838,10 @@ function draw() {
 
   // Projectiles
   for (const p of projectiles) {
-    if (p.phase === 'exploding') drawTornado(p);
-    if (p.phase === 'flying')    drawFlyingShuriken(p);
+    if (p.type === 'bolt')           drawBolt(p);
+    if (p.type === 'seed')           drawSeed(p);
+    if (p.phase === 'exploding')     drawTornado(p);
+    if (p.phase === 'flying')        drawFlyingShuriken(p);
   }
 
   // Balls + weapons + HP bars
@@ -666,6 +851,8 @@ function draw() {
     if (b.weaponType === 'axe')      drawIceAxe(b);
     if (b.weaponType === 'shuriken') drawShuriken(b);
     if (b.weaponType === 'sword')    drawFireSword(b);
+    if (b.weaponType === 'branch')   drawBranch(b);
+    if (b.weaponType === 'hammer')   drawHammer(b);
     drawEarthCooldown(b);
     drawHpBar(b);
   }
@@ -688,6 +875,14 @@ function drawBall(b) {
     ctx.beginPath(); ctx.arc(b.x, b.y, BALL_R+8, 0, Math.PI*2);
     ctx.strokeStyle = 'rgba(251,146,60,0.8)'; ctx.lineWidth = 3;
     ctx.setLineDash([4,4]); ctx.shadowColor = '#fb923c'; ctx.shadowBlur = 12; ctx.stroke(); ctx.restore();
+  }
+
+  // Stun ring
+  if (b.stunFrames > 0) {
+    ctx.save();
+    ctx.beginPath(); ctx.arc(b.x, b.y, BALL_R+10, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(253,224,71,0.9)'; ctx.lineWidth = 4;
+    ctx.setLineDash([3,3]); ctx.shadowColor = '#fde047'; ctx.shadowBlur = 16; ctx.stroke(); ctx.restore();
   }
   // Halo
   ctx.save();
@@ -810,8 +1005,84 @@ function drawTornado(p) {
   ctx.restore(); ctx.globalAlpha = 1; ctx.restore();
 }
 
+function drawBranch(b) {
+  const S  = b.weaponSize;
+  const wx = b.x + Math.cos(b.orbitAngle) * WEAPON_ORBIT_R;
+  const wy = b.y + Math.sin(b.orbitAngle) * WEAPON_ORBIT_R;
+  ctx.save(); ctx.translate(wx, wy); ctx.rotate(b.orbitAngle + Math.PI / 4);
+  // Main branch
+  ctx.beginPath(); ctx.moveTo(0, -S * 1.1); ctx.lineTo(0, S * 0.5);
+  ctx.strokeStyle = '#713f12'; ctx.lineWidth = 7; ctx.lineCap = 'round';
+  ctx.shadowColor = '#4ade80'; ctx.shadowBlur = 12; ctx.stroke();
+  // Side twigs
+  ctx.beginPath(); ctx.moveTo(0, -S * 0.5); ctx.lineTo(S * 0.35, -S * 0.8);
+  ctx.strokeStyle = '#854d0e'; ctx.lineWidth = 4; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, -S * 0.1); ctx.lineTo(-S * 0.3, -S * 0.35);
+  ctx.strokeStyle = '#854d0e'; ctx.lineWidth = 3; ctx.stroke();
+  // Leaves
+  for (const [lx, ly, r] of [[S*0.35, -S*0.8, 7], [-S*0.3, -S*0.35, 6], [0, -S*1.1, 8]]) {
+    ctx.beginPath(); ctx.arc(lx, ly, r, 0, Math.PI*2);
+    ctx.fillStyle = '#4ade80'; ctx.shadowColor = '#86efac'; ctx.shadowBlur = 10; ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawSeed(p) {
+  ctx.save();
+  ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI*2);
+  ctx.fillStyle   = p.isHeal ? '#f0fdf4' : '#15803d';
+  ctx.shadowColor = p.isHeal ? '#86efac' : '#4ade80';
+  ctx.shadowBlur  = 12;
+  ctx.fill();
+  ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+  ctx.fillStyle = p.isHeal ? '#4ade80' : '#bbf7d0';
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawHammer(b) {
+  const S  = b.weaponSize;
+  const wx = b.x + Math.cos(b.orbitAngle) * WEAPON_ORBIT_R;
+  const wy = b.y + Math.sin(b.orbitAngle) * WEAPON_ORBIT_R;
+  ctx.save(); ctx.translate(wx, wy); ctx.rotate(b.orbitAngle + Math.PI / 4);
+  // Handle
+  ctx.beginPath(); ctx.moveTo(0, S * 0.6); ctx.lineTo(0, -S * 0.5);
+  ctx.strokeStyle = '#4c1d95'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+  ctx.shadowColor = '#a78bfa'; ctx.shadowBlur = 10; ctx.stroke();
+  // Head
+  ctx.beginPath(); ctx.roundRect(-S * 0.4, -S * 1.0, S * 0.8, S * 0.5, 4);
+  const hg = ctx.createLinearGradient(-S*0.4, -S, S*0.4, -S*0.5);
+  hg.addColorStop(0, '#ede9fe'); hg.addColorStop(0.5, '#a78bfa'); hg.addColorStop(1, '#6d28d9');
+  ctx.fillStyle = hg; ctx.shadowColor = '#c4b5fd'; ctx.shadowBlur = 20; ctx.fill();
+  ctx.strokeStyle = '#ddd6fe'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.restore();
+}
+
+function drawBolt(p) {
+  const prog  = 1 - p.frames / THUNDER_BOLT_FRAMES;
+  const alpha = prog < 0.15 ? prog / 0.15 : prog > 0.8 ? (1 - prog) / 0.2 : 1;
+  ctx.save(); ctx.globalAlpha = Math.min(alpha, 1);
+  // Outer glow bolt
+  ctx.beginPath(); ctx.moveTo(p.x, 0);
+  let cy = 0;
+  for (let i = 1; i <= 8; i++) {
+    cy = i * (H / 8);
+    ctx.lineTo(p.x + (i < 8 ? (Math.random()-0.5)*38 : 0), cy);
+  }
+  ctx.strokeStyle = '#fde047'; ctx.lineWidth = 5;
+  ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 30; ctx.stroke();
+  // Bright white core
+  ctx.beginPath(); ctx.moveTo(p.x, 0);
+  cy = 0;
+  for (let i = 1; i <= 8; i++) {
+    cy = i * (H / 8);
+    ctx.lineTo(p.x + (i < 8 ? (Math.random()-0.5)*18 : 0), cy);
+  }
+  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.shadowBlur = 8; ctx.stroke();
+  ctx.globalAlpha = 1; ctx.restore();
+}
+
 function drawQuakeRing(b) {
-  if (b.quakeFrames <= 0) return;
   const prog  = 1 - b.quakeFrames / QUAKE_FRAMES;
   const alpha = prog < 0.4 ? prog / 0.4 : (1 - prog) / 0.6;
   const r     = QUAKE_RADIUS * prog;
