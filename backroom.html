@@ -571,10 +571,8 @@ function update() {
     } else if (b.kbFrames===0) {
       if (spd(b)<BASE_SPEED*0.95) setSpd(b,BASE_SPEED);
     }
-    if (b.stunFrames===0) {
+    if (b.stunFrames===0 && b.bindFrames===0) {
       b.x+=b.vx; b.y+=b.vy;
-      // Bound balls: halt movement
-      if (b.bindFrames>0) { b.vx=0; b.vy=0; }
       let bounced=false;
       if (b.x-BALL_R<0)  { b.x=BALL_R;     b.vx= Math.abs(b.vx); bounced=true; }
       if (b.x+BALL_R>W)  { b.x=W-BALL_R;   b.vx=-Math.abs(b.vx); bounced=true; }
@@ -584,6 +582,9 @@ function update() {
         if (b.kbFrames===0) setSpd(b, b.slowFrames>0 ? BASE_SPEED*SLOW_FACTOR : BASE_SPEED);
         spawnParticles(b.x,b.y,b.glowColor,3);
       }
+    } else if (b.bindFrames>0) {
+      // Bound: zero out all velocity so it doesn't drift
+      b.vx=0; b.vy=0; b.kbFrames=0;
     }
     if (b.weaponType==='shuriken' && b.tornadoCd===0) {
       b.tornadoCd=TORNADO_CD; b.shurikenOut=true; launchShuriken(b);
@@ -691,8 +692,6 @@ function update() {
         b.bindTick = 0;
         spawnParticles(b.x, b.y, '#15803d', 3);
       }
-      // Bound balls can't move
-      b.vx = 0; b.vy = 0;
     }
 
     // Plant: root spawn CD
@@ -700,11 +699,13 @@ function update() {
       if (b.rootCd>0) b.rootCd--;
       if (b.rootCd===0) {
         b.rootCd = PLANT_ROOT_CD;
-        plantRoots.push({
-          x: BALL_R*2+Math.random()*(W-BALL_R*4),
-          y: BALL_R*2+Math.random()*(H-BALL_R*4),
-          ownerId: b.uid, done: false,
-        });
+        for (let ri=0; ri<2; ri++) {
+          plantRoots.push({
+            x: BALL_R*2+Math.random()*(W-BALL_R*4),
+            y: BALL_R*2+Math.random()*(H-BALL_R*4),
+            ownerId: b.uid, done: false,
+          });
+        }
       }
     }
 
