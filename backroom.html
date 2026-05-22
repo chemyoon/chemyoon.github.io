@@ -7,30 +7,22 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body {
-    width: 100%; height: 100%;
-  }
+  html, body { width: 100%; height: 100%; }
   body {
     background: #0f172a;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     min-height: 100vh;
     font-family: 'Fredoka One', cursive;
-    overflow-x: hidden;
-    overflow-y: auto;
-    padding: 12px;
+    overflow-x: hidden; overflow-y: auto; padding: 12px;
   }
-
-  /* ── Select Screen ── */
   #select-screen {
     display: flex; flex-direction: column; align-items: center;
-    gap: clamp(12px, 2.5vh, 32px);
-    width: 100%; max-width: 100vw;
+    gap: clamp(12px, 2.5vh, 32px); width: 100%; max-width: 100vw;
   }
   #select-screen h1 {
     font-size: clamp(1.2rem, 4vw, 2.4rem); color: #fff; letter-spacing: 3px;
-    text-shadow: 0 0 30px rgba(255,255,255,0.3);
-    text-align: center;
+    text-shadow: 0 0 30px rgba(255,255,255,0.3); text-align: center;
   }
   .select-row { display: flex; gap: clamp(10px, 2vw, 40px); align-items: flex-start; flex-wrap: wrap; justify-content: center; }
   .player-select { display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -45,8 +37,7 @@
     background: #1e293b; border: 3px solid #334155;
     border-radius: 16px; padding: clamp(8px, 1.2vw, 16px) clamp(5px, 0.8vw, 10px) clamp(6px, 1vw, 12px);
     display: flex; flex-direction: column; align-items: center; gap: clamp(4px, 0.6vw, 8px);
-    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
-    user-select: none;
+    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; user-select: none;
   }
   .char-card:hover { transform: translateY(-4px); }
   .char-card.selected-p1 { border-color: #60a5fa; box-shadow: 0 0 20px #3b82f666; }
@@ -73,8 +64,6 @@
   #start-btn:hover { opacity: 0.9; transform: scale(1.03); }
   #start-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
   .select-hint { font-size: clamp(0.65rem, 1.2vw, 0.8rem); color: #475569; font-family: 'Nunito', sans-serif; }
-
-  /* Player count toggle */
   .player-count-row {
     display: flex; align-items: center; gap: 14px;
     font-family: 'Nunito', sans-serif; font-weight: 700; color: #94a3b8;
@@ -88,8 +77,6 @@
   }
   .count-btn.active { background: #3b82f6; border-color: #60a5fa; color: #fff; box-shadow: 0 0 14px #3b82f666; }
   .count-btn:hover:not(.active) { border-color: #64748b; color: #cbd5e1; }
-
-  /* Stats row */
   #stats { display: flex; justify-content: space-between; gap: 6px;
     width: 100%; margin-top: clamp(6px,1vh,10px); padding: 0 4px; flex-wrap: wrap; }
   .stat-box {
@@ -109,18 +96,6 @@
     box-shadow: 0 0 40px rgba(0,0,0,0.6); position: relative; overflow: hidden;
   }
   canvas { display: block; }
-  #stats {
-    display: flex; justify-content: space-between;
-    width: 100%; margin-top: clamp(6px, 1vh, 10px); padding: 0 4px;
-  }
-  .stat-box {
-    background: #0f172a; border-radius: 8px;
-    padding: clamp(5px, 1vh, 8px) clamp(8px, 1.5vw, 16px);
-    font-size: clamp(0.65rem, 1.2vw, 0.85rem); border: 2px solid #334155;
-  }
-  .stat-box span { display: block; font-family: 'Nunito', sans-serif; font-size: clamp(0.55rem, 1vw, 0.72rem); color: #94a3b8; }
-  #p1-stat { text-align: left; }
-  #p2-stat { text-align: right; }
   .battle-btns { display: flex; gap: 12px; margin-top: 12px; }
   .battle-btn {
     background: #334155; color: #fff; border: none; border-radius: 8px;
@@ -174,19 +149,19 @@ const CHARACTERS = {
   ice: {
     id:'ice', name:'ICE', icon:'❄️', desc:'Slows enemies\nwith a frost axe',
     color:'#7dd3fc', glowColor:'#bae6fd', shadowColor:'#0ea5e9',
-    weaponType:'axe', weaponSize:52, orbitSpeed:0.10,
+    weaponType:'axe', weaponSize:52, orbitSpeed:0.067,
     statDesc: () => `Axe DMG: ${ICE_DAMAGE} | Slow: ${(SLOW_FRAMES/60).toFixed(1)}s`,
   },
   wind: {
     id:'wind', name:'WIND', icon:'🌪️', desc:'Throws shuriken\n& teleports',
     color:'#d4a843', glowColor:'#fcd34d', shadowColor:'#92400e',
-    weaponType:'shuriken', weaponSize:24, orbitSpeed:0.10,
+    weaponType:'shuriken', weaponSize:24, orbitSpeed:0.067,
     statDesc: () => `Shuriken: 7 | Tornado: ${TORNADO_DAMAGE} | CD: ${(TORNADO_CD/60).toFixed(1)}s`,
   },
   fire: {
     id:'fire', name:'FIRE', icon:'🔥', desc:'Sword + burn\ndot on hit',
     color:'#fb923c', glowColor:'#fdba74', shadowColor:'#c2410c',
-    weaponType:'sword', weaponSize:42, orbitSpeed:0.10,
+    weaponType:'sword', weaponSize:42, orbitSpeed:0.067,
     statDesc: () => `Sword DMG: ${FIRE_DIRECT_DMG} | Burn: ${FIRE_BURN_TOTAL} over ${(FIRE_BURN_FRAMES/60).toFixed(1)}s`,
   },
   earth: {
@@ -204,19 +179,19 @@ const CHARACTERS = {
   thunder: {
     id:'thunder', name:'THUNDER', icon:'⚡', desc:'Hammer knockback\n+ lightning strikes',
     color:'#a78bfa', glowColor:'#c4b5fd', shadowColor:'#6d28d9',
-    weaponType:'hammer', weaponSize:46, orbitSpeed:0.10,
+    weaponType:'hammer', weaponSize:46, orbitSpeed:0.067,
     statDesc: () => `Hammer DMG: ${THUNDER_DMG} | Lightning: ${THUNDER_BOLT_DMG} | CD: ${(THUNDER_BOLT_CD/60).toFixed(1)}s`,
   },
   water: {
     id:'water', name:'WATER', icon:'💧', desc:'Spear (center-grip)\n+ throws water lance',
     color:'#38bdf8', glowColor:'#7dd3fc', shadowColor:'#0284c7',
-    weaponType:'spear', weaponSize:0, orbitSpeed:0.10,
+    weaponType:'spear', weaponSize:0, orbitSpeed:0.067,
     statDesc: () => `Spear DMG: ${WATER_SPEAR_DMG} | Lance DMG: ${WATER_LANCE_DMG} | CD: ${(WATER_LANCE_CD/60).toFixed(1)}s`,
   },
   mechanic: {
     id:'mechanic', name:'MECHANIC', icon:'🔧', desc:'Wrench + deploys\nauto-targeting cannon',
     color:'#f97316', glowColor:'#fdba74', shadowColor:'#c2410c',
-    weaponType:'wrench', weaponSize:31, orbitSpeed:0.10,
+    weaponType:'wrench', weaponSize:31, orbitSpeed:0.067,
     statDesc: () => `Wrench DMG: ${MECH_WRENCH_DMG} | Cannon DMG: ${MECH_CANNON_DMG} | CD: 1s`,
   },
   poison: {
@@ -234,8 +209,27 @@ const CHARACTERS = {
   shadow: {
     id:'shadow', name:'SHADOW', icon:'👤', desc:'Orbit kunai DMG4\n+ shadow clone 5s',
     color:'#475569', glowColor:'#94a3b8', shadowColor:'#1e293b',
-    weaponType:'kunai', weaponSize:22, orbitSpeed:0.1,
+    weaponType:'kunai', weaponSize:22, orbitSpeed:0.067,
     statDesc: () => `Kunai DMG: ${SHADOW_KUNAI_DMG} | Clone CD: ${(SHADOW_CLONE_CD/60).toFixed(1)}s | Duration: 5s`,
+  },
+  // ── NEW CHARACTERS ──
+  blood: {
+    id:'blood', name:'BLOOD', icon:'🩸', desc:'Steal 3 HP on\ncollision + blood wave',
+    color:'#dc2626', glowColor:'#f87171', shadowColor:'#7f1d1d',
+    weaponType:'blood', weaponSize:0, orbitSpeed:0,
+    statDesc: () => `Steal: ${BLOOD_STEAL} HP | Wave: ${BLOOD_WAVE_DMG} DMG | Every ${BLOOD_WAVE_THRESHOLD} HP stolen`,
+  },
+  samurai: {
+    id:'samurai', name:'SAMURAI', icon:'⚔️', desc:'Katana orbit\n+ dash through enemies',
+    color:'#be123c', glowColor:'#fb7185', shadowColor:'#881337',
+    weaponType:'katana', weaponSize:52, orbitSpeed:0.067,
+    statDesc: () => `Katana DMG: ${SAMURAI_KATANA_DMG} | Dash DMG: ${SAMURAI_DASH_DMG} | CD: ${(SAMURAI_DASH_CD/60).toFixed(1)}s`,
+  },
+  berserker: {
+    id:'berserker', name:'BERSERK', icon:'💢', desc:'Greatsword\n7s normal / 4s berserk',
+    color:'#b45309', glowColor:'#fbbf24', shadowColor:'#78350f',
+    weaponType:'greatsword', weaponSize:52, orbitSpeed:0.067,
+    statDesc: () => `Normal DMG: ${BERSERK_NORMAL_DMG} | Berserk DMG: ${BERSERK_RAGE_DMG} | Speed: ×1.8`,
   },
 };
 
@@ -244,58 +238,54 @@ const ctx    = canvas.getContext('2d');
 let W = 650, H = 650;
 
 function resizeCanvas() {
-  const maxSize = Math.min(
-    window.innerWidth  - 32,
-    window.innerHeight - 220
-  );
+  const maxSize = Math.min(window.innerWidth-32, window.innerHeight-220);
   const size = Math.max(320, Math.min(650, maxSize));
   W = size; H = size;
-  canvas.width  = W;
-  canvas.height = H;
+  canvas.width = W; canvas.height = H;
   const aw = document.getElementById('arena-wrapper');
-  if (aw) { aw.style.width = W + 'px'; aw.style.height = H + 'px'; }
+  if (aw) { aw.style.width = W+'px'; aw.style.height = H+'px'; }
   const st = document.getElementById('stats');
-  if (st) st.style.width = W + 'px';
+  if (st) st.style.width = W+'px';
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-const BALL_R          = 28;
-const BASE_SPEED      = 9.6;
-const SLOW_FACTOR     = 0.38;
-const WEAPON_ORBIT_R  = 68;
+const BALL_R         = 28;
+const BASE_SPEED     = 4.8;  // 9.6 * 2/3 * 3/4
+const SLOW_FACTOR    = 0.38;
+const WEAPON_ORBIT_R = 68;
 
-  //Ice sword
-const ICE_DAMAGE      = 8;
-const SLOW_FRAMES     = 117;
+// Ice
+const ICE_DAMAGE   = 8;
+const SLOW_FRAMES  = 117;
 
-  // Wind
-const TORNADO_DAMAGE  = 14;
-const TORNADO_CD      = 210;
-const TORNADO_TRAVEL  = 900;
-const TORNADO_RADIUS  = 180;
-const TORNADO_FRAMES  = 28;
-const PROJ_SPEED      = 15.25;
+// Wind
+const TORNADO_DAMAGE = 14;
+const TORNADO_CD     = 210;
+const TORNADO_TRAVEL = 900;
+const TORNADO_RADIUS = 180;
+const TORNADO_FRAMES = 28;
+const PROJ_SPEED     = 15.25;
 
-  // Fire sword
+// Fire
 const FIRE_DIRECT_DMG   = 6;
 const FIRE_BURN_TOTAL   = 6;
 const FIRE_BURN_FRAMES  = 36;
 const FIRE_SWORD_HIT_CD = 20;
 
-  //EarthQuake
-const QUAKE_DAMAGE    = 20;
-const QUAKE_CD        = 360;
-const QUAKE_RADIUS    = Math.round(BALL_R * 1.8 * 3 * 3 / 2);
-const QUAKE_FRAMES    = 72;
+// Earth
+const QUAKE_DAMAGE = 20;
+const QUAKE_CD     = 360;
+const QUAKE_RADIUS = Math.round(BALL_R * 1.8 * 3 * 3 / 2);
+const QUAKE_FRAMES = 72;
 
-  // Plant wand
+// Plant
 const PLANT_SEED_DMG   = 6;
 const PLANT_SEED_HEAL  = 2;
 const PLANT_SEED_CD    = 168;
 const PLANT_SEED_SPEED = 8.0;
 
-  // Thunder hammer
+// Thunder
 const THUNDER_DMG         = 4;
 const THUNDER_HIT_CD      = 20;
 const THUNDER_KNOCKBACK   = BASE_SPEED * 1.5;
@@ -306,35 +296,35 @@ const THUNDER_BOLT_DMG    = 6;
 const THUNDER_BOLT_FRAMES = 48;
 const THUNDER_STUN_FRAMES = 24;
 
-// Water spear
-const WATER_SPEAR_DMG        = 5;
-const WATER_SPEAR_HIT_CD     = 20;  // reduced: faster hit registration
-const WATER_SPEAR_LEN        = () => W * 0.25;   // same as old whip length
-const WATER_LANCE_CD         = 300;  // 5s @60fps
-const WATER_LANCE_SPEED      = BASE_SPEED * 1.7;
-const WATER_LANCE_DMG        = 3;    // thrown lance + afterimage
-const WATER_LANCE_TRAIL_LEN  = 8;    // number of afterimage segments
-const WATER_VORTEX_CD        = 120;  // 2s cooldown (starts AFTER vortex ends)
-const WATER_VORTEX_FRAMES    = 150;  // 2.5s duration
-const WATER_VORTEX_RADIUS    = BALL_R * 2.4;
-const WATER_VORTEX_DMG_INTERVAL = 12; // 0.2s @60fps → 1 dmg
+// Water
+const WATER_SPEAR_DMG       = 5;
+const WATER_SPEAR_HIT_CD    = 20;
+const WATER_SPEAR_LEN       = () => W * 0.25;
+const WATER_LANCE_CD        = 300;
+const WATER_LANCE_SPEED     = BASE_SPEED * 1.7;
+const WATER_LANCE_DMG       = 3;
+const WATER_LANCE_TRAIL_LEN = 8;
+const WATER_VORTEX_CD       = 120;
+const WATER_VORTEX_FRAMES   = 150;
+const WATER_VORTEX_RADIUS   = BALL_R * 2.4;
+const WATER_VORTEX_DMG_INTERVAL = 12;
 
 // Mechanic
-const MECH_WRENCH_DMG     = 6;
-const MECH_WRENCH_HIT_CD  = 20;
-const MECH_CANNON_FIRE_CD = 48;    // 0.8s @60fps
-const MECH_CANNON_LIFE    = 480;   // 7s @60fps
-const MECH_CANNON_DMG     = 2;
-const MECH_CANNON_SPEED   = BASE_SPEED * (4/3);
-const MECH_MAX_CANNONS    = 5;
+const MECH_WRENCH_DMG    = 6;
+const MECH_WRENCH_HIT_CD = 20;
+const MECH_CANNON_FIRE_CD = 48;
+const MECH_CANNON_LIFE   = 480;
+const MECH_CANNON_DMG    = 2;
+const MECH_CANNON_SPEED  = BASE_SPEED * (4/3);
+const MECH_MAX_CANNONS   = 5;
 
-// Poison (updated dmg)
+// Poison
 const POISON_CONTACT_FRAMES  = 180;
 const POISON_CONTACT_TICK    = 30;
-const POISON_CONTACT_DMG     = 2;   // was 1, now 2 per tick
+const POISON_CONTACT_DMG     = 2;
 const POISON_CLOUD_FRAMES    = 180;
 const POISON_CLOUD_TICK      = 30;
-const POISON_CLOUD_DMG       = 3;   // was 1, now 3 per tick
+const POISON_CLOUD_DMG       = 3;
 const POISON_CLOUD_DOT_FRAMES= 240;
 const POISON_CLOUD_CD        = 300;
 const POISON_CLOUD_RADIUS    = BALL_R * 3;
@@ -342,41 +332,65 @@ const POISON_ANTIDOTE_HEAL   = 5;
 const POISON_CONTACT_HIT_CD  = 40;
 
 // Plant roots
-const PLANT_ROOT_CD          = 300; // 5s @60fps
+const PLANT_ROOT_CD          = 300;
 const PLANT_ROOT_RADIUS      = BALL_R * 0.5;
-const PLANT_ROOT_BIND_FRAMES = 180; // 3.0 s
+const PLANT_ROOT_BIND_FRAMES = 180;
 const PLANT_ROOT_TICK        = 30;
 const PLANT_ROOT_DMG         = 1;
 const PLANT_ROOT_HEAL        = 5;
 
 // Blackhole
-const BH_PHASE_CD      = 300;  // 5s idle before phase
-const BH_PHASE_FRAMES  = 120;  // 2s phased (immune)
-const BH_HOLE_FRAMES   = 180;  // 3s blackhole duration
-const BH_HOLE_PULL     = 0.99 * 1.2; // vortex strength × 1.2 (per blackhole)
-const BH_HOLE_DMG_TICK = 5;    // 5프레임마다 2 데미지
-const BH_HOLE_DMG      = 2;
+const BH_PHASE_CD     = 300;
+const BH_PHASE_FRAMES = 120;
+const BH_HOLE_FRAMES  = 180;
+const BH_HOLE_PULL    = 0.99 * 1.2;
+const BH_HOLE_DMG_TICK= 5;
+const BH_HOLE_DMG     = 2;
 
 // Shadow
-const SHADOW_KUNAI_DMG   = 6;
+const SHADOW_KUNAI_DMG    = 6;
 const SHADOW_KUNAI_HIT_CD = 20;
-const SHADOW_CLONE_CD    = 300;  // 5s between clones
-const SHADOW_CLONE_LIFE  = 300;  // 5s clone duration
+const SHADOW_CLONE_CD     = 300;
+const SHADOW_CLONE_LIFE   = 300;
 
-// ── Player colours / labels ──
+// ── Blood ──
+const BLOOD_STEAL           = 5;
+const BLOOD_WAVE_THRESHOLD  = 30;
+const BLOOD_WAVE_DMG        = 8;
+const BLOOD_WAVE_RADIUS     = BALL_R * 5.0;
+const BLOOD_WAVE_KB         = BASE_SPEED * 1.6;
+const BLOOD_WAVE_KB_FRAMES  = 45;
+const BLOOD_COLLISION_CD    = 30;   // frames between steal hits
+
+// ── Samurai ──
+const SAMURAI_KATANA_DMG  = 5;
+const SAMURAI_KATANA_HIT_CD = 20;
+const SAMURAI_DASH_CD     = 240;   // 4s
+const SAMURAI_DASH_SPEED  = BASE_SPEED * 6;
+const SAMURAI_DASH_DMG    = 8;
+const SAMURAI_DASH_HIT_CD = 12;   // frames between dash hits per enemy
+
+// ── Berserker ──
+const BERSERK_NORMAL_FRAMES = 540; // 9s
+const BERSERK_RAGE_FRAMES   = 180; // 3s
+const BERSERK_NORMAL_DMG    = 2;
+const BERSERK_RAGE_DMG      = 10;
+const BERSERK_SPEED_MULT    = 1.8;
+const BERSERK_HIT_CD        = 20;
+const BERSERK_SWORD_HIT_CD  = 20;
+
+// Player colours
 const PLAYER_COLORS = ['#60a5fa','#f87171','#4ade80','#fbbf24'];
 const PLAYER_ICONS  = ['🔵','🔴','🟢','🟡'];
 const PLAYER_NAMES  = ['Player 1','Player 2','Player 3','Player 4'];
 
-let playerCount  = 2;
-let selectedChars = [null, null, null, null]; // up to 4
+let playerCount   = 2;
+let selectedChars = [null,null,null,null];
 
 function setPlayerCount(n) {
   playerCount = n;
   selectedChars = Array(4).fill(null);
-  document.querySelectorAll('.count-btn').forEach((btn,i) => {
-    btn.classList.toggle('active', i+2 === n);
-  });
+  document.querySelectorAll('.count-btn').forEach((btn,i) => btn.classList.toggle('active', i+2===n));
   buildSelectScreen();
 }
 
@@ -384,1618 +398,1289 @@ function buildSelectScreen() {
   const charList = Object.values(CHARACTERS);
   const row = document.getElementById('player-select-row');
   row.innerHTML = '';
-
   for (let pi=0; pi<playerCount; pi++) {
-    if (pi > 0) {
+    if (pi>0) {
       const vs = document.createElement('div');
-      vs.className = 'vs-divider';
-      vs.innerHTML = '<span>VS</span>';
-      row.appendChild(vs);
+      vs.className='vs-divider'; vs.innerHTML='<span>VS</span>'; row.appendChild(vs);
     }
-    const sec = document.createElement('div');
-    sec.className = 'player-select';
-    const label = document.createElement('div');
-    label.className = 'player-label';
-    label.textContent = `${PLAYER_ICONS[pi]} ${PLAYER_NAMES[pi]}`;
-    label.style.color = PLAYER_COLORS[pi];
-    const cards = document.createElement('div');
-    cards.className = 'char-cards';
-    cards.id = `p${pi+1}-cards`;
+    const sec = document.createElement('div'); sec.className='player-select';
+    const label = document.createElement('div'); label.className='player-label';
+    label.textContent=`${PLAYER_ICONS[pi]} ${PLAYER_NAMES[pi]}`; label.style.color=PLAYER_COLORS[pi];
+    const cards = document.createElement('div'); cards.className='char-cards'; cards.id=`p${pi+1}-cards`;
     charList.forEach(ch => {
-      const card = document.createElement('div');
-      card.className = 'char-card';
-      card.dataset.id = ch.id;
-      card.innerHTML = `<div class="char-icon">${ch.icon}</div><div class="char-name">${ch.name}</div><div class="char-desc">${ch.desc.replace('\n','<br>')}</div>`;
-      card.onclick = () => selectChar(pi, ch.id);
-      cards.appendChild(card);
+      const card = document.createElement('div'); card.className='char-card'; card.dataset.id=ch.id;
+      card.innerHTML=`<div class="char-icon">${ch.icon}</div><div class="char-name">${ch.name}</div><div class="char-desc">${ch.desc.replace('\n','<br>')}</div>`;
+      card.onclick=()=>selectChar(pi,ch.id); cards.appendChild(card);
     });
-    sec.appendChild(label);
-    sec.appendChild(cards);
-    row.appendChild(sec);
+    sec.appendChild(label); sec.appendChild(cards); row.appendChild(sec);
   }
-  updateCardHighlights();
-  checkStartReady();
+  updateCardHighlights(); checkStartReady();
 }
 
 function selectChar(pi, charId) {
-  selectedChars[pi] = charId;
-  updateCardHighlights();
-  checkStartReady();
+  selectedChars[pi]=charId; updateCardHighlights(); checkStartReady();
 }
-
 function checkStartReady() {
-  const ready = selectedChars.slice(0, playerCount).every(c => c !== null);
-  document.getElementById('start-btn').disabled = !ready;
+  document.getElementById('start-btn').disabled = !selectedChars.slice(0,playerCount).every(c=>c!==null);
 }
-
 function updateCardHighlights() {
-  document.querySelectorAll('.char-card').forEach(c => {
-    for (let pi=0; pi<4; pi++) c.classList.remove(`selected-p${pi+1}`);
+  document.querySelectorAll('.char-card').forEach(c=>{
+    for(let pi=0;pi<4;pi++) c.classList.remove(`selected-p${pi+1}`);
   });
-  for (let pi=0; pi<playerCount; pi++) {
-    document.querySelectorAll(`#p${pi+1}-cards .char-card`).forEach(c => {
-      if (c.dataset.id === selectedChars[pi]) c.classList.add(`selected-p${pi+1}`);
+  for(let pi=0;pi<playerCount;pi++) {
+    document.querySelectorAll(`#p${pi+1}-cards .char-card`).forEach(c=>{
+      if(c.dataset.id===selectedChars[pi]) c.classList.add(`selected-p${pi+1}`);
     });
   }
 }
-
 function goSelect() {
-  gameOver = true;
+  gameOver=true;
   document.getElementById('battle-screen').classList.remove('active');
-  document.getElementById('select-screen').style.display = 'flex';
+  document.getElementById('select-screen').style.display='flex';
 }
-
 function startBattle() {
-  document.getElementById('select-screen').style.display = 'none';
+  document.getElementById('select-screen').style.display='none';
   document.getElementById('battle-screen').classList.add('active');
-  const chosen = selectedChars.slice(0, playerCount);
-  document.getElementById('battle-title').textContent =
-    chosen.map(id => `${CHARACTERS[id].icon}${CHARACTERS[id].name}`).join(' VS ');
-  resizeCanvas();
-  initGame(chosen);
+  const chosen=selectedChars.slice(0,playerCount);
+  document.getElementById('battle-title').textContent=chosen.map(id=>`${CHARACTERS[id].icon}${CHARACTERS[id].name}`).join(' VS ');
+  resizeCanvas(); initGame(chosen);
 }
-
 function restartBattle() {
   document.getElementById('winner-overlay').classList.remove('show');
-  initGame(selectedChars.slice(0, playerCount));
+  initGame(selectedChars.slice(0,playerCount));
 }
 
 let balls, projectiles, particles, cannons, vortices, poisonClouds, plantRoots, blackholes, gameOver;
 
-function spd(b) { return Math.hypot(b.vx, b.vy); }
-function setSpd(b, s) {
-  const cur = spd(b);
-  if (cur < 0.001) { b.vx = s; b.vy = 0; return; }
-  b.vx = b.vx/cur*s; b.vy = b.vy/cur*s;
+function spd(b) { return Math.hypot(b.vx,b.vy); }
+function setSpd(b,s) {
+  const cur=spd(b);
+  if(cur<0.001){b.vx=s;b.vy=0;return;}
+  b.vx=b.vx/cur*s; b.vy=b.vy/cur*s;
 }
 
-let _ballUid = 0;
+let _ballUid=0;
 function makeBall(charId, x, y, vx, vy) {
-  const ch = CHARACTERS[charId];
+  const ch=CHARACTERS[charId];
   return {
-    id:charId, uid: _ballUid++, name:ch.name, icon:ch.icon, x, y, vx, vy,
-    hp:100, maxHp:999,  // no HP cap — healing can exceed 100
+    id:charId, uid:_ballUid++, name:ch.name, icon:ch.icon, x, y, vx, vy,
+    hp:100, maxHp:999,
     color:ch.color, glowColor:ch.glowColor, shadowColor:ch.shadowColor,
     orbitAngle:0, orbitSpeed:ch.orbitSpeed,
     weaponType:ch.weaponType, weaponSize:ch.weaponSize,
     slowFrames:0,
     axeHitCd:0, swordHitCd:0, shurikenHitCd:0, shurikenOut:false,
-    tornadoCd:  ch.weaponType==='shuriken' ? TORNADO_CD      : undefined,
+    tornadoCd:   ch.weaponType==='shuriken' ? TORNADO_CD      : undefined,
     burnFrames:0,
-    quakeCd:    ch.weaponType==='none'     ? QUAKE_CD        : undefined,
+    quakeCd:     ch.weaponType==='none'     ? QUAKE_CD        : undefined,
     quakeFrames:0, quakeDamageDone:false,
-    seedCd:     ch.weaponType==='branch'   ? PLANT_SEED_CD   : undefined,
+    seedCd:      ch.weaponType==='branch'   ? PLANT_SEED_CD   : undefined,
     hammerHitCd:0,
     kbFrames:0, kbTargetSpd:0,
     stunFrames:0, stunVx:0, stunVy:0,
-    boltCd:     ch.weaponType==='hammer'   ? THUNDER_BOLT_CD : undefined,
-    // Water spear
-    spearHitCd:   ch.weaponType==='spear' ? 0 : undefined,
-    lanceCd:      ch.weaponType==='spear' ? WATER_LANCE_CD : undefined,
-    lanceVolley:  0,
-    lanceVolleyCd: 0,
-    vortexCd:     ch.weaponType==='spear' ? WATER_VORTEX_CD : undefined,
-    wrenchHitCd: 0,
-    // Poison (owner state)
+    boltCd:      ch.weaponType==='hammer'   ? THUNDER_BOLT_CD : undefined,
+    spearHitCd:  ch.weaponType==='spear'    ? 0               : undefined,
+    lanceCd:     ch.weaponType==='spear'    ? WATER_LANCE_CD  : undefined,
+    lanceVolley:0, lanceVolleyCd:0,
+    vortexCd:    ch.weaponType==='spear'    ? WATER_VORTEX_CD : undefined,
+    wrenchHitCd:0,
     poisonContactCd: ch.weaponType==='poison' ? 0 : undefined,
     poisonCloudCd:   ch.weaponType==='poison' ? POISON_CLOUD_CD : undefined,
-    // Plant roots
-    rootCd: ch.weaponType==='branch' ? PLANT_ROOT_CD : undefined,
-    // Blackhole
-    bhPhaseCd:    ch.weaponType==='blackhole' ? BH_PHASE_CD : undefined,
-    bhPhaseFrames: 0,   // >0 = currently phased
-    bhHoleFrames:  0,   // >0 = blackholes active
-    // Shadow
-    kunaiHitCd:   ch.weaponType==='kunai' ? 0 : undefined,
-    cloneCd:      ch.weaponType==='kunai' ? SHADOW_CLONE_CD : undefined,
-    isClone:      false,
-    cloneOwnerUid: null,
-    // Debuff state
-    poisonFrames: 0,
-    poisonTick:   0,
-    poisonSource: null,
-    poisonOwnerUid: null,
-    // Binding (plant root)
-    bindFrames:   0,
-    bindTick:     0,
+    rootCd:      ch.weaponType==='branch'   ? PLANT_ROOT_CD   : undefined,
+    bhPhaseCd:   ch.weaponType==='blackhole'? BH_PHASE_CD     : undefined,
+    bhPhaseFrames:0, bhHoleFrames:0,
+    kunaiHitCd:  ch.weaponType==='kunai'    ? 0               : undefined,
+    cloneCd:     ch.weaponType==='kunai'    ? SHADOW_CLONE_CD : undefined,
+    isClone:false, cloneOwnerUid:null,
+    poisonFrames:0, poisonTick:0, poisonSource:null, poisonOwnerUid:null,
+    bindFrames:0, bindTick:0,
+    // Blood
+    bloodCollisionCd:  ch.weaponType==='blood' ? 0 : undefined,
+    bloodStolenAccum:  ch.weaponType==='blood' ? 0 : undefined,
+    bloodWaveActive:   false,
+    bloodWaveFrames:   0,
+    // Samurai
+    katanaHitCd:  ch.weaponType==='katana'  ? 0               : undefined,
+    dashCd:       ch.weaponType==='katana'  ? SAMURAI_DASH_CD : undefined,
+    isDashing:    false,
+    dashFrames:   0,
+    dashVx:0, dashVy:0,
+    dashHitEnemies: null,
+    dashWindup:   false,   // 0.5s windup before dash
+    dashWindupFrames: 0,
+    dashDirX: 0, dashDirY: 0,  // stored dash direction
+    // Berserker
+    gsHitCd:      ch.weaponType==='greatsword' ? 0                    : undefined,
+    berserkState: ch.weaponType==='greatsword' ? 'normal'             : undefined,
+    berserkFrames:ch.weaponType==='greatsword' ? BERSERK_NORMAL_FRAMES: undefined,
   };
 }
 
 function initGame(charIds) {
-  gameOver = false;
+  gameOver=false;
   document.getElementById('winner-overlay').classList.remove('show');
-  const n = charIds.length;
-  // Spread positions evenly around center
-  const positions = [
-    [W*0.25, H*0.25], [W*0.75, H*0.75],
-    [W*0.75, H*0.25], [W*0.25, H*0.75],
-  ];
-  balls = charIds.map((id, i) => {
-    const [px, py] = positions[i];
-    const ang = Math.random()*Math.PI*2;
-    return makeBall(id, px, py, Math.cos(ang)*BASE_SPEED, Math.sin(ang)*BASE_SPEED);
+  const positions=[[W*0.25,H*0.25],[W*0.75,H*0.75],[W*0.75,H*0.25],[W*0.25,H*0.75]];
+  balls=charIds.map((id,i)=>{
+    const [px,py]=positions[i];
+    const ang=Math.random()*Math.PI*2;
+    return makeBall(id,px,py,Math.cos(ang)*BASE_SPEED,Math.sin(ang)*BASE_SPEED);
   });
-  projectiles = []; particles = []; cannons = []; vortices = []; poisonClouds = []; plantRoots = []; blackholes = [];
-  buildStatUI();
-  updateStatUI();
+  projectiles=[]; particles=[]; cannons=[]; vortices=[]; poisonClouds=[]; plantRoots=[]; blackholes=[];
+  buildStatUI(); updateStatUI();
 }
 
-function spawnParticles(x, y, color, count) {
-  for (let i=0;i<count;i++) {
+function spawnParticles(x,y,color,count) {
+  for(let i=0;i<count;i++){
     const a=Math.random()*Math.PI*2, s=2.5+Math.random()*4.5;
     particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,r:3.5+Math.random()*4,color,life:1,decay:0.018+Math.random()*0.02});
   }
 }
 
 function update() {
-  if (gameOver) return;
+  if(gameOver) return;
 
-  for (const b of balls) {
-    b.orbitAngle += b.orbitSpeed * (b.slowFrames>0 ? 0.5 : 1);
-    if (b.axeHitCd>0)    b.axeHitCd--;
-    if (b.swordHitCd>0)  b.swordHitCd--;
-    if (b.shurikenHitCd>0) b.shurikenHitCd--;
-    if (b.hammerHitCd>0) b.hammerHitCd--;
-    if (b.tornadoCd>0)   b.tornadoCd--;
-    if (b.quakeCd>0)     b.quakeCd--;
-    if (b.quakeFrames>0) b.quakeFrames--;
-    if (b.boltCd>0)      b.boltCd--;
+  for(const b of balls) {
+    b.orbitAngle += b.orbitSpeed * (b.slowFrames>0?0.5:1);
+    if(b.axeHitCd>0)    b.axeHitCd--;
+    if(b.swordHitCd>0)  b.swordHitCd--;
+    if(b.shurikenHitCd>0) b.shurikenHitCd--;
+    if(b.hammerHitCd>0) b.hammerHitCd--;
+    if(b.tornadoCd>0)   b.tornadoCd--;
+    if(b.quakeCd>0)     b.quakeCd--;
+    if(b.quakeFrames>0) b.quakeFrames--;
+    if(b.boltCd>0)      b.boltCd--;
 
-    if (b.stunFrames>0) {
+    if(b.stunFrames>0) {
       b.stunFrames--;
       b.vx=0; b.vy=0;
-      if (b.stunFrames===0) { b.vx=b.stunVx; b.vy=b.stunVy; }
+      if(b.stunFrames===0){b.vx=b.stunVx;b.vy=b.stunVy;}
     }
-    if (b.kbFrames>0 && b.stunFrames===0) {
+    if(b.kbFrames>0 && b.stunFrames===0) {
       b.kbFrames--;
-      const progress = 1 - b.kbFrames/THUNDER_KB_RESTORE;
-      const targetSpd = b.slowFrames>0 ? BASE_SPEED*SLOW_FACTOR : BASE_SPEED;
-      setSpd(b, Math.max(b.kbTargetSpd+(targetSpd-b.kbTargetSpd)*progress, targetSpd));
+      const progress=1-b.kbFrames/THUNDER_KB_RESTORE;
+      const targetSpd=b.slowFrames>0?BASE_SPEED*SLOW_FACTOR:BASE_SPEED;
+      setSpd(b,Math.max(b.kbTargetSpd+(targetSpd-b.kbTargetSpd)*progress,targetSpd));
     }
-    if (b.burnFrames>0) {
+    if(b.burnFrames>0) {
       b.burnFrames--;
-      b.hp -= FIRE_BURN_TOTAL/FIRE_BURN_FRAMES;
-      if (b.burnFrames%8===0) spawnParticles(b.x,b.y,'#fb923c',2);
+      b.hp-=FIRE_BURN_TOTAL/FIRE_BURN_FRAMES;
+      if(b.burnFrames%8===0) spawnParticles(b.x,b.y,'#fb923c',2);
     }
-    if (b.slowFrames>0) {
+    if(b.slowFrames>0) {
       b.slowFrames--;
-      if (Math.abs(spd(b)-BASE_SPEED*SLOW_FACTOR)>0.05) setSpd(b,BASE_SPEED*SLOW_FACTOR);
-    } else if (b.kbFrames===0) {
-      if (spd(b)<BASE_SPEED*0.95) setSpd(b,BASE_SPEED);
-    }
-    if (b.stunFrames===0 && b.bindFrames===0) {
-      b.x+=b.vx; b.y+=b.vy;
-      let bounced=false;
-      if (b.x-BALL_R<0)  { b.x=BALL_R;     b.vx= Math.abs(b.vx); bounced=true; }
-      if (b.x+BALL_R>W)  { b.x=W-BALL_R;   b.vx=-Math.abs(b.vx); bounced=true; }
-      if (b.y-BALL_R<0)  { b.y=BALL_R;     b.vy= Math.abs(b.vy); bounced=true; }
-      if (b.y+BALL_R>H)  { b.y=H-BALL_R;   b.vy=-Math.abs(b.vy); bounced=true; }
-      if (bounced) {
-        if (b.kbFrames===0) setSpd(b, b.slowFrames>0 ? BASE_SPEED*SLOW_FACTOR : BASE_SPEED);
-        spawnParticles(b.x,b.y,b.glowColor,3);
+      if(Math.abs(spd(b)-BASE_SPEED*SLOW_FACTOR)>0.05) setSpd(b,BASE_SPEED*SLOW_FACTOR);
+    } else if(b.kbFrames===0 && !b.isDashing && !b.dashWindup) {
+      // Berserker rage speed
+      if(b.weaponType==='greatsword' && b.berserkState==='rage') {
+        if(spd(b)<BASE_SPEED*BERSERK_SPEED_MULT*0.95) setSpd(b,BASE_SPEED*BERSERK_SPEED_MULT);
+      } else {
+        if(spd(b)<BASE_SPEED*0.95) setSpd(b,BASE_SPEED);
       }
-    } else if (b.bindFrames>0) {
-      // Bound: zero out all velocity so it doesn't drift
+    }
+
+    if(b.stunFrames===0 && b.bindFrames===0) {
+      if(b.isDashing) {
+        // Samurai dash movement
+        b.x+=b.dashVx; b.y+=b.dashVy;
+        b.dashFrames--;
+        let hitWall=false;
+        if(b.x-BALL_R<0){b.x=BALL_R; hitWall=true;}
+        if(b.x+BALL_R>W){b.x=W-BALL_R; hitWall=true;}
+        if(b.y-BALL_R<0){b.y=BALL_R; hitWall=true;}
+        if(b.y+BALL_R>H){b.y=H-BALL_R; hitWall=true;}
+        if(hitWall || b.dashFrames<=0) {
+          b.isDashing=false;
+          b.vx=b.dashVx/SAMURAI_DASH_SPEED*BASE_SPEED;
+          b.vy=b.dashVy/SAMURAI_DASH_SPEED*BASE_SPEED;
+          b.dashCd=SAMURAI_DASH_CD;
+          spawnParticles(b.x,b.y,'#e2e8f0',10);
+        }
+      } else {
+        b.x+=b.vx; b.y+=b.vy;
+        let bounced=false;
+        if(b.x-BALL_R<0){b.x=BALL_R;b.vx=Math.abs(b.vx);bounced=true;}
+        if(b.x+BALL_R>W){b.x=W-BALL_R;b.vx=-Math.abs(b.vx);bounced=true;}
+        if(b.y-BALL_R<0){b.y=BALL_R;b.vy=Math.abs(b.vy);bounced=true;}
+        if(b.y+BALL_R>H){b.y=H-BALL_R;b.vy=-Math.abs(b.vy);bounced=true;}
+        if(bounced){
+          if(b.kbFrames===0){
+            if(b.weaponType==='greatsword'&&b.berserkState==='rage')
+              setSpd(b,BASE_SPEED*BERSERK_SPEED_MULT);
+            else setSpd(b,b.slowFrames>0?BASE_SPEED*SLOW_FACTOR:BASE_SPEED);
+          }
+          spawnParticles(b.x,b.y,b.glowColor,3);
+        }
+      }
+    } else if(b.bindFrames>0) {
       b.vx=0; b.vy=0; b.kbFrames=0;
     }
-    if (b.weaponType==='shuriken' && b.tornadoCd===0) {
-      b.tornadoCd=TORNADO_CD; b.shurikenOut=true; launchShuriken(b);
-    }
-    if (b.weaponType==='branch' && b.seedCd===0) {
-      b.seedCd=PLANT_SEED_CD; launchSeeds(b);
-    }
-    if (b.seedCd>0) b.seedCd--;
-    if (b.weaponType==='hammer' && b.boltCd===0) {
-      b.boltCd=THUNDER_BOLT_CD; launchBolts(b);
-    }
-    if (b.weaponType==='none' && b.quakeCd===0 && b.quakeFrames===0) {
-      b.quakeFrames=QUAKE_FRAMES; b.quakeDamageDone=false; b.quakeCd=99999;
+
+    // Wind shuriken
+    if(b.weaponType==='shuriken'&&b.tornadoCd===0){b.tornadoCd=TORNADO_CD;b.shurikenOut=true;launchShuriken(b);}
+    // Plant seeds
+    if(b.weaponType==='branch'&&b.seedCd===0){b.seedCd=PLANT_SEED_CD;launchSeeds(b);}
+    if(b.seedCd>0) b.seedCd--;
+    // Thunder bolts
+    if(b.weaponType==='hammer'&&b.boltCd===0){b.boltCd=THUNDER_BOLT_CD;launchBolts(b);}
+    // Earth quake
+    if(b.weaponType==='none'&&b.quakeCd===0&&b.quakeFrames===0){
+      b.quakeFrames=QUAKE_FRAMES;b.quakeDamageDone=false;b.quakeCd=99999;
       spawnParticles(b.x,b.y,'#a3a3a3',8);
     }
-    if (b.weaponType==='none' && b.quakeFrames>0 && !b.quakeDamageDone) {
+    if(b.weaponType==='none'&&b.quakeFrames>0&&!b.quakeDamageDone){
       const prog=1-b.quakeFrames/QUAKE_FRAMES;
       const visualR=QUAKE_RADIUS*prog;
-      for (const enemy of balls) {
-        if (enemy===b) continue;
-        if (Math.hypot(b.x-enemy.x,b.y-enemy.y)<visualR+BALL_R) {
-          enemy.hp-=QUAKE_DAMAGE; b.quakeDamageDone=true;
-          spawnParticles(b.x,b.y,'#a3a3a3',16); break;
+      for(const enemy of balls){
+        if(enemy===b) continue;
+        if(Math.hypot(b.x-enemy.x,b.y-enemy.y)<visualR+BALL_R){
+          enemy.hp-=QUAKE_DAMAGE;b.quakeDamageDone=true;
+          spawnParticles(b.x,b.y,'#a3a3a3',16);break;
         }
       }
     }
-    if (b.weaponType==='none' && b.quakeFrames===1) b.quakeCd=QUAKE_CD;
+    if(b.weaponType==='none'&&b.quakeFrames===1) b.quakeCd=QUAKE_CD;
 
-    // Water: spear orbit + lance throw + vortex
-    if (b.weaponType==='spear') {
-      if (b.spearHitCd>0) b.spearHitCd--;
-      if (b.lanceCd>0)    b.lanceCd--;
-      if (b.vortexCd>0)   b.vortexCd--;
-      // Spear orbit hit check — both tip and butt, all enemies
-      if (b.spearHitCd===0) {
-        const wx  = b.x + Math.cos(b.orbitAngle) * WEAPON_ORBIT_R;
-        const wy  = b.y + Math.sin(b.orbitAngle) * WEAPON_ORBIT_R;
-        const L   = WATER_SPEAR_LEN() * 0.38;
-        const ang = b.orbitAngle + Math.PI/4;
-        const tipX  = wx + Math.cos(ang) * L * 1.25;
-        const tipY  = wy + Math.sin(ang) * L * 1.25;
-        const buttX = wx - Math.cos(ang) * L;
-        const buttY = wy - Math.sin(ang) * L;
-        for (const enemy of balls) {
-          if (enemy === b) continue;
-          const dTip  = Math.hypot(tipX -enemy.x, tipY -enemy.y);
-          const dButt = Math.hypot(buttX-enemy.x, buttY-enemy.y);
-          if (dTip<BALL_R+10 || dButt<BALL_R+10) {
-            enemy.hp -= WATER_SPEAR_DMG;
-            b.spearHitCd = WATER_SPEAR_HIT_CD;
-            spawnParticles(dTip<dButt?tipX:buttX, dTip<dButt?tipY:buttY, '#38bdf8', 8);
-            break;
+    // Water spear + lance + vortex
+    if(b.weaponType==='spear'){
+      if(b.spearHitCd>0) b.spearHitCd--;
+      if(b.lanceCd>0)    b.lanceCd--;
+      if(b.vortexCd>0)   b.vortexCd--;
+      if(b.spearHitCd===0){
+        const wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R;
+        const wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
+        const L=WATER_SPEAR_LEN()*0.38;
+        const ang=b.orbitAngle+Math.PI/4;
+        const tipX=wx+Math.cos(ang)*L*1.25, tipY=wy+Math.sin(ang)*L*1.25;
+        const buttX=wx-Math.cos(ang)*L,    buttY=wy-Math.sin(ang)*L;
+        for(const enemy of balls){
+          if(enemy===b) continue;
+          const dTip=Math.hypot(tipX-enemy.x,tipY-enemy.y);
+          const dButt=Math.hypot(buttX-enemy.x,buttY-enemy.y);
+          if(dTip<BALL_R+10||dButt<BALL_R+10){
+            enemy.hp-=WATER_SPEAR_DMG;b.spearHitCd=WATER_SPEAR_HIT_CD;
+            spawnParticles(dTip<dButt?tipX:buttX,dTip<dButt?tipY:buttY,'#38bdf8',8);break;
           }
         }
       }
-
-      // Lance volley: 3 lances, each aimed at enemy's current position, 0.1s apart
-      if (b.lanceCd===0) {
-        b.lanceCd = WATER_LANCE_CD;
-        b.lanceVolley = 3;
-        b.lanceVolleyCd = 0; // fire first one immediately
-      }
-      if (b.lanceVolley > 0) {
-        if (b.lanceVolleyCd > 0) {
-          b.lanceVolleyCd--;
-        } else {
-          const enemies = balls.filter(e=>e!==b);
-          const enemy = enemies[Math.floor(Math.random()*enemies.length)];
-          if (enemy) {
-            const ang = Math.atan2(enemy.y-b.y, enemy.x-b.x);
-            projectiles.push({
-              type: 'lance',
-              x: b.x, y: b.y,
-              vx: Math.cos(ang)*WATER_LANCE_SPEED,
-              vy: Math.sin(ang)*WATER_LANCE_SPEED,
-              angle: ang,
-              ownerId: b.uid,
-              trail: [],
-              hitCd: 0, traveled: 0, stuck: false, stuckFrames: 0, done: false,
-            });
+      if(b.lanceCd===0){b.lanceCd=WATER_LANCE_CD;b.lanceVolley=3;b.lanceVolleyCd=0;}
+      if(b.lanceVolley>0){
+        if(b.lanceVolleyCd>0){b.lanceVolleyCd--;}
+        else{
+          const enemies=balls.filter(e=>e!==b);
+          const enemy=enemies[Math.floor(Math.random()*enemies.length)];
+          if(enemy){
+            const ang=Math.atan2(enemy.y-b.y,enemy.x-b.x);
+            projectiles.push({type:'lance',x:b.x,y:b.y,vx:Math.cos(ang)*WATER_LANCE_SPEED,vy:Math.sin(ang)*WATER_LANCE_SPEED,angle:ang,ownerId:b.uid,trail:[],hitCd:0,traveled:0,stuck:false,stuckFrames:0,done:false});
           }
-          b.lanceVolley--;
-          b.lanceVolleyCd = 6; // 0.1s @60fps between each
+          b.lanceVolley--;b.lanceVolleyCd=6;
         }
       }
-
-      // Vortex spawn — cd starts only after vortex expires (see updateVortices)
-      if (b.vortexCd===0) {
-        b.vortexCd = 99999; // sentinel: blocked until vortex ends
-        vortices.push({
-          x: BALL_R*2+Math.random()*(W-BALL_R*4),
-          y: BALL_R*2+Math.random()*(H-BALL_R*4),
-          frames: WATER_VORTEX_FRAMES,
-          dmgTimer: 0, ownerId: b.uid, angle: 0,
-        });
+      if(b.vortexCd===0){
+        b.vortexCd=99999;
+        vortices.push({x:BALL_R*2+Math.random()*(W-BALL_R*4),y:BALL_R*2+Math.random()*(H-BALL_R*4),frames:WATER_VORTEX_FRAMES,dmgTimer:0,ownerId:b.uid,angle:0});
       }
     }
 
-    // Binding (plant root)
-    if (b.bindFrames > 0) {
-      b.bindFrames--;
-      b.bindTick++;
-      if (b.bindTick >= PLANT_ROOT_TICK) {
-        b.hp -= PLANT_ROOT_DMG;
-        b.bindTick = 0;
-        spawnParticles(b.x, b.y, '#15803d', 3);
+    // Binding
+    if(b.bindFrames>0){
+      b.bindFrames--;b.bindTick++;
+      if(b.bindTick>=PLANT_ROOT_TICK){b.hp-=PLANT_ROOT_DMG;b.bindTick=0;spawnParticles(b.x,b.y,'#15803d',3);}
+    }
+    // Plant roots
+    if(b.weaponType==='branch'){
+      if(b.rootCd>0) b.rootCd--;
+      if(b.rootCd===0){
+        b.rootCd=PLANT_ROOT_CD;
+        for(let ri=0;ri<2;ri++) plantRoots.push({x:BALL_R*2+Math.random()*(W-BALL_R*4),y:BALL_R*2+Math.random()*(H-BALL_R*4),ownerId:b.uid,done:false});
       }
     }
 
-    // Plant: root spawn CD
-    if (b.weaponType==='branch') {
-      if (b.rootCd>0) b.rootCd--;
-      if (b.rootCd===0) {
-        b.rootCd = PLANT_ROOT_CD;
-        for (let ri=0; ri<2; ri++) {
-          plantRoots.push({
-            x: BALL_R*2+Math.random()*(W-BALL_R*4),
-            y: BALL_R*2+Math.random()*(H-BALL_R*4),
-            ownerId: b.uid, done: false,
-          });
-        }
-      }
-    }
-
-    // Blackhole: phase cycle
-    if (b.weaponType==='blackhole') {
-      // Skip immunity/phase during phased state
-      if (b.bhPhaseFrames > 0) {
+    // Blackhole phase cycle
+    if(b.weaponType==='blackhole'){
+      if(b.bhPhaseFrames>0){
         b.bhPhaseFrames--;
-        // Immune: skip all debuffs
-        b.burnFrames = 0; b.poisonFrames = 0; b.slowFrames = 0;
-        b.stunFrames = 0; b.bindFrames = 0;
-        if (b.bhPhaseFrames === 0) {
-          // Phase ends → spawn 4 corner blackholes
-          b.bhHoleFrames = BH_HOLE_FRAMES;
-          const corners = [
-            {x:BALL_R*3, y:BALL_R*3},
-            {x:W-BALL_R*3, y:BALL_R*3},
-            {x:BALL_R*3, y:H-BALL_R*3},
-            {x:W-BALL_R*3, y:H-BALL_R*3},
-          ];
-          for (const c of corners) blackholes.push({x:c.x, y:c.y, ownerId:b.uid, frames:BH_HOLE_FRAMES, dmgTimer:0});
+        b.burnFrames=0;b.poisonFrames=0;b.slowFrames=0;b.stunFrames=0;b.bindFrames=0;
+        if(b.bhPhaseFrames===0){
+          b.bhHoleFrames=BH_HOLE_FRAMES;
+          const corners=[{x:BALL_R*3,y:BALL_R*3},{x:W-BALL_R*3,y:BALL_R*3},{x:BALL_R*3,y:H-BALL_R*3},{x:W-BALL_R*3,y:H-BALL_R*3}];
+          for(const c of corners) blackholes.push({x:c.x,y:c.y,ownerId:b.uid,frames:BH_HOLE_FRAMES,dmgTimer:0});
         }
-      } else if (b.bhHoleFrames > 0) {
+      } else if(b.bhHoleFrames>0){
         b.bhHoleFrames--;
-        if (b.bhHoleFrames === 0) b.bhPhaseCd = BH_PHASE_CD; // restart cycle
+        if(b.bhHoleFrames===0) b.bhPhaseCd=BH_PHASE_CD;
       } else {
-        if (b.bhPhaseCd > 0) b.bhPhaseCd--;
-        if (b.bhPhaseCd === 0) b.bhPhaseFrames = BH_PHASE_FRAMES; // enter phase
+        if(b.bhPhaseCd>0) b.bhPhaseCd--;
+        if(b.bhPhaseCd===0) b.bhPhaseFrames=BH_PHASE_FRAMES;
       }
     }
 
-    // Shadow: clone CD + clone lifetime management
-    if (b.weaponType==='kunai' && !b.isClone) {
-      if (b.kunaiHitCd>0) b.kunaiHitCd--;
-      if (b.cloneCd>0) b.cloneCd--;
-      if (b.cloneCd===0) {
-        b.cloneCd = 99999;
-        for (let ci=0; ci<3; ci++) {
-          const ang = Math.random()*Math.PI*2;
-          const rx = BALL_R*3+Math.random()*(W-BALL_R*6);
-          const ry = BALL_R*3+Math.random()*(H-BALL_R*6);
-          const clone = makeBall('shadow', rx, ry, Math.cos(ang)*BASE_SPEED, Math.sin(ang)*BASE_SPEED);
-          clone.isClone = true;
-          clone.cloneOwnerUid = b.uid;
-          clone.cloneFrames = SHADOW_CLONE_LIFE;
-          clone.hp = b.hp;
+    // Shadow clone
+    if(b.weaponType==='kunai'&&!b.isClone){
+      if(b.kunaiHitCd>0) b.kunaiHitCd--;
+      if(b.cloneCd>0) b.cloneCd--;
+      if(b.cloneCd===0){
+        b.cloneCd=99999;
+        for(let ci=0;ci<3;ci++){
+          const ang=Math.random()*Math.PI*2;
+          const rx=BALL_R*3+Math.random()*(W-BALL_R*6), ry=BALL_R*3+Math.random()*(H-BALL_R*6);
+          const clone=makeBall('shadow',rx,ry,Math.cos(ang)*BASE_SPEED,Math.sin(ang)*BASE_SPEED);
+          clone.isClone=true;clone.cloneOwnerUid=b.uid;clone.cloneFrames=SHADOW_CLONE_LIFE;clone.hp=b.hp;
           balls.push(clone);
         }
         buildStatUI();
       }
     }
-    // Clone: count down, then resolve (higher HP survives)
-    if (b.isClone) {
-      if (b.kunaiHitCd>0) b.kunaiHitCd--;
+    if(b.isClone){
+      if(b.kunaiHitCd>0) b.kunaiHitCd--;
       b.cloneFrames--;
-      if (b.cloneFrames <= 0) {
-        const owner = balls.find(o=>o.uid===b.cloneOwnerUid && !o.isClone);
-        if (owner) {
-          if (b.hp >= owner.hp) owner.hp = b.hp; // higher HP survives
-          owner.cloneCd = SHADOW_CLONE_CD;
+      if(b.cloneFrames<=0){
+        const owner=balls.find(o=>o.uid===b.cloneOwnerUid&&!o.isClone);
+        if(owner){if(b.hp>=owner.hp) owner.hp=b.hp;owner.cloneCd=SHADOW_CLONE_CD;}
+        b.hp=0;
+      }
+    }
+
+    // Poison owner
+    if(b.weaponType==='poison'){
+      if(b.poisonContactCd>0) b.poisonContactCd--;
+      if(b.poisonCloudCd>0)   b.poisonCloudCd--;
+      if(b.poisonCloudCd===0){
+        b.poisonCloudCd=99999;
+        poisonClouds.push({x:BALL_R*2+Math.random()*(W-BALL_R*4),y:BALL_R*2+Math.random()*(H-BALL_R*4),frames:POISON_CLOUD_FRAMES,ownerId:b.uid,angle:0});
+      }
+    }
+    // Poison debuff tick
+    if(b.poisonFrames>0&&b.poisonOwnerUid!==b.uid&&b.bhPhaseFrames===0){
+      b.poisonFrames--;b.poisonTick++;
+      const dmgPerTick=b.poisonSource==='cloud'?POISON_CLOUD_DMG:POISON_CONTACT_DMG;
+      if(b.poisonTick>=POISON_CONTACT_TICK){b.hp-=dmgPerTick;b.poisonTick=0;spawnParticles(b.x,b.y,'#84cc16',3);}
+      if(b.poisonFrames===0){b.poisonSource=null;b.poisonOwnerUid=null;}
+    }
+
+    // ── Blood: collision CD tick ──
+    if(b.weaponType==='blood'){
+      if(b.bloodCollisionCd>0) b.bloodCollisionCd--;
+      // Blood wave active ring visual
+      if(b.bloodWaveActive){
+        b.bloodWaveFrames--;
+        if(b.bloodWaveFrames<=0) b.bloodWaveActive=false;
+      }
+    }
+
+    // ── Samurai: katana hit CD + dash CD + windup ──
+    if(b.weaponType==='katana'){
+      if(b.katanaHitCd>0) b.katanaHitCd--;
+      // Windup phase: 0.5s (30 frames) slow backward movement then dash
+      if(b.dashWindup){
+        b.dashWindupFrames--;
+        // Slowly drift backward (opposite to dash direction)
+        b.vx = -b.dashDirX * BASE_SPEED * 0.25;
+        b.vy = -b.dashDirY * BASE_SPEED * 0.25;
+        if(b.dashWindupFrames<=0){
+          b.dashWindup=false;
+          b.isDashing=true;
+          b.dashVx=b.dashDirX*SAMURAI_DASH_SPEED;
+          b.dashVy=b.dashDirY*SAMURAI_DASH_SPEED;
+          b.dashFrames=Math.ceil(Math.max(W,H)/SAMURAI_DASH_SPEED)+8;
+          b.dashHitEnemies=new Set();
+          spawnParticles(b.x,b.y,'#fb7185',14);
         }
-        b.hp = 0; // mark for removal
       }
-    }
-
-    // Poison owner: contact hit cd + cloud spawn
-    if (b.weaponType==='poison') {
-      if (b.poisonContactCd>0) b.poisonContactCd--;
-      if (b.poisonCloudCd>0)   b.poisonCloudCd--;
-      // Cloud spawn: only when CD hits 0
-      if (b.poisonCloudCd===0) {
-        b.poisonCloudCd = 99999; // sentinel; reset after cloud expires
-        poisonClouds.push({
-          x: BALL_R*2 + Math.random()*(W-BALL_R*4),
-          y: BALL_R*2 + Math.random()*(H-BALL_R*4),
-          frames: POISON_CLOUD_FRAMES,
-          ownerId: b.uid,
-          angle: 0,
-        });
-      }
-    }
-
-    // Any ball: poison debuff tick — immune only to own poison
-    if (b.poisonFrames > 0 && b.poisonOwnerUid !== b.uid && b.bhPhaseFrames===0) {
-      b.poisonFrames--;
-      b.poisonTick++;
-      const dmgPerTick = b.poisonSource==='cloud' ? POISON_CLOUD_DMG : POISON_CONTACT_DMG;
-      if (b.poisonTick >= POISON_CONTACT_TICK) {
-        b.hp -= dmgPerTick;
-        b.poisonTick = 0;
-        spawnParticles(b.x, b.y, '#84cc16', 3);
-      }
-      if (b.poisonFrames === 0) { b.poisonSource = null; b.poisonOwnerUid = null; }
-    }
-
-  }  // end for balls
-
-  // Ball–ball collision for all pairs
-  for (let i=0; i<balls.length; i++) {
-    for (let j=i+1; j<balls.length; j++) {
-      const bi=balls[i], bj=balls[j];
-      const dx=bj.x-bi.x, dy=bj.y-bi.y, d=Math.hypot(dx,dy);
-      if (d<BALL_R*2 && d>0.001) {
-        const nx=dx/d, ny=dy/d, overlap=BALL_R*2-d;
-        bi.x-=nx*(overlap/2+0.5); bi.y-=ny*(overlap/2+0.5);
-        bj.x+=nx*(overlap/2+0.5); bj.y+=ny*(overlap/2+0.5);
-        const vi=bi.vx*nx+bi.vy*ny, vw=bj.vx*nx+bj.vy*ny;
-        if (vi-vw>0) {
-          bi.vx+=(vw-vi)*nx; bi.vy+=(vw-vi)*ny;
-          bj.vx+=(vi-vw)*nx; bj.vy+=(vi-vw)*ny;
+      if(b.dashCd>0&&!b.isDashing&&!b.dashWindup) b.dashCd--;
+      if(b.dashCd===0&&!b.isDashing&&!b.dashWindup){
+        // Aim at nearest enemy
+        const enemies=balls.filter(e=>e!==b);
+        let dirX=b.vx, dirY=b.vy; // fallback: current movement dir
+        if(enemies.length>0){
+          const nearest=enemies.reduce((a,c)=>Math.hypot(c.x-b.x,c.y-b.y)<Math.hypot(a.x-b.x,a.y-b.y)?c:a);
+          const dx=nearest.x-b.x, dy=nearest.y-b.y, d=Math.hypot(dx,dy)||1;
+          dirX=dx/d; dirY=dy/d;
+        } else {
+          const s=spd(b); dirX=s>0.001?b.vx/s:1; dirY=s>0.001?b.vy/s:0;
         }
-        setSpd(bi, bi.slowFrames>0?BASE_SPEED*SLOW_FACTOR:BASE_SPEED);
-        setSpd(bj, bj.slowFrames>0?BASE_SPEED*SLOW_FACTOR:BASE_SPEED);
+        b.dashDirX=dirX; b.dashDirY=dirY;
+        b.dashWindup=true; b.dashWindupFrames=30;
+      }
+    }
+
+    // ── Berserker: state cycle ──
+    if(b.weaponType==='greatsword'){
+      if(b.gsHitCd>0) b.gsHitCd--;
+      if(b.berserkFrames>0) b.berserkFrames--;
+      if(b.berserkFrames===0){
+        if(b.berserkState==='normal'){
+          b.berserkState='rage';
+          b.berserkFrames=BERSERK_RAGE_FRAMES;
+          spawnParticles(b.x,b.y,'#ef4444',14);
+        } else {
+          b.berserkState='normal';
+          b.berserkFrames=BERSERK_NORMAL_FRAMES;
+          // Reset speed to normal
+          setSpd(b,BASE_SPEED);
+        }
+      }
+    }
+  } // end for balls
+
+  // Blood: ball–blood collision steal (happens in ball-ball collision block)
+  // Ball–ball collision
+  for(let i=0;i<balls.length;i++){
+    for(let j=i+1;j<balls.length;j++){
+      const bi=balls[i],bj=balls[j];
+      const dx=bj.x-bi.x,dy=bj.y-bi.y,d=Math.hypot(dx,dy);
+      if(d<BALL_R*2&&d>0.001){
+        const nx=dx/d,ny=dy/d,overlap=BALL_R*2-d;
+        bi.x-=nx*(overlap/2+0.5);bi.y-=ny*(overlap/2+0.5);
+        bj.x+=nx*(overlap/2+0.5);bj.y+=ny*(overlap/2+0.5);
+        const vi=bi.vx*nx+bi.vy*ny,vw=bj.vx*nx+bj.vy*ny;
+        if(vi-vw>0){bi.vx+=(vw-vi)*nx;bi.vy+=(vw-vi)*ny;bj.vx+=(vi-vw)*nx;bj.vy+=(vi-vw)*ny;}
+        setSpd(bi,bi.slowFrames>0?BASE_SPEED*SLOW_FACTOR:BASE_SPEED);
+        setSpd(bj,bj.slowFrames>0?BASE_SPEED*SLOW_FACTOR:BASE_SPEED);
         spawnParticles((bi.x+bj.x)/2,(bi.y+bj.y)/2,'#ffffff',10);
+
+        // Blood steal on direct collision
+        for(const [blood,other] of [[bi,bj],[bj,bi]]){
+          if(blood.weaponType==='blood'&&blood.bloodCollisionCd===0&&other.bhPhaseFrames===0){
+            blood.bloodCollisionCd=BLOOD_COLLISION_CD;
+            other.hp-=BLOOD_STEAL;
+            blood.hp+=BLOOD_STEAL;
+            blood.bloodStolenAccum+=BLOOD_STEAL;
+            spawnParticles(other.x,other.y,'#dc2626',6);
+            spawnParticles(blood.x,blood.y,'#f87171',4);
+            // Blood wave trigger
+            if(blood.bloodStolenAccum>=BLOOD_WAVE_THRESHOLD){
+              blood.bloodStolenAccum-=BLOOD_WAVE_THRESHOLD;
+              blood.bloodWaveActive=true;
+              blood.bloodWaveFrames=90;
+              // Apply wave to all nearby enemies
+              for(const enemy of balls){
+                if(enemy===blood) continue;
+                if(enemy.bhPhaseFrames>0) continue;
+                const dist=Math.hypot(enemy.x-blood.x,enemy.y-blood.y);
+                if(dist<BLOOD_WAVE_RADIUS+BALL_R){
+                  enemy.hp-=BLOOD_WAVE_DMG;
+                  const enx=(enemy.x-blood.x)/(dist||1),eny=(enemy.y-blood.y)/(dist||1);
+                  enemy.vx=enx*BLOOD_WAVE_KB;enemy.vy=eny*BLOOD_WAVE_KB;
+                  enemy.kbFrames=BLOOD_WAVE_KB_FRAMES;enemy.kbTargetSpd=BLOOD_WAVE_KB;
+                  spawnParticles(enemy.x,enemy.y,'#dc2626',12);
+                }
+              }
+              spawnParticles(blood.x,blood.y,'#ef4444',20);
+            }
+          }
+        }
       }
     }
   }
 
-  // Weapon hits: each ball vs all others
-  for (const attacker of balls) {
-    for (const target of balls) {
-      if (attacker !== target) weaponHitChecks(attacker, target);
+  // Samurai dash hit enemies — enlarged radius (BALL_R * 1.5)
+  for(const b of balls){
+    if(b.isDashing&&b.dashHitEnemies){
+      for(const target of balls){
+        if(target===b) continue;
+        if(b.dashHitEnemies.has(target.uid)) continue;
+        if(target.bhPhaseFrames>0) continue;
+        if(Math.hypot(b.x-target.x,b.y-target.y)<BALL_R*1.5+BALL_R){
+          b.dashHitEnemies.add(target.uid);
+          target.hp-=SAMURAI_DASH_DMG;
+          spawnParticles(target.x,target.y,'#fb7185',12);
+        }
+      }
     }
   }
-  updateVortices(); updateCannons(); updatePoisonClouds(); updatePlantRoots(); updateBlackholes();
-  updateProjectiles(); updateParticles(); checkGameOver(); updateStatUI();
+
+  // Weapon hits
+  for(const attacker of balls){
+    for(const target of balls){
+      if(attacker!==target) weaponHitChecks(attacker,target);
+    }
+  }
+  updateVortices();updateCannons();updatePoisonClouds();updatePlantRoots();updateBlackholes();
+  updateProjectiles();updateParticles();checkGameOver();updateStatUI();
 }
 
-// ── weaponHitChecks ──
 function weaponHitChecks(attacker, target) {
-  const wx   = attacker.x + Math.cos(attacker.orbitAngle)*WEAPON_ORBIT_R;
-  const wy   = attacker.y + Math.sin(attacker.orbitAngle)*WEAPON_ORBIT_R;
-  const dist = Math.hypot(wx-target.x, wy-target.y);
+  const wx=attacker.x+Math.cos(attacker.orbitAngle)*WEAPON_ORBIT_R;
+  const wy=attacker.y+Math.sin(attacker.orbitAngle)*WEAPON_ORBIT_R;
+  const dist=Math.hypot(wx-target.x,wy-target.y);
 
-  function reduceEarthCd() {
-    if (target.weaponType==='none' && target.quakeCd>0)
-      target.quakeCd = Math.max(0, target.quakeCd-90);
-  }
+  function reduceEarthCd(){if(target.weaponType==='none'&&target.quakeCd>0)target.quakeCd=Math.max(0,target.quakeCd-90);}
 
-  // Skip if target is in blackhole phase (immune)
-  if (target.bhPhaseFrames > 0) return;
+  if(target.bhPhaseFrames>0) return;
 
-  if (attacker.weaponType==='axe' && attacker.axeHitCd===0) {
-    if (dist < attacker.weaponSize+BALL_R) {
-      target.hp-=ICE_DAMAGE; target.slowFrames=SLOW_FRAMES;
-      attacker.axeHitCd=50; setSpd(target,BASE_SPEED*SLOW_FACTOR);
-      spawnParticles(target.x,target.y,'#7dd3fc',8); reduceEarthCd();
+  if(attacker.weaponType==='axe'&&attacker.axeHitCd===0){
+    if(dist<attacker.weaponSize+BALL_R){
+      target.hp-=ICE_DAMAGE;target.slowFrames=SLOW_FRAMES;
+      attacker.axeHitCd=50;setSpd(target,BASE_SPEED*SLOW_FACTOR);
+      spawnParticles(target.x,target.y,'#7dd3fc',8);reduceEarthCd();
     }
   }
-  if (attacker.weaponType==='sword' && attacker.swordHitCd===0) {
-    if (dist < attacker.weaponSize+BALL_R) {
-      target.hp-=FIRE_DIRECT_DMG; target.burnFrames=FIRE_BURN_FRAMES;
+  if(attacker.weaponType==='sword'&&attacker.swordHitCd===0){
+    if(dist<attacker.weaponSize+BALL_R){
+      target.hp-=FIRE_DIRECT_DMG;target.burnFrames=FIRE_BURN_FRAMES;
       attacker.swordHitCd=FIRE_SWORD_HIT_CD;
-      spawnParticles(target.x,target.y,'#fb923c',10); reduceEarthCd();
+      spawnParticles(target.x,target.y,'#fb923c',10);reduceEarthCd();
     }
   }
-  if (attacker.weaponType==='hammer' && attacker.hammerHitCd===0) {
-    if (dist < attacker.weaponSize+BALL_R) {
-      const nx=(target.x-wx)/Math.max(dist,0.001);
-      const ny=(target.y-wy)/Math.max(dist,0.001);
-      target.hp-=THUNDER_DMG; attacker.hammerHitCd=THUNDER_HIT_CD;
-      target.vx=nx*THUNDER_KNOCKBACK; target.vy=ny*THUNDER_KNOCKBACK;
-      target.kbFrames=THUNDER_KB_RESTORE; target.kbTargetSpd=THUNDER_KNOCKBACK;
-      spawnParticles(target.x,target.y,'#c4b5fd',10); reduceEarthCd();
+  if(attacker.weaponType==='hammer'&&attacker.hammerHitCd===0){
+    if(dist<attacker.weaponSize+BALL_R){
+      const nx=(target.x-wx)/Math.max(dist,0.001),ny=(target.y-wy)/Math.max(dist,0.001);
+      target.hp-=THUNDER_DMG;attacker.hammerHitCd=THUNDER_HIT_CD;
+      target.vx=nx*THUNDER_KNOCKBACK;target.vy=ny*THUNDER_KNOCKBACK;
+      target.kbFrames=THUNDER_KB_RESTORE;target.kbTargetSpd=THUNDER_KNOCKBACK;
+      spawnParticles(target.x,target.y,'#c4b5fd',10);reduceEarthCd();
     }
   }
-  if (attacker.weaponType==='shuriken' && !attacker.shurikenOut && attacker.shurikenHitCd===0) {
-    if (dist < attacker.weaponSize+BALL_R) {
-      target.hp-=4; attacker.shurikenHitCd=50;
-      spawnParticles(target.x,target.y,'#fcd34d',6); reduceEarthCd();
+  if(attacker.weaponType==='shuriken'&&!attacker.shurikenOut&&attacker.shurikenHitCd===0){
+    if(dist<attacker.weaponSize+BALL_R){
+      target.hp-=4;attacker.shurikenHitCd=50;
+      spawnParticles(target.x,target.y,'#fcd34d',6);reduceEarthCd();
     }
   }
-  if (attacker.weaponType==='wrench' && attacker.wrenchHitCd===0) {
-    if (dist < attacker.weaponSize+BALL_R) {
-      target.hp-=MECH_WRENCH_DMG; attacker.wrenchHitCd=MECH_WRENCH_HIT_CD;
-      spawnParticles(target.x,target.y,'#fdba74',8); reduceEarthCd();
-      if (cannons.filter(c=>c.ownerId===attacker.uid).length < MECH_MAX_CANNONS) {
-        cannons.push({
-          x: BALL_R*2+Math.random()*(W-BALL_R*4),
-          y: BALL_R*2+Math.random()*(H-BALL_R*4),
-          ownerId: attacker.uid, targetUid: target.uid,
-          fireCd: MECH_CANNON_FIRE_CD, frames: MECH_CANNON_LIFE, angle: 0,
-        });
+  if(attacker.weaponType==='wrench'&&attacker.wrenchHitCd===0){
+    if(dist<attacker.weaponSize+BALL_R){
+      target.hp-=MECH_WRENCH_DMG;attacker.wrenchHitCd=MECH_WRENCH_HIT_CD;
+      spawnParticles(target.x,target.y,'#fdba74',8);reduceEarthCd();
+      if(cannons.filter(c=>c.ownerId===attacker.uid).length<MECH_MAX_CANNONS){
+        cannons.push({x:BALL_R*2+Math.random()*(W-BALL_R*4),y:BALL_R*2+Math.random()*(H-BALL_R*4),ownerId:attacker.uid,targetUid:target.uid,fireCd:MECH_CANNON_FIRE_CD,frames:MECH_CANNON_LIFE,angle:0});
       }
     }
   }
-  if (attacker.weaponType==='kunai' && attacker.kunaiHitCd===0) {
-    const S = attacker.weaponSize;
-    for (const sign of [1, -1]) {
-      const kwx = attacker.x + Math.cos(attacker.orbitAngle)*WEAPON_ORBIT_R*sign;
-      const kwy = attacker.y + Math.sin(attacker.orbitAngle)*WEAPON_ORBIT_R*sign;
-      if (Math.hypot(kwx-target.x, kwy-target.y) < S+BALL_R) {
-        target.hp -= SHADOW_KUNAI_DMG; attacker.kunaiHitCd = SHADOW_KUNAI_HIT_CD;
-        spawnParticles(target.x, target.y, '#94a3b8', 8); reduceEarthCd(); break;
+  if(attacker.weaponType==='kunai'&&attacker.kunaiHitCd===0){
+    const S=attacker.weaponSize;
+    for(const sign of [1,-1]){
+      const kwx=attacker.x+Math.cos(attacker.orbitAngle)*WEAPON_ORBIT_R*sign;
+      const kwy=attacker.y+Math.sin(attacker.orbitAngle)*WEAPON_ORBIT_R*sign;
+      if(Math.hypot(kwx-target.x,kwy-target.y)<S+BALL_R){
+        target.hp-=SHADOW_KUNAI_DMG;attacker.kunaiHitCd=SHADOW_KUNAI_HIT_CD;
+        spawnParticles(target.x,target.y,'#94a3b8',8);reduceEarthCd();break;
       }
     }
   }
-  // Poison: contact-based (ball–ball distance, not weapon orbit)
-  if (attacker.weaponType==='poison' && attacker.poisonContactCd===0) {
-    const ballDist = Math.hypot(attacker.x-target.x, attacker.y-target.y);
-    if (ballDist < BALL_R*2+4) {
-      attacker.poisonContactCd = POISON_CONTACT_HIT_CD;
-      if (target.poisonFrames > 0 && target.poisonSource === 'cloud') {
-        target.poisonFrames = 0; target.poisonSource = null;
-        target.poisonTick = 0; target.poisonOwnerUid = null;
-        target.hp += POISON_ANTIDOTE_HEAL; // no cap
-        spawnParticles(target.x, target.y, '#ffffff', 14);
-      } else if (target.poisonFrames === 0) {
-        // Apply contact poison
-        target.poisonFrames = POISON_CONTACT_FRAMES;
-        target.poisonSource = 'contact';
-        target.poisonOwnerUid = attacker.uid;
-        target.poisonTick = 0;
-        spawnParticles(target.x, target.y, '#84cc16', 8);
+  // Poison contact
+  if(attacker.weaponType==='poison'&&attacker.poisonContactCd===0){
+    const ballDist=Math.hypot(attacker.x-target.x,attacker.y-target.y);
+    if(ballDist<BALL_R*2+4){
+      attacker.poisonContactCd=POISON_CONTACT_HIT_CD;
+      if(target.poisonFrames>0&&target.poisonSource==='cloud'){
+        target.poisonFrames=0;target.poisonSource=null;target.poisonTick=0;target.poisonOwnerUid=null;
+        target.hp+=POISON_ANTIDOTE_HEAL;spawnParticles(target.x,target.y,'#ffffff',14);
+      } else if(target.poisonFrames===0){
+        target.poisonFrames=POISON_CONTACT_FRAMES;target.poisonSource='contact';
+        target.poisonOwnerUid=attacker.uid;target.poisonTick=0;
+        spawnParticles(target.x,target.y,'#84cc16',8);
       }
-      // If already contact-poisoned: no double-stack, just ignore
     }
   }
-}  // end weaponHitChecks
-
-function updatePoisonClouds() {
-  for (let i=poisonClouds.length-1;i>=0;i--) {
-    const c=poisonClouds[i];
-    c.frames--; c.angle+=0.04;
-    if (c.frames<=0) {
-      // Cloud expired — start CD on owner
-      const owner=balls.find(b=>b.uid===c.ownerId);
-      if (owner) owner.poisonCloudCd=POISON_CLOUD_CD;
-      poisonClouds.splice(i,1); continue;
+  // ── Katana orbit hit ──
+  if(attacker.weaponType==='katana'&&attacker.katanaHitCd===0&&!attacker.isDashing){
+    if(dist<attacker.weaponSize+BALL_R){
+      target.hp-=SAMURAI_KATANA_DMG;attacker.katanaHitCd=SAMURAI_KATANA_HIT_CD;
+      spawnParticles(target.x,target.y,'#f1f5f9',8);reduceEarthCd();
     }
-    for (const b of balls) {
-      if (b.uid === c.ownerId) continue; // immune to own cloud
-      if (Math.hypot(b.x-c.x, b.y-c.y) > POISON_CLOUD_RADIUS+BALL_R) continue;
-      // Ball is inside cloud
-      if (b.poisonFrames > 0 && b.poisonSource === 'contact') {
-        b.poisonFrames=0; b.poisonSource=null;
-        b.poisonTick=0; b.poisonOwnerUid=null;
-        b.hp += POISON_ANTIDOTE_HEAL; // no cap
-        spawnParticles(b.x,b.y,'#ffffff',14);
-      } else if (b.poisonFrames===0) {
-        // Apply cloud poison
-        b.poisonFrames=POISON_CLOUD_DOT_FRAMES;
-        b.poisonSource='cloud';
-        b.poisonOwnerUid=c.ownerId;
-        b.poisonTick=0;
-        spawnParticles(b.x,b.y,'#84cc16',8);
-      }
-      // If already cloud-poisoned: no re-apply
+  }
+  // ── Greatsword orbit hit ──
+  if(attacker.weaponType==='greatsword'&&attacker.gsHitCd===0){
+    if(dist<attacker.weaponSize+BALL_R){
+      const dmg=attacker.berserkState==='rage'?BERSERK_RAGE_DMG:BERSERK_NORMAL_DMG;
+      target.hp-=dmg;attacker.gsHitCd=BERSERK_SWORD_HIT_CD;
+      if(attacker.berserkState==='rage') attacker.hp+=5;
+      const col=attacker.berserkState==='rage'?'#ef4444':'#fbbf24';
+      spawnParticles(target.x,target.y,col,attacker.berserkState==='rage'?14:8);reduceEarthCd();
     }
   }
 }
 
-function updatePlantRoots() {
-  for (let i=plantRoots.length-1;i>=0;i--) {
-    const r=plantRoots[i];
-    if (r.done) { plantRoots.splice(i,1); continue; }
-    for (const b of balls) {
-      if (Math.hypot(b.x-r.x, b.y-r.y) > PLANT_ROOT_RADIUS+BALL_R) continue;
-      if (b.uid === r.ownerId) {
-        // Plant owner: heal + consume root
-        b.hp += PLANT_ROOT_HEAL;
-        spawnParticles(r.x,r.y,'#4ade80',10);
-        r.done = true; break;
-      } else {
-        // Enemy: bind if not already bound
-        if (b.bindFrames === 0) {
-          b.bindFrames = PLANT_ROOT_BIND_FRAMES;
-          b.bindTick = 0;
-          spawnParticles(r.x,r.y,'#15803d',10);
-          r.done = true; break;
-        }
-      }
+function updatePoisonClouds(){
+  for(let i=poisonClouds.length-1;i>=0;i--){
+    const c=poisonClouds[i];c.frames--;c.angle+=0.04;
+    if(c.frames<=0){const owner=balls.find(b=>b.uid===c.ownerId);if(owner)owner.poisonCloudCd=POISON_CLOUD_CD;poisonClouds.splice(i,1);continue;}
+    for(const b of balls){
+      if(b.uid===c.ownerId) continue;
+      if(Math.hypot(b.x-c.x,b.y-c.y)>POISON_CLOUD_RADIUS+BALL_R) continue;
+      if(b.poisonFrames>0&&b.poisonSource==='contact'){b.poisonFrames=0;b.poisonSource=null;b.poisonTick=0;b.poisonOwnerUid=null;b.hp+=POISON_ANTIDOTE_HEAL;spawnParticles(b.x,b.y,'#ffffff',14);}
+      else if(b.poisonFrames===0){b.poisonFrames=POISON_CLOUD_DOT_FRAMES;b.poisonSource='cloud';b.poisonOwnerUid=c.ownerId;b.poisonTick=0;spawnParticles(b.x,b.y,'#84cc16',8);}
     }
   }
 }
 
-function updateBlackholes() {
-  for (let i=blackholes.length-1;i>=0;i--) {
-    const h=blackholes[i];
-    h.frames--; h.dmgTimer++;
-    if (h.frames<=0) { blackholes.splice(i,1); continue; }
-    for (const b of balls) {
-      if (b.uid === h.ownerId) continue; // blackhole owner immune
-      if (b.bhPhaseFrames > 0) continue; // phased balls immune
-      const dx=b.x-h.x, dy=b.y-h.y;
-      const dist=Math.hypot(dx,dy)||0.001;
-      // Strong straight pull — distance-independent below 300px, inverse beyond
-      const strength = dist < 300
-        ? 2.2
-        : 2.2 * (300/dist);
-      b.vx -= (dx/dist)*strength;
-      b.vy -= (dy/dist)*strength;
-      // Allow higher speed cap so pull feels strong
-      const s=spd(b);
-      if (s>BASE_SPEED*3.5) setSpd(b,BASE_SPEED*3.5);
-      // Contact damage (larger radius)
-      if (dist < BALL_R*3.5 && h.dmgTimer>=BH_HOLE_DMG_TICK) {
-        b.hp -= BH_HOLE_DMG;
-        spawnParticles(b.x,b.y,'#a855f7',5);
-      }
+function updatePlantRoots(){
+  for(let i=plantRoots.length-1;i>=0;i--){
+    const r=plantRoots[i];if(r.done){plantRoots.splice(i,1);continue;}
+    for(const b of balls){
+      if(Math.hypot(b.x-r.x,b.y-r.y)>PLANT_ROOT_RADIUS+BALL_R) continue;
+      if(b.uid===r.ownerId){b.hp+=PLANT_ROOT_HEAL;spawnParticles(r.x,r.y,'#4ade80',10);r.done=true;break;}
+      else{if(b.bindFrames===0){b.bindFrames=PLANT_ROOT_BIND_FRAMES;b.bindTick=0;spawnParticles(r.x,r.y,'#15803d',10);r.done=true;break;}}
     }
-    if (h.dmgTimer>=BH_HOLE_DMG_TICK) h.dmgTimer=0;
   }
 }
 
-function updateVortices() {
-  for (let i=vortices.length-1;i>=0;i--) {
-    const v=vortices[i];
-    v.frames--; v.angle+=0.10;
-    if (v.frames<=0) {
-      // Vortex expired — now start the cooldown on the owner
-      const owner=balls.find(b=>b.uid===v.ownerId);
-      if (owner) owner.vortexCd=WATER_VORTEX_CD;
-      vortices.splice(i,1); continue;
+function updateBlackholes(){
+  for(let i=blackholes.length-1;i>=0;i--){
+    const h=blackholes[i];h.frames--;h.dmgTimer++;
+    if(h.frames<=0){blackholes.splice(i,1);continue;}
+    for(const b of balls){
+      if(b.uid===h.ownerId) continue;if(b.bhPhaseFrames>0) continue;
+      const dx=b.x-h.x,dy=b.y-h.y,dist=Math.hypot(dx,dy)||0.001;
+      const strength=dist<300?2.2:2.2*(300/dist);
+      b.vx-=(dx/dist)*strength;b.vy-=(dy/dist)*strength;
+      const s=spd(b);if(s>BASE_SPEED*3.5)setSpd(b,BASE_SPEED*3.5);
+      if(dist<BALL_R*3.5&&h.dmgTimer>=BH_HOLE_DMG_TICK){b.hp-=BH_HOLE_DMG;spawnParticles(b.x,b.y,'#a855f7',5);}
     }
+    if(h.dmgTimer>=BH_HOLE_DMG_TICK)h.dmgTimer=0;
+  }
+}
+
+function updateVortices(){
+  for(let i=vortices.length-1;i>=0;i--){
+    const v=vortices[i];v.frames--;v.angle+=0.10;
+    if(v.frames<=0){const owner=balls.find(b=>b.uid===v.ownerId);if(owner)owner.vortexCd=WATER_VORTEX_CD;vortices.splice(i,1);continue;}
     v.dmgTimer++;
-    for (const b of balls) {
-      const dx=b.x-v.x, dy=b.y-v.y;
-      const dist=Math.hypot(dx,dy)||0.001;
-      // Pull affects everyone (including owner — tactical positioning)
-      if (dist>0.1) {
-        const nx=dx/dist, ny=dy/dist;
-        const strength = 0.99 / (1 + dist*0.012);
-        const tangX=-ny, tangY=nx;
-        b.vx += (-nx*strength + tangX*strength*0.75);
-        b.vy += (-ny*strength + tangY*strength*0.75);
-        const s=spd(b);
-        if (s>BASE_SPEED*2.0) setSpd(b,BASE_SPEED*2.0);
+    for(const b of balls){
+      const dx=b.x-v.x,dy=b.y-v.y,dist=Math.hypot(dx,dy)||0.001;
+      if(dist>0.1){
+        const nx=dx/dist,ny=dy/dist,strength=0.99/(1+dist*0.012);
+        const tangX=-ny,tangY=nx;
+        b.vx+=(-nx*strength+tangX*strength*0.75);b.vy+=(-ny*strength+tangY*strength*0.75);
+        const s=spd(b);if(s>BASE_SPEED*2.0)setSpd(b,BASE_SPEED*2.0);
       }
-      // Damage: only non-owner balls, blackhole in phase immune
-      if (b.uid !== v.ownerId &&
-          b.bhPhaseFrames === 0 &&
-          dist < WATER_VORTEX_RADIUS+BALL_R &&
-          v.dmgTimer>=WATER_VORTEX_DMG_INTERVAL) {
-        b.hp-=1;
-        // Fire burn + water vortex: vortex damages but cures burn
-        if (b.burnFrames > 0) {
-          b.burnFrames = 0;
-          spawnParticles(b.x,b.y,'#7dd3fc',5);
-        }
+      if(b.uid!==v.ownerId&&b.bhPhaseFrames===0&&dist<WATER_VORTEX_RADIUS+BALL_R&&v.dmgTimer>=WATER_VORTEX_DMG_INTERVAL){
+        b.hp-=1;if(b.burnFrames>0){b.burnFrames=0;spawnParticles(b.x,b.y,'#7dd3fc',5);}
         spawnParticles(b.x,b.y,'#0284c7',3);
       }
     }
-    if (v.dmgTimer>=WATER_VORTEX_DMG_INTERVAL) v.dmgTimer=0;
+    if(v.dmgTimer>=WATER_VORTEX_DMG_INTERVAL)v.dmgTimer=0;
   }
 }
 
-function updateCannons() {
-  for (let i=cannons.length-1;i>=0;i--) {
-    const c=cannons[i];
-    const owner=balls.find(b=>b.uid===c.ownerId);
-    if (!owner || owner.hp<=0) { cannons.splice(i,1); continue; }
-    c.frames--;
-    if (c.frames<=0) { cannons.splice(i,1); continue; }
-    c.fireCd--;
-    const target=balls.find(b=>b.uid===c.targetUid);
-    if (!target) { cannons.splice(i,1); continue; }
-    c.angle=Math.atan2(target.y-c.y, target.x-c.x);
-    if (c.fireCd<=0) {
-      c.fireCd=MECH_CANNON_FIRE_CD;
-      projectiles.push({
-        type:'cannonball',
-        x:c.x, y:c.y,
-        vx:Math.cos(c.angle)*MECH_CANNON_SPEED,
-        vy:Math.sin(c.angle)*MECH_CANNON_SPEED,
-        targetUid:c.targetUid,
-        traveled:0, done:false,
-      });
-    }
+function updateCannons(){
+  for(let i=cannons.length-1;i>=0;i--){
+    const c=cannons[i];const owner=balls.find(b=>b.uid===c.ownerId);
+    if(!owner||owner.hp<=0){cannons.splice(i,1);continue;}
+    c.frames--;if(c.frames<=0){cannons.splice(i,1);continue;}
+    c.fireCd--;const target=balls.find(b=>b.uid===c.targetUid);
+    if(!target){cannons.splice(i,1);continue;}
+    c.angle=Math.atan2(target.y-c.y,target.x-c.x);
+    if(c.fireCd<=0){c.fireCd=MECH_CANNON_FIRE_CD;projectiles.push({type:'cannonball',x:c.x,y:c.y,vx:Math.cos(c.angle)*MECH_CANNON_SPEED,vy:Math.sin(c.angle)*MECH_CANNON_SPEED,targetUid:c.targetUid,traveled:0,done:false});}
   }
 }
 
-function launchBolts(owner) {
-  for (let i=0;i<THUNDER_BOLT_COUNT;i++) {
-    projectiles.push({
-      type:'bolt', x:BALL_R+Math.random()*(W-BALL_R*2),
-      frames:THUNDER_BOLT_FRAMES, ownerId:owner.uid,
-      hitBalls:new Set(), done:false,
-    });
-  }
+function launchBolts(owner){
+  for(let i=0;i<THUNDER_BOLT_COUNT;i++) projectiles.push({type:'bolt',x:BALL_R+Math.random()*(W-BALL_R*2),frames:THUNDER_BOLT_FRAMES,ownerId:owner.uid,hitBalls:new Set(),done:false});
 }
-
-function launchSeeds(owner) {
-  const baseAngle=owner.orbitAngle, healIdx=Math.floor(Math.random()*4);
-  for (let i=0;i<4;i++) {
+function launchSeeds(owner){
+  const baseAngle=owner.orbitAngle,healIdx=Math.floor(Math.random()*4);
+  for(let i=0;i<4;i++){
     const angle=baseAngle+(Math.PI/2)*i;
-    projectiles.push({
-      type:'seed',
-      x:owner.x+Math.cos(angle)*WEAPON_ORBIT_R,
-      y:owner.y+Math.sin(angle)*WEAPON_ORBIT_R,
-      vx:Math.cos(angle)*PLANT_SEED_SPEED, vy:Math.sin(angle)*PLANT_SEED_SPEED,
-      ownerId:owner.uid, isHeal:i===healIdx, hitCd:0, traveled:0, done:false,
-    });
+    projectiles.push({type:'seed',x:owner.x+Math.cos(angle)*WEAPON_ORBIT_R,y:owner.y+Math.sin(angle)*WEAPON_ORBIT_R,vx:Math.cos(angle)*PLANT_SEED_SPEED,vy:Math.sin(angle)*PLANT_SEED_SPEED,ownerId:owner.uid,isHeal:i===healIdx,hitCd:0,traveled:0,done:false});
   }
 }
-
-function launchShuriken(owner) {
+function launchShuriken(owner){
   const angle=owner.orbitAngle;
-  projectiles.push({
-    type:'shuriken',
-    x:owner.x+Math.cos(angle)*WEAPON_ORBIT_R,
-    y:owner.y+Math.sin(angle)*WEAPON_ORBIT_R,
-    vx:Math.cos(angle)*PROJ_SPEED, vy:Math.sin(angle)*PROJ_SPEED,
-    size:owner.weaponSize, spinAngle:0, traveled:0,
-    ownerId:owner.uid, phase:'flying',
-    tornadoFrames:0, tx:0, ty:0,
-    damageDone:false, flyingHitCd:0, done:false,
-  });
+  projectiles.push({type:'shuriken',x:owner.x+Math.cos(angle)*WEAPON_ORBIT_R,y:owner.y+Math.sin(angle)*WEAPON_ORBIT_R,vx:Math.cos(angle)*PROJ_SPEED,vy:Math.sin(angle)*PROJ_SPEED,size:owner.weaponSize,spinAngle:0,traveled:0,ownerId:owner.uid,phase:'flying',tornadoFrames:0,tx:0,ty:0,damageDone:false,flyingHitCd:0,done:false});
 }
 
-function updateProjectiles() {
-  for (const p of projectiles) {
-    if (p.done) continue;
-
-    if (p.type==='lance') {
-      // Stuck in wall: tick down, hit nearby enemies
-      if (p.stuck) {
-        p.stuckFrames--;
-        if (p.stuckFrames<=0) { p.done=true; continue; }
-        if (p.hitCd>0) { p.hitCd--; continue; }
-        for (const b of balls) {
-          if (b.uid===p.ownerId) continue;
-          if (Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+14) {
-            b.hp -= WATER_LANCE_DMG;
-            spawnParticles(p.x,p.y,'#38bdf8',6);
-            p.hitCd=20; break;
-          }
-        }
+function updateProjectiles(){
+  for(const p of projectiles){
+    if(p.done) continue;
+    if(p.type==='lance'){
+      if(p.stuck){
+        p.stuckFrames--;if(p.stuckFrames<=0){p.done=true;continue;}
+        if(p.hitCd>0){p.hitCd--;continue;}
+        for(const b of balls){if(b.uid===p.ownerId) continue;if(Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+14){b.hp-=WATER_LANCE_DMG;spawnParticles(p.x,p.y,'#38bdf8',6);p.hitCd=20;break;}}
         continue;
       }
-
-      // Record trail
-      p.trail.unshift({x:p.x, y:p.y, angle:p.angle});
-      if (p.trail.length > WATER_LANCE_TRAIL_LEN) p.trail.pop();
-
-      p.x += p.vx; p.y += p.vy;
-      p.traveled += Math.hypot(p.vx, p.vy);
-
-      // Wall — stick
-      let hitWall = false;
-      if (p.x<8)   { p.x=8;     hitWall=true; }
-      if (p.x>W-8) { p.x=W-8;   hitWall=true; }
-      if (p.y<8)   { p.y=8;     hitWall=true; }
-      if (p.y>H-8) { p.y=H-8;   hitWall=true; }
-      if (hitWall) {
-        p.stuck=true; p.stuckFrames=90;
-        p.vx=0; p.vy=0;
-        spawnParticles(p.x,p.y,'#38bdf8',6);
-        continue;
-      }
-      if (p.traveled > Math.hypot(W,H)*1.1) { p.done=true; continue; }
-      if (p.hitCd>0) { p.hitCd--; continue; }
-
-      // Lance head hit — check all enemies
-      let lanceHit = false;
-      for (const b of balls) {
-        if (b.uid===p.ownerId) continue;
-        if (Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+12) {
-          b.hp -= WATER_LANCE_DMG;
-          spawnParticles(p.x,p.y,'#38bdf8',12);
-          p.hitCd=20; lanceHit=true; break;
-        }
-      }
-      // Afterimage hit — only if head didn't already hit
-      if (!lanceHit) {
-        for (let ti=0;ti<p.trail.length;ti++) {
-          if ((1-ti/p.trail.length)<0.2) continue;
-          const t=p.trail[ti];
-          for (const b of balls) {
-            if (b.uid===p.ownerId) continue;
-            if (Math.hypot(t.x-b.x,t.y-b.y)<BALL_R+8) {
-              b.hp -= Math.ceil(WATER_LANCE_DMG * 0.5);
-              spawnParticles(t.x,t.y,'#7dd3fc',4);
-              p.hitCd=20; lanceHit=true; break;
-            }
-          }
-          if (lanceHit) break;
-        }
-      }
+      p.trail.unshift({x:p.x,y:p.y,angle:p.angle});
+      if(p.trail.length>WATER_LANCE_TRAIL_LEN)p.trail.pop();
+      p.x+=p.vx;p.y+=p.vy;p.traveled+=Math.hypot(p.vx,p.vy);
+      let hitWall=false;
+      if(p.x<8){p.x=8;hitWall=true;}if(p.x>W-8){p.x=W-8;hitWall=true;}
+      if(p.y<8){p.y=8;hitWall=true;}if(p.y>H-8){p.y=H-8;hitWall=true;}
+      if(hitWall){p.stuck=true;p.stuckFrames=90;p.vx=0;p.vy=0;spawnParticles(p.x,p.y,'#38bdf8',6);continue;}
+      if(p.traveled>Math.hypot(W,H)*1.1){p.done=true;continue;}
+      if(p.hitCd>0){p.hitCd--;continue;}
+      let lanceHit=false;
+      for(const b of balls){if(b.uid===p.ownerId)continue;if(Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+12){b.hp-=WATER_LANCE_DMG;spawnParticles(p.x,p.y,'#38bdf8',12);p.hitCd=20;lanceHit=true;break;}}
+      if(!lanceHit){for(let ti=0;ti<p.trail.length;ti++){if((1-ti/p.trail.length)<0.2)continue;const t=p.trail[ti];for(const b of balls){if(b.uid===p.ownerId)continue;if(Math.hypot(t.x-b.x,t.y-b.y)<BALL_R+8){b.hp-=Math.ceil(WATER_LANCE_DMG*0.5);spawnParticles(t.x,t.y,'#7dd3fc',4);p.hitCd=20;lanceHit=true;break;}}if(lanceHit)break;}}
       continue;
     }
-
-    if (p.type==='cannonball') {
-      p.x+=p.vx; p.y+=p.vy;
-      p.traveled+=Math.hypot(p.vx,p.vy);
-      // Wall bounce
-      if (p.x<8)   { p.x=8;     p.vx= Math.abs(p.vx); }
-      if (p.x>W-8) { p.x=W-8;   p.vx=-Math.abs(p.vx); }
-      if (p.y<8)   { p.y=8;     p.vy= Math.abs(p.vy); }
-      if (p.y>H-8) { p.y=H-8;   p.vy=-Math.abs(p.vy); }
-      if (p.traveled>Math.hypot(W,H)*1.2) { p.done=true; continue; }
+    if(p.type==='cannonball'){
+      p.x+=p.vx;p.y+=p.vy;p.traveled+=Math.hypot(p.vx,p.vy);
+      if(p.x<8){p.x=8;p.vx=Math.abs(p.vx);}if(p.x>W-8){p.x=W-8;p.vx=-Math.abs(p.vx);}
+      if(p.y<8){p.y=8;p.vy=Math.abs(p.vy);}if(p.y>H-8){p.y=H-8;p.vy=-Math.abs(p.vy);}
+      if(p.traveled>Math.hypot(W,H)*1.2){p.done=true;continue;}
       const target=balls.find(b=>b.uid===p.targetUid);
-      if (target && Math.hypot(p.x-target.x,p.y-target.y)<BALL_R+7) {
-        target.hp-=MECH_CANNON_DMG;
-        spawnParticles(target.x,target.y,'#fdba74',6);
-        p.done=true;
+      if(target&&Math.hypot(p.x-target.x,p.y-target.y)<BALL_R+7){target.hp-=MECH_CANNON_DMG;spawnParticles(target.x,target.y,'#fdba74',6);p.done=true;}
+      continue;
+    }
+    if(p.type==='bolt'){
+      p.frames--;if(p.frames<=0){p.done=true;continue;}
+      for(const b of balls){
+        if(p.hitBalls.has(b.uid))continue;if(b.uid===p.ownerId)continue;if(b.bhPhaseFrames>0)continue;
+        if(Math.abs(b.x-p.x)<BALL_R+10){p.hitBalls.add(b.uid);b.hp-=THUNDER_BOLT_DMG;b.stunVx=b.vx;b.stunVy=b.vy;b.vx=0;b.vy=0;b.stunFrames=THUNDER_STUN_FRAMES;b.kbFrames=0;spawnParticles(b.x,b.y,'#fde68a',12);}
       }
       continue;
     }
-
-    if (p.type==='bolt') {
-      p.frames--;
-      if (p.frames<=0) { p.done=true; continue; }
-      for (const b of balls) {
-        if (p.hitBalls.has(b.uid)) continue;
-        if (b.uid === p.ownerId) continue; // owner immune to own bolts
-        if (b.bhPhaseFrames > 0) continue; // blackhole phase immune
-        if (Math.abs(b.x-p.x)<BALL_R+10) {
-          p.hitBalls.add(b.uid); b.hp-=THUNDER_BOLT_DMG;
-          b.stunVx=b.vx; b.stunVy=b.vy;
-          b.vx=0; b.vy=0; b.stunFrames=THUNDER_STUN_FRAMES; b.kbFrames=0;
-          spawnParticles(b.x,b.y,'#fde68a',12);
-        }
+    if(p.type==='seed'){
+      p.x+=p.vx;p.y+=p.vy;p.traveled+=Math.hypot(p.vx,p.vy);if(p.hitCd>0)p.hitCd--;
+      if(p.x<6){p.x=6;p.vx=Math.abs(p.vx);}if(p.x>W-6){p.x=W-6;p.vx=-Math.abs(p.vx);}
+      if(p.y<6){p.y=6;p.vy=Math.abs(p.vy);}if(p.y>H-6){p.y=H-6;p.vy=-Math.abs(p.vy);}
+      if(p.traveled>Math.hypot(W,H)*0.9){p.done=true;continue;}
+      if(p.hitCd===0){
+        if(p.isHeal){for(const b of balls){if(Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+11){b.hp+=PLANT_SEED_HEAL;spawnParticles(b.x,b.y,'#facc15',6);p.done=true;break;}}}
+        else{for(const b of balls){if(b.uid===p.ownerId)continue;if(Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+11){b.hp-=PLANT_SEED_DMG;spawnParticles(b.x,b.y,'#4ade80',6);p.done=true;break;}}}
       }
       continue;
     }
-
-    if (p.type==='seed') {
-      p.x+=p.vx; p.y+=p.vy;
-      p.traveled+=Math.hypot(p.vx,p.vy);
-      if (p.hitCd>0) p.hitCd--;
-      if (p.x<6)    { p.x=6;     p.vx= Math.abs(p.vx); }
-      if (p.x>W-6)  { p.x=W-6;   p.vx=-Math.abs(p.vx); }
-      if (p.y<6)    { p.y=6;     p.vy= Math.abs(p.vy); }
-      if (p.y>H-6)  { p.y=H-6;   p.vy=-Math.abs(p.vy); }
-      if (p.traveled>Math.hypot(W,H)*0.9) { p.done=true; continue; }
-      if (p.hitCd===0) {
-        if (p.isHeal) {
-          for (const b of balls) {
-            if (Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+11) {
-              b.hp += PLANT_SEED_HEAL;
-              spawnParticles(b.x,b.y,'#facc15',6); p.done=true; break;
-            }
-          }
-        } else {
-          for (const b of balls) {
-            if (b.uid===p.ownerId) continue;
-            if (Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+11) {
-              b.hp-=PLANT_SEED_DMG;
-              spawnParticles(b.x,b.y,'#4ade80',6); p.done=true; break;
-            }
-          }
-        }
+    if(p.phase==='flying'){
+      p.spinAngle+=0.2;if(p.flyingHitCd>0)p.flyingHitCd--;
+      const px=p.x,py=p.y;p.x+=p.vx;p.y+=p.vy;p.traveled+=Math.hypot(p.x-px,p.y-py);
+      if(p.x<8){p.x=8;p.vx=Math.abs(p.vx);}if(p.x>W-8){p.x=W-8;p.vx=-Math.abs(p.vx);}
+      if(p.y<8){p.y=8;p.vy=Math.abs(p.vy);}if(p.y>H-8){p.y=H-8;p.vy=-Math.abs(p.vy);}
+      if(p.flyingHitCd===0){
+        for(const b of balls){if(b.uid===p.ownerId)continue;if(Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+p.size*0.5){b.hp-=7;p.flyingHitCd=30;spawnParticles(b.x,b.y,'#fcd34d',6);if(b.weaponType==='none'&&b.quakeCd>0)b.quakeCd=Math.max(0,b.quakeCd-90);break;}}
       }
-      continue;
-    }
-
-    if (p.phase==='flying') {
-      p.spinAngle+=0.2;
-      if (p.flyingHitCd>0) p.flyingHitCd--;
-      const px=p.x, py=p.y;
-      p.x+=p.vx; p.y+=p.vy;
-      p.traveled+=Math.hypot(p.x-px,p.y-py);
-      if (p.x<8)   { p.x=8;     p.vx= Math.abs(p.vx); }
-      if (p.x>W-8) { p.x=W-8;   p.vx=-Math.abs(p.vx); }
-      if (p.y<8)   { p.y=8;     p.vy= Math.abs(p.vy); }
-      if (p.y>H-8) { p.y=H-8;   p.vy=-Math.abs(p.vy); }
-      if (p.flyingHitCd===0) {
-        for (const b of balls) {
-          if (b.uid===p.ownerId) continue;
-          if (Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+p.size*0.5) {
-            b.hp-=7; p.flyingHitCd=30;
-            spawnParticles(b.x,b.y,'#fcd34d',6);
-            if (b.weaponType==='none' && b.quakeCd>0)
-              b.quakeCd=Math.max(0,b.quakeCd-90);
-            break;
-          }
-        }
-      }
-      if (p.traveled>=TORNADO_TRAVEL) {
-        p.phase='exploding'; p.tornadoFrames=TORNADO_FRAMES; p.tx=p.x; p.ty=p.y;
-      }
-    } else if (p.phase==='exploding') {
-      if (!p.damageDone) {
+      if(p.traveled>=TORNADO_TRAVEL){p.phase='exploding';p.tornadoFrames=TORNADO_FRAMES;p.tx=p.x;p.ty=p.y;}
+    } else if(p.phase==='exploding'){
+      if(!p.damageDone){
         p.damageDone=true;
-        for (const b of balls) {
-          if (b.uid===p.ownerId) continue;
-          if (Math.hypot(p.tx-b.x,p.ty-b.y)<TORNADO_RADIUS+BALL_R) {
-            b.hp-=TORNADO_DAMAGE;
-            if (b.weaponType==='none' && b.quakeCd>0)
-              b.quakeCd=Math.max(0,b.quakeCd-90);
-            spawnParticles(b.x,b.y,'#fcd34d',14);
-          }
-        }
+        for(const b of balls){if(b.uid===p.ownerId)continue;if(Math.hypot(p.tx-b.x,p.ty-b.y)<TORNADO_RADIUS+BALL_R){b.hp-=TORNADO_DAMAGE;if(b.weaponType==='none'&&b.quakeCd>0)b.quakeCd=Math.max(0,b.quakeCd-90);spawnParticles(b.x,b.y,'#fcd34d',14);}}
         const owner=balls.find(b=>b.uid===p.ownerId);
-        if (owner) {
-          owner.x=Math.max(BALL_R,Math.min(W-BALL_R,p.tx));
-          owner.y=Math.max(BALL_R,Math.min(H-BALL_R,p.ty));
-          spawnParticles(owner.x,owner.y,'#fcd34d',12);
-        }
+        if(owner){owner.x=Math.max(BALL_R,Math.min(W-BALL_R,p.tx));owner.y=Math.max(BALL_R,Math.min(H-BALL_R,p.ty));spawnParticles(owner.x,owner.y,'#fcd34d',12);}
       }
       p.tornadoFrames--;
-      if (p.tornadoFrames<=0) {
-        p.done=true;
-        const owner=balls.find(b=>b.uid===p.ownerId);
-        if (owner) owner.shurikenOut=false;
-      }
+      if(p.tornadoFrames<=0){p.done=true;const owner=balls.find(b=>b.uid===p.ownerId);if(owner)owner.shurikenOut=false;}
     }
   }
-  for (let i=projectiles.length-1;i>=0;i--) {
-    if (projectiles[i].done) projectiles.splice(i,1);
+  for(let i=projectiles.length-1;i>=0;i--){if(projectiles[i].done)projectiles.splice(i,1);}
+}
+
+function updateParticles(){
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vx*=0.92;p.vy*=0.92;p.life-=p.decay;
+    if(p.life<=0)particles.splice(i,1);
   }
 }
 
-function updateParticles() {
-  for (let i=particles.length-1;i>=0;i--) {
-    const p=particles[i];
-    p.x+=p.vx; p.y+=p.vy; p.vx*=0.92; p.vy*=0.92; p.life-=p.decay;
-    if (p.life<=0) particles.splice(i,1);
-  }
-}
-
-function checkGameOver() {
-  let removed = false;
-  for (let i=balls.length-1;i>=0;i--) {
-    if (balls[i].hp<=0) {
-      spawnParticles(balls[i].x,balls[i].y,balls[i].glowColor,20);
-      balls.splice(i,1);
-      removed = true;
-    }
-  }
-  if (removed) buildStatUI(); // sync stat boxes immediately
-  if (balls.length===1) {
-    gameOver=true;
-    const winner=balls[0];
+function checkGameOver(){
+  let removed=false;
+  for(let i=balls.length-1;i>=0;i--){if(balls[i].hp<=0){spawnParticles(balls[i].x,balls[i].y,balls[i].glowColor,20);balls.splice(i,1);removed=true;}}
+  if(removed)buildStatUI();
+  if(balls.length===1){
+    gameOver=true;const winner=balls[0];
     const el=document.getElementById('winner-text');
-    el.textContent=`${winner.icon} ${winner.name} WINS!`;
-    el.style.color=winner.glowColor;
+    el.textContent=`${winner.icon} ${winner.name} WINS!`;el.style.color=winner.glowColor;
     document.getElementById('winner-overlay').classList.add('show');
-  } else if (balls.length===0) {
-    gameOver=true;
-    const el=document.getElementById('winner-text');
-    el.textContent='DRAW!'; el.style.color='#fff';
+  } else if(balls.length===0){
+    gameOver=true;const el=document.getElementById('winner-text');
+    el.textContent='DRAW!';el.style.color='#fff';
     document.getElementById('winner-overlay').classList.add('show');
   }
 }
 
-function buildStatUI() {
-  const stats=document.getElementById('stats');
-  stats.innerHTML='';
-  balls.forEach((b,i)=>{
-    const box=document.createElement('div');
-    box.className='stat-box'; box.id=`stat-box-${b.uid}`;
+function buildStatUI(){
+  const stats=document.getElementById('stats');stats.innerHTML='';
+  balls.forEach(b=>{
+    const box=document.createElement('div');box.className='stat-box';box.id=`stat-box-${b.uid}`;
     box.innerHTML=`<span id="stat-hp-${b.uid}"></span><span id="stat-desc-${b.uid}"></span>`;
     stats.appendChild(box);
   });
 }
-
-function updateStatUI() {
-  if (!balls) return;
-  balls.forEach((b,i)=>{
+function updateStatUI(){
+  if(!balls) return;
+  balls.forEach(b=>{
     const ch=CHARACTERS[b.id];
     const hpEl=document.getElementById(`stat-hp-${b.uid}`);
     const descEl=document.getElementById(`stat-desc-${b.uid}`);
     const box=document.getElementById(`stat-box-${b.uid}`);
-    if (!hpEl) return;
+    if(!hpEl) return;
     hpEl.textContent=`${b.icon} ${b.name}  HP: ${Math.max(0,Math.ceil(b.hp))}`;
     descEl.textContent=ch.statDesc();
-    box.style.color=b.glowColor;
-    box.style.borderColor=b.glowColor+'44';
+    box.style.color=b.glowColor;box.style.borderColor=b.glowColor+'44';
   });
 }
 
-function draw() {
+// ════════════════════════════════
+//  DRAW
+// ════════════════════════════════
+function draw(){
   ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#f8fafc'; ctx.fillRect(0,0,W,H);
-  ctx.save(); ctx.strokeStyle='rgba(0,0,0,0.04)'; ctx.lineWidth=1;
-  for (let x=0;x<=W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for (let y=0;y<=H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.fillStyle='#f8fafc';ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.strokeStyle='rgba(0,0,0,0.04)';ctx.lineWidth=1;
+  for(let x=0;x<=W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<=H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
   ctx.restore();
-  for (const p of particles) {
-    ctx.save(); ctx.globalAlpha=p.life; ctx.shadowColor=p.color; ctx.shadowBlur=12;
-    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=p.color; ctx.fill(); ctx.restore();
+  for(const p of particles){ctx.save();ctx.globalAlpha=p.life;ctx.shadowColor=p.color;ctx.shadowBlur=12;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color;ctx.fill();ctx.restore();}
+  for(const p of projectiles){
+    if(p.type==='bolt')       drawBolt(p);
+    if(p.type==='seed')       drawSeed(p);
+    if(p.type==='lance')      drawLance(p);
+    if(p.type==='cannonball') drawCannonball(p);
+    if(p.phase==='exploding') drawTornado(p);
+    if(p.phase==='flying')    drawFlyingShuriken(p);
   }
-  for (const p of projectiles) {
-    if (p.type==='bolt')       drawBolt(p);
-    if (p.type==='seed')       drawSeed(p);
-    if (p.type==='lance')      drawLance(p);
-    if (p.type==='cannonball') drawCannonball(p);
-    if (p.phase==='exploding') drawTornado(p);
-    if (p.phase==='flying')    drawFlyingShuriken(p);
-  }
-  for (const v of vortices) drawVortex(v);
-  for (const c of cannons)   drawCannon(c);
-  for (const c of poisonClouds) drawPoisonCloud(c);
-  for (const r of plantRoots)   drawPlantRoot(r);
-  for (const h of blackholes)   drawBlackhole(h);
-  for (const b of balls) {
+  for(const v of vortices)     drawVortex(v);
+  for(const c of cannons)      drawCannon(c);
+  for(const c of poisonClouds) drawPoisonCloud(c);
+  for(const r of plantRoots)   drawPlantRoot(r);
+  for(const h of blackholes)   drawBlackhole(h);
+  for(const b of balls){
     drawQuakeRing(b); drawBall(b);
-    if (b.weaponType==='axe')      drawIceAxe(b);
-    if (b.weaponType==='shuriken') drawShuriken(b);
-    if (b.weaponType==='sword')    drawFireSword(b);
-    if (b.weaponType==='branch')   drawBranch(b);
-    if (b.weaponType==='hammer')   drawHammer(b);
-    if (b.weaponType==='spear')    drawWaterSpear(b);
-    if (b.weaponType==='wrench')   drawWrench(b);
-    if (b.weaponType==='kunai')    drawKunai(b);
+    if(b.weaponType==='axe')        drawIceAxe(b);
+    if(b.weaponType==='shuriken')   drawShuriken(b);
+    if(b.weaponType==='sword')      drawFireSword(b);
+    if(b.weaponType==='branch')     drawBranch(b);
+    if(b.weaponType==='hammer')     drawHammer(b);
+    if(b.weaponType==='spear')      drawWaterSpear(b);
+    if(b.weaponType==='wrench')     drawWrench(b);
+    if(b.weaponType==='kunai')      drawKunai(b);
+    if(b.weaponType==='katana')     drawKatana(b);
+    if(b.weaponType==='greatsword') drawGreatsword(b);
+    drawBloodWave(b);
     drawBlackholePhase(b);
-    drawEarthCooldown(b); drawHpBar(b);
+    drawBerserkAura(b);
+    drawDashTrail(b);
+    drawEarthCooldown(b);
+    drawHpBar(b);
   }
 }
 
-function drawBall(b) {
-  if (b.slowFrames>0) {
-    ctx.save(); ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+10,0,Math.PI*2);
-    ctx.strokeStyle='rgba(56,189,248,0.35)'; ctx.lineWidth=6; ctx.stroke(); ctx.restore();
-    ctx.save(); ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+5,0,Math.PI*2);
-    ctx.strokeStyle='rgba(147,210,255,0.95)'; ctx.lineWidth=2.5;
-    ctx.setLineDash([5,4]); ctx.shadowColor='#38bdf8'; ctx.shadowBlur=10; ctx.stroke(); ctx.restore();
+function drawBall(b){
+  if(b.slowFrames>0){
+    ctx.save();ctx.beginPath();ctx.arc(b.x,b.y,BALL_R+10,0,Math.PI*2);ctx.strokeStyle='rgba(56,189,248,0.35)';ctx.lineWidth=6;ctx.stroke();ctx.restore();
+    ctx.save();ctx.beginPath();ctx.arc(b.x,b.y,BALL_R+5,0,Math.PI*2);ctx.strokeStyle='rgba(147,210,255,0.95)';ctx.lineWidth=2.5;ctx.setLineDash([5,4]);ctx.shadowColor='#38bdf8';ctx.shadowBlur=10;ctx.stroke();ctx.restore();
   }
-  if (b.burnFrames>0) {
-    ctx.save(); ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+8,0,Math.PI*2);
-    ctx.strokeStyle='rgba(251,146,60,0.8)'; ctx.lineWidth=3;
-    ctx.setLineDash([4,4]); ctx.shadowColor='#fb923c'; ctx.shadowBlur=12; ctx.stroke(); ctx.restore();
-  }
-  if (b.stunFrames>0) {
-    ctx.save(); ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+10,0,Math.PI*2);
-    ctx.strokeStyle='rgba(253,224,71,0.9)'; ctx.lineWidth=4;
-    ctx.setLineDash([3,3]); ctx.shadowColor='#fde047'; ctx.shadowBlur=16; ctx.stroke(); ctx.restore();
-  }
-  if (b.poisonFrames>0) {
-    ctx.save(); ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+7,0,Math.PI*2);
-    ctx.strokeStyle='rgba(132,204,22,0.85)'; ctx.lineWidth=3;
-    ctx.setLineDash([4,3]); ctx.shadowColor='#84cc16'; ctx.shadowBlur=14; ctx.stroke(); ctx.restore();
-  }
-  if (b.bindFrames>0) {
-    ctx.save(); ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+9,0,Math.PI*2);
-    ctx.strokeStyle='rgba(21,128,61,0.9)'; ctx.lineWidth=4;
-    ctx.setLineDash([5,3]); ctx.shadowColor='#15803d'; ctx.shadowBlur=12; ctx.stroke(); ctx.restore();
+  if(b.burnFrames>0){ctx.save();ctx.beginPath();ctx.arc(b.x,b.y,BALL_R+8,0,Math.PI*2);ctx.strokeStyle='rgba(251,146,60,0.8)';ctx.lineWidth=3;ctx.setLineDash([4,4]);ctx.shadowColor='#fb923c';ctx.shadowBlur=12;ctx.stroke();ctx.restore();}
+  if(b.stunFrames>0){ctx.save();ctx.beginPath();ctx.arc(b.x,b.y,BALL_R+10,0,Math.PI*2);ctx.strokeStyle='rgba(253,224,71,0.9)';ctx.lineWidth=4;ctx.setLineDash([3,3]);ctx.shadowColor='#fde047';ctx.shadowBlur=16;ctx.stroke();ctx.restore();}
+  if(b.poisonFrames>0){ctx.save();ctx.beginPath();ctx.arc(b.x,b.y,BALL_R+7,0,Math.PI*2);ctx.strokeStyle='rgba(132,204,22,0.85)';ctx.lineWidth=3;ctx.setLineDash([4,3]);ctx.shadowColor='#84cc16';ctx.shadowBlur=14;ctx.stroke();ctx.restore();}
+  if(b.bindFrames>0){ctx.save();ctx.beginPath();ctx.arc(b.x,b.y,BALL_R+9,0,Math.PI*2);ctx.strokeStyle='rgba(21,128,61,0.9)';ctx.lineWidth=4;ctx.setLineDash([5,3]);ctx.shadowColor='#15803d';ctx.shadowBlur=12;ctx.stroke();ctx.restore();}
+  // Blood: red aura when accumulating
+  if(b.weaponType==='blood'&&b.bloodStolenAccum>0){
+    const pct=b.bloodStolenAccum/BLOOD_WAVE_THRESHOLD;
+    ctx.save();ctx.beginPath();ctx.arc(b.x,b.y,BALL_R+6,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(220,38,38,${0.3+pct*0.5})`;ctx.lineWidth=3+pct*3;
+    ctx.shadowColor='#dc2626';ctx.shadowBlur=10+pct*14;ctx.stroke();ctx.restore();
   }
   ctx.save();
   const halo=ctx.createRadialGradient(b.x,b.y,BALL_R*0.6,b.x,b.y,BALL_R+18);
-  halo.addColorStop(0,b.glowColor+'99'); halo.addColorStop(1,b.glowColor+'00');
-  ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+18,0,Math.PI*2); ctx.fillStyle=halo; ctx.fill(); ctx.restore();
-  ctx.save();
+  halo.addColorStop(0,b.glowColor+'99');halo.addColorStop(1,b.glowColor+'00');
+  ctx.beginPath();ctx.arc(b.x,b.y,BALL_R+18,0,Math.PI*2);ctx.fillStyle=halo;ctx.fill();ctx.restore();
+  // Berserker rage: red-tinted ball
+  let ballAlpha=1;
+  if(b.weaponType==='greatsword'&&b.berserkState==='rage') ballAlpha=0.92;
+  if(b.isDashing) ballAlpha=0.75;
+  ctx.save();ctx.globalAlpha=ballAlpha;
   const g=ctx.createRadialGradient(b.x-8,b.y-8,4,b.x,b.y,BALL_R);
-  g.addColorStop(0,'#ffffff'); g.addColorStop(0.3,b.glowColor); g.addColorStop(1,b.shadowColor);
-  ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R,0,Math.PI*2);
-  ctx.fillStyle=g; ctx.shadowColor=b.glowColor; ctx.shadowBlur=22; ctx.fill(); ctx.restore();
-  ctx.save(); ctx.font='bold 25px Fredoka One, cursive';
-  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle='#1e293b';
-  ctx.fillText(Math.ceil(Math.max(0,b.hp)),b.x,b.y); ctx.restore();
+  let c0='#ffffff', c1=b.glowColor, c2=b.shadowColor;
+  if(b.weaponType==='greatsword'&&b.berserkState==='rage'){c1='#ef4444';c2='#7f1d1d';}
+  g.addColorStop(0,c0);g.addColorStop(0.3,c1);g.addColorStop(1,c2);
+  ctx.beginPath();ctx.arc(b.x,b.y,BALL_R,0,Math.PI*2);
+  ctx.fillStyle=g;ctx.shadowColor=b.berserkState==='rage'?'#ef4444':b.glowColor;ctx.shadowBlur=22;ctx.fill();ctx.restore();
+  ctx.save();ctx.globalAlpha=ballAlpha;
+  ctx.font='bold 25px Fredoka One, cursive';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#1e293b';
+  ctx.fillText(Math.ceil(Math.max(0,b.hp)),b.x,b.y);ctx.restore();
 }
 
-function drawHpBar(b) {
+function drawHpBar(b){
   const bw=BALL_R*2,bx=b.x-BALL_R,by=b.y-BALL_R-12;
-  ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.beginPath(); ctx.roundRect(bx,by,bw,6,3); ctx.fill();
-  ctx.fillStyle=b.glowColor; ctx.beginPath(); ctx.roundRect(bx,by,bw*Math.max(0,b.hp/b.maxHp),6,3); ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.roundRect(bx,by,bw,6,3);ctx.fill();
+  ctx.fillStyle=b.glowColor;ctx.beginPath();ctx.roundRect(bx,by,bw*Math.max(0,b.hp/b.maxHp),6,3);ctx.fill();
 }
 
-function drawIceAxe(b) {
-  const S=b.weaponSize, wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R, wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
-  ctx.save(); ctx.translate(wx,wy); ctx.rotate(b.orbitAngle+Math.PI/4);
-  ctx.beginPath(); ctx.moveTo(0,-S); ctx.lineTo(S*0.7,0); ctx.lineTo(0,S*0.4); ctx.lineTo(-S*0.4,S*0.1); ctx.closePath();
-  const ag=ctx.createLinearGradient(-S,-S,S,S);
-  ag.addColorStop(0,'#e0f2fe'); ag.addColorStop(0.5,'#7dd3fc'); ag.addColorStop(1,'#0284c7');
-  ctx.fillStyle=ag; ctx.shadowColor='#7dd3fc'; ctx.shadowBlur=22; ctx.fill();
-  ctx.strokeStyle='#e0f2fe'; ctx.lineWidth=2; ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(0,S*0.4); ctx.lineTo(-S*0.7,S*1.2);
-  ctx.strokeStyle='#92400e'; ctx.lineWidth=4; ctx.lineCap='round'; ctx.shadowBlur=0; ctx.stroke(); ctx.restore();
+function drawIceAxe(b){
+  const S=b.weaponSize,wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R,wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
+  ctx.save();ctx.translate(wx,wy);ctx.rotate(b.orbitAngle+Math.PI/4);
+  ctx.beginPath();ctx.moveTo(0,-S);ctx.lineTo(S*0.7,0);ctx.lineTo(0,S*0.4);ctx.lineTo(-S*0.4,S*0.1);ctx.closePath();
+  const ag=ctx.createLinearGradient(-S,-S,S,S);ag.addColorStop(0,'#e0f2fe');ag.addColorStop(0.5,'#7dd3fc');ag.addColorStop(1,'#0284c7');
+  ctx.fillStyle=ag;ctx.shadowColor='#7dd3fc';ctx.shadowBlur=22;ctx.fill();ctx.strokeStyle='#e0f2fe';ctx.lineWidth=2;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,S*0.4);ctx.lineTo(-S*0.7,S*1.2);ctx.strokeStyle='#92400e';ctx.lineWidth=4;ctx.lineCap='round';ctx.shadowBlur=0;ctx.stroke();ctx.restore();
 }
 
-function drawFireSword(b) {
-  const S=b.weaponSize, wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R, wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
-  ctx.save(); ctx.translate(wx,wy); ctx.rotate(b.orbitAngle+Math.PI/4);
-  ctx.beginPath(); ctx.moveTo(0,-S*1.2); ctx.lineTo(S*0.18,0); ctx.lineTo(0,S*0.15); ctx.lineTo(-S*0.18,0); ctx.closePath();
-  const sg=ctx.createLinearGradient(0,-S*1.2,0,S*0.15);
-  sg.addColorStop(0,'#ffffff'); sg.addColorStop(0.3,'#fdba74'); sg.addColorStop(1,'#dc2626');
-  ctx.fillStyle=sg; ctx.shadowColor='#fb923c'; ctx.shadowBlur=24; ctx.fill();
-  ctx.strokeStyle='#fef2f2'; ctx.lineWidth=1.5; ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(-S*0.35,0); ctx.lineTo(S*0.35,0);
-  ctx.strokeStyle='#92400e'; ctx.lineWidth=5; ctx.lineCap='round'; ctx.shadowBlur=0; ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(0,S*0.15); ctx.lineTo(0,S*0.7);
-  ctx.strokeStyle='#78350f'; ctx.lineWidth=4; ctx.stroke(); ctx.restore();
+function drawFireSword(b){
+  const S=b.weaponSize,wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R,wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
+  ctx.save();ctx.translate(wx,wy);ctx.rotate(b.orbitAngle+Math.PI/4);
+  ctx.beginPath();ctx.moveTo(0,-S*1.2);ctx.lineTo(S*0.18,0);ctx.lineTo(0,S*0.15);ctx.lineTo(-S*0.18,0);ctx.closePath();
+  const sg=ctx.createLinearGradient(0,-S*1.2,0,S*0.15);sg.addColorStop(0,'#ffffff');sg.addColorStop(0.3,'#fdba74');sg.addColorStop(1,'#dc2626');
+  ctx.fillStyle=sg;ctx.shadowColor='#fb923c';ctx.shadowBlur=24;ctx.fill();ctx.strokeStyle='#fef2f2';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-S*0.35,0);ctx.lineTo(S*0.35,0);ctx.strokeStyle='#92400e';ctx.lineWidth=5;ctx.lineCap='round';ctx.shadowBlur=0;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,S*0.15);ctx.lineTo(0,S*0.7);ctx.strokeStyle='#78350f';ctx.lineWidth=4;ctx.stroke();ctx.restore();
 }
 
-function drawShuriken(b) {
-  if (b.shurikenOut) return;
-  const S=b.weaponSize, wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R, wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
-  ctx.save(); ctx.translate(wx,wy); ctx.rotate(b.orbitAngle*2);
-  for (let i=0;i<4;i++) {
-    ctx.save(); ctx.rotate(Math.PI/2*i); ctx.beginPath();
-    ctx.moveTo(0,0); ctx.lineTo(S*0.5,-S*0.2); ctx.lineTo(S,0); ctx.lineTo(S*0.5,S*0.2); ctx.closePath();
-    const sg=ctx.createLinearGradient(0,0,S,0);
-    sg.addColorStop(0,'#fef3c7'); sg.addColorStop(1,'#d97706');
-    ctx.fillStyle=sg; ctx.shadowColor='#fbbf24'; ctx.shadowBlur=16; ctx.fill(); ctx.restore();
+function drawShuriken(b){
+  if(b.shurikenOut) return;
+  const S=b.weaponSize,wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R,wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
+  ctx.save();ctx.translate(wx,wy);ctx.rotate(b.orbitAngle*2);
+  for(let i=0;i<4;i++){
+    ctx.save();ctx.rotate(Math.PI/2*i);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(S*0.5,-S*0.2);ctx.lineTo(S,0);ctx.lineTo(S*0.5,S*0.2);ctx.closePath();
+    const sg=ctx.createLinearGradient(0,0,S,0);sg.addColorStop(0,'#fef3c7');sg.addColorStop(1,'#d97706');
+    ctx.fillStyle=sg;ctx.shadowColor='#fbbf24';ctx.shadowBlur=16;ctx.fill();ctx.restore();
   }
   ctx.restore();
 }
 
-function drawFlyingShuriken(p) {
+function drawFlyingShuriken(p){
   const S=p.size;
-  ctx.save(); ctx.globalAlpha=0.25; ctx.shadowColor='#fbbf24'; ctx.shadowBlur=20;
-  ctx.beginPath(); ctx.arc(p.x-p.vx*3,p.y-p.vy*3,S*0.35,0,Math.PI*2); ctx.fillStyle='#fcd34d'; ctx.fill(); ctx.restore();
-  ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.spinAngle); ctx.shadowColor='#fbbf24'; ctx.shadowBlur=20;
-  for (let i=0;i<4;i++) {
-    ctx.save(); ctx.rotate(Math.PI/2*i); ctx.beginPath();
-    ctx.moveTo(0,0); ctx.lineTo(S*0.5,-S*0.2); ctx.lineTo(S,0); ctx.lineTo(S*0.5,S*0.2); ctx.closePath();
-    const sg=ctx.createLinearGradient(0,0,S,0);
-    sg.addColorStop(0,'#fff7e0'); sg.addColorStop(1,'#f59e0b');
-    ctx.fillStyle=sg; ctx.fill(); ctx.restore();
-  }
+  ctx.save();ctx.globalAlpha=0.25;ctx.shadowColor='#fbbf24';ctx.shadowBlur=20;ctx.beginPath();ctx.arc(p.x-p.vx*3,p.y-p.vy*3,S*0.35,0,Math.PI*2);ctx.fillStyle='#fcd34d';ctx.fill();ctx.restore();
+  ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.spinAngle);ctx.shadowColor='#fbbf24';ctx.shadowBlur=20;
+  for(let i=0;i<4;i++){ctx.save();ctx.rotate(Math.PI/2*i);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(S*0.5,-S*0.2);ctx.lineTo(S,0);ctx.lineTo(S*0.5,S*0.2);ctx.closePath();const sg=ctx.createLinearGradient(0,0,S,0);sg.addColorStop(0,'#fff7e0');sg.addColorStop(1,'#f59e0b');ctx.fillStyle=sg;ctx.fill();ctx.restore();}
   ctx.restore();
 }
 
-function drawTornado(p) {
-  const prog=1-p.tornadoFrames/TORNADO_FRAMES;
-  const alpha=prog<0.4?prog/0.4:(1-prog)/0.6;
-  const r=TORNADO_RADIUS*(0.2+0.8*Math.min(prog*2.5,1));
-  ctx.save(); ctx.globalAlpha=Math.min(alpha,1);
-  const core=ctx.createRadialGradient(p.tx,p.ty,0,p.tx,p.ty,r*0.55);
-  core.addColorStop(0,'rgba(253,230,138,0.55)'); core.addColorStop(0.5,'rgba(251,191,36,0.22)'); core.addColorStop(1,'rgba(251,191,36,0)');
-  ctx.beginPath(); ctx.arc(p.tx,p.ty,r*0.55,0,Math.PI*2); ctx.fillStyle=core; ctx.fill();
-  for (const rg of [{rf:1.0,a:0.9,lw:4.5},{rf:0.75,a:0.75,lw:3.5},{rf:0.5,a:0.6,lw:2.5},{rf:0.28,a:0.5,lw:2}]) {
-    ctx.beginPath(); ctx.arc(p.tx,p.ty,r*rg.rf,0,Math.PI*2);
-    ctx.strokeStyle=`rgba(251,191,36,${rg.a})`; ctx.lineWidth=rg.lw;
-    ctx.shadowColor='#fbbf24'; ctx.shadowBlur=18; ctx.stroke();
+function drawTornado(p){
+  const prog=1-p.tornadoFrames/TORNADO_FRAMES;const alpha=prog<0.4?prog/0.4:(1-prog)/0.6;const r=TORNADO_RADIUS*(0.2+0.8*Math.min(prog*2.5,1));
+  ctx.save();ctx.globalAlpha=Math.min(alpha,1);
+  const core=ctx.createRadialGradient(p.tx,p.ty,0,p.tx,p.ty,r*0.55);core.addColorStop(0,'rgba(253,230,138,0.55)');core.addColorStop(0.5,'rgba(251,191,36,0.22)');core.addColorStop(1,'rgba(251,191,36,0)');
+  ctx.beginPath();ctx.arc(p.tx,p.ty,r*0.55,0,Math.PI*2);ctx.fillStyle=core;ctx.fill();
+  for(const rg of [{rf:1.0,a:0.9,lw:4.5},{rf:0.75,a:0.75,lw:3.5},{rf:0.5,a:0.6,lw:2.5},{rf:0.28,a:0.5,lw:2}]){
+    ctx.beginPath();ctx.arc(p.tx,p.ty,r*rg.rf,0,Math.PI*2);ctx.strokeStyle=`rgba(251,191,36,${rg.a})`;ctx.lineWidth=rg.lw;ctx.shadowColor='#fbbf24';ctx.shadowBlur=18;ctx.stroke();
   }
-  ctx.save(); ctx.translate(p.tx,p.ty);
-  for (let i=0;i<8;i++) {
-    ctx.rotate(Math.PI/4); ctx.beginPath(); ctx.moveTo(0,0);
-    ctx.quadraticCurveTo(r*0.55,r*0.35,r*0.9,0);
-    ctx.strokeStyle='rgba(253,230,138,0.7)'; ctx.lineWidth=2.5; ctx.shadowColor='#fbbf24'; ctx.shadowBlur=12; ctx.stroke();
-  }
-  ctx.restore(); ctx.globalAlpha=1; ctx.restore();
+  ctx.save();ctx.translate(p.tx,p.ty);for(let i=0;i<8;i++){ctx.rotate(Math.PI/4);ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(r*0.55,r*0.35,r*0.9,0);ctx.strokeStyle='rgba(253,230,138,0.7)';ctx.lineWidth=2.5;ctx.shadowColor='#fbbf24';ctx.shadowBlur=12;ctx.stroke();}
+  ctx.restore();ctx.globalAlpha=1;ctx.restore();
 }
 
-function drawBranch(b) {
-  const S=b.weaponSize, wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R, wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
-  ctx.save(); ctx.translate(wx,wy); ctx.rotate(b.orbitAngle+Math.PI/4);
-  ctx.beginPath(); ctx.moveTo(0,-S*1.1); ctx.lineTo(0,S*0.5);
-  ctx.strokeStyle='#713f12'; ctx.lineWidth=7; ctx.lineCap='round'; ctx.shadowColor='#4ade80'; ctx.shadowBlur=12; ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(0,-S*0.5); ctx.lineTo(S*0.35,-S*0.8);
-  ctx.strokeStyle='#854d0e'; ctx.lineWidth=4; ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(0,-S*0.1); ctx.lineTo(-S*0.3,-S*0.35);
-  ctx.strokeStyle='#854d0e'; ctx.lineWidth=3; ctx.stroke();
-  for (const [lx,ly,r] of [[S*0.35,-S*0.8,7],[-S*0.3,-S*0.35,6],[0,-S*1.1,8]]) {
-    ctx.beginPath(); ctx.arc(lx,ly,r,0,Math.PI*2);
-    ctx.fillStyle='#4ade80'; ctx.shadowColor='#86efac'; ctx.shadowBlur=10; ctx.fill();
-  }
+function drawBranch(b){
+  const S=b.weaponSize,wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R,wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
+  ctx.save();ctx.translate(wx,wy);ctx.rotate(b.orbitAngle+Math.PI/4);
+  ctx.beginPath();ctx.moveTo(0,-S*1.1);ctx.lineTo(0,S*0.5);ctx.strokeStyle='#713f12';ctx.lineWidth=7;ctx.lineCap='round';ctx.shadowColor='#4ade80';ctx.shadowBlur=12;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,-S*0.5);ctx.lineTo(S*0.35,-S*0.8);ctx.strokeStyle='#854d0e';ctx.lineWidth=4;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,-S*0.1);ctx.lineTo(-S*0.3,-S*0.35);ctx.strokeStyle='#854d0e';ctx.lineWidth=3;ctx.stroke();
+  for(const[lx,ly,r]of[[S*0.35,-S*0.8,7],[-S*0.3,-S*0.35,6],[0,-S*1.1,8]]){ctx.beginPath();ctx.arc(lx,ly,r,0,Math.PI*2);ctx.fillStyle='#4ade80';ctx.shadowColor='#86efac';ctx.shadowBlur=10;ctx.fill();}
   ctx.restore();
 }
 
-function drawSeed(p) {
-  ctx.save(); ctx.beginPath(); ctx.arc(p.x,p.y,11,0,Math.PI*2);
-  ctx.fillStyle=p.isHeal?'#facc15':'#15803d';
-  ctx.shadowColor=p.isHeal?'#fde68a':'#4ade80'; ctx.shadowBlur=18; ctx.fill();
-  ctx.beginPath(); ctx.arc(p.x,p.y,5,0,Math.PI*2);
-  ctx.fillStyle=p.isHeal?'#fff7c0':'#bbf7d0'; ctx.fill(); ctx.restore();
+function drawSeed(p){
+  ctx.save();ctx.beginPath();ctx.arc(p.x,p.y,11,0,Math.PI*2);ctx.fillStyle=p.isHeal?'#facc15':'#15803d';ctx.shadowColor=p.isHeal?'#fde68a':'#4ade80';ctx.shadowBlur=18;ctx.fill();ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);ctx.fillStyle=p.isHeal?'#fff7c0':'#bbf7d0';ctx.fill();ctx.restore();
 }
 
-function drawHammer(b) {
-  const S=b.weaponSize, wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R, wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
-  ctx.save(); ctx.translate(wx,wy); ctx.rotate(b.orbitAngle+Math.PI/4);
-  ctx.beginPath(); ctx.moveTo(0,S*0.6); ctx.lineTo(0,-S*0.5);
-  ctx.strokeStyle='#4c1d95'; ctx.lineWidth=6; ctx.lineCap='round'; ctx.shadowColor='#a78bfa'; ctx.shadowBlur=10; ctx.stroke();
-  ctx.beginPath(); ctx.roundRect(-S*0.4,-S*1.0,S*0.8,S*0.5,4);
-  const hg=ctx.createLinearGradient(-S*0.4,-S,S*0.4,-S*0.5);
-  hg.addColorStop(0,'#ede9fe'); hg.addColorStop(0.5,'#a78bfa'); hg.addColorStop(1,'#6d28d9');
-  ctx.fillStyle=hg; ctx.shadowColor='#c4b5fd'; ctx.shadowBlur=20; ctx.fill();
-  ctx.strokeStyle='#ddd6fe'; ctx.lineWidth=1.5; ctx.stroke(); ctx.restore();
+function drawHammer(b){
+  const S=b.weaponSize,wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R,wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
+  ctx.save();ctx.translate(wx,wy);ctx.rotate(b.orbitAngle+Math.PI/4);
+  ctx.beginPath();ctx.moveTo(0,S*0.6);ctx.lineTo(0,-S*0.5);ctx.strokeStyle='#4c1d95';ctx.lineWidth=6;ctx.lineCap='round';ctx.shadowColor='#a78bfa';ctx.shadowBlur=10;ctx.stroke();
+  ctx.beginPath();ctx.roundRect(-S*0.4,-S*1.0,S*0.8,S*0.5,4);
+  const hg=ctx.createLinearGradient(-S*0.4,-S,S*0.4,-S*0.5);hg.addColorStop(0,'#ede9fe');hg.addColorStop(0.5,'#a78bfa');hg.addColorStop(1,'#6d28d9');
+  ctx.fillStyle=hg;ctx.shadowColor='#c4b5fd';ctx.shadowBlur=20;ctx.fill();ctx.strokeStyle='#ddd6fe';ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
 }
 
-function drawBolt(p) {
-  const prog=1-p.frames/THUNDER_BOLT_FRAMES;
-  const alpha=prog<0.15?prog/0.15:prog>0.8?(1-prog)/0.2:1;
-  ctx.save(); ctx.globalAlpha=Math.min(alpha,1);
-  ctx.beginPath(); ctx.moveTo(p.x,0);
-  for (let i=1;i<=8;i++) ctx.lineTo(p.x+(i<8?(Math.random()-0.5)*38:0),i*(H/8));
-  ctx.strokeStyle='#fde047'; ctx.lineWidth=5; ctx.shadowColor='#fbbf24'; ctx.shadowBlur=30; ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(p.x,0);
-  for (let i=1;i<=8;i++) ctx.lineTo(p.x+(i<8?(Math.random()-0.5)*18:0),i*(H/8));
-  ctx.strokeStyle='#ffffff'; ctx.lineWidth=2; ctx.shadowBlur=8; ctx.stroke();
-  ctx.globalAlpha=1; ctx.restore();
+function drawBolt(p){
+  const prog=1-p.frames/THUNDER_BOLT_FRAMES;const alpha=prog<0.15?prog/0.15:prog>0.8?(1-prog)/0.2:1;
+  ctx.save();ctx.globalAlpha=Math.min(alpha,1);
+  ctx.beginPath();ctx.moveTo(p.x,0);for(let i=1;i<=8;i++)ctx.lineTo(p.x+(i<8?(Math.random()-0.5)*38:0),i*(H/8));
+  ctx.strokeStyle='#fde047';ctx.lineWidth=5;ctx.shadowColor='#fbbf24';ctx.shadowBlur=30;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(p.x,0);for(let i=1;i<=8;i++)ctx.lineTo(p.x+(i<8?(Math.random()-0.5)*18:0),i*(H/8));
+  ctx.strokeStyle='#ffffff';ctx.lineWidth=2;ctx.shadowBlur=8;ctx.stroke();
+  ctx.globalAlpha=1;ctx.restore();
 }
 
-function drawQuakeRing(b) {
-  if (b.quakeFrames<=0) return;
-  const prog=1-b.quakeFrames/QUAKE_FRAMES;
-  const alpha=prog<0.4?prog/0.4:(1-prog)/0.6;
-  const r=QUAKE_RADIUS*prog;
-  ctx.save(); ctx.globalAlpha=Math.min(alpha,1);
-  const core=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,r*0.7);
-  core.addColorStop(0,'rgba(163,120,60,0.65)'); core.addColorStop(1,'rgba(163,120,60,0)');
-  ctx.beginPath(); ctx.arc(b.x,b.y,r*0.7,0,Math.PI*2); ctx.fillStyle=core; ctx.fill();
-  for (const rg of [{rf:1.0,a:1.0,lw:6},{rf:0.7,a:0.85,lw:4},{rf:0.42,a:0.65,lw:3}]) {
-    ctx.beginPath(); ctx.arc(b.x,b.y,r*rg.rf,0,Math.PI*2);
-    ctx.strokeStyle=`rgba(120,70,20,${rg.a})`; ctx.lineWidth=rg.lw;
-    ctx.shadowColor='#78350f'; ctx.shadowBlur=22; ctx.stroke();
-  }
-  ctx.save(); ctx.translate(b.x,b.y);
-  for (let i=0;i<8;i++) {
-    ctx.rotate(Math.PI/4); ctx.beginPath(); ctx.moveTo(BALL_R*0.5,0);
-    ctx.lineTo(r*0.5,r*0.12); ctx.lineTo(r*0.78,-r*0.08); ctx.lineTo(r*0.95,0);
-    ctx.strokeStyle='rgba(92,50,10,0.9)'; ctx.lineWidth=3; ctx.shadowColor='#92400e'; ctx.shadowBlur=10; ctx.stroke();
-  }
-  ctx.restore(); ctx.globalAlpha=1; ctx.restore();
+function drawQuakeRing(b){
+  if(b.quakeFrames<=0) return;
+  const prog=1-b.quakeFrames/QUAKE_FRAMES;const alpha=prog<0.4?prog/0.4:(1-prog)/0.6;const r=QUAKE_RADIUS*prog;
+  ctx.save();ctx.globalAlpha=Math.min(alpha,1);
+  const core=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,r*0.7);core.addColorStop(0,'rgba(163,120,60,0.65)');core.addColorStop(1,'rgba(163,120,60,0)');
+  ctx.beginPath();ctx.arc(b.x,b.y,r*0.7,0,Math.PI*2);ctx.fillStyle=core;ctx.fill();
+  for(const rg of [{rf:1.0,a:1.0,lw:6},{rf:0.7,a:0.85,lw:4},{rf:0.42,a:0.65,lw:3}]){ctx.beginPath();ctx.arc(b.x,b.y,r*rg.rf,0,Math.PI*2);ctx.strokeStyle=`rgba(120,70,20,${rg.a})`;ctx.lineWidth=rg.lw;ctx.shadowColor='#78350f';ctx.shadowBlur=22;ctx.stroke();}
+  ctx.save();ctx.translate(b.x,b.y);for(let i=0;i<8;i++){ctx.rotate(Math.PI/4);ctx.beginPath();ctx.moveTo(BALL_R*0.5,0);ctx.lineTo(r*0.5,r*0.12);ctx.lineTo(r*0.78,-r*0.08);ctx.lineTo(r*0.95,0);ctx.strokeStyle='rgba(92,50,10,0.9)';ctx.lineWidth=3;ctx.shadowColor='#92400e';ctx.shadowBlur=10;ctx.stroke();}
+  ctx.restore();ctx.globalAlpha=1;ctx.restore();
 }
 
-function drawEarthCooldown(b) {
-  if (b.weaponType!=='none') return;
-  const isQuaking=b.quakeFrames>0, isReady=b.quakeCd===0&&!isQuaking;
-  const displayCd=Math.min(b.quakeCd,QUAKE_CD);
+function drawEarthCooldown(b){
+  if(b.weaponType!=='none') return;
+  const isQuaking=b.quakeFrames>0,isReady=b.quakeCd===0&&!isQuaking;const displayCd=Math.min(b.quakeCd,QUAKE_CD);
   const label=isQuaking?'🌋 QUAKING':isReady?'💥 READY':`⏱ ${(displayCd/60).toFixed(1)}s`;
-  ctx.save(); ctx.font='bold 11px Nunito, sans-serif';
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  const tx=b.x, ty=b.y-BALL_R-22, tw=ctx.measureText(label).width+12;
+  ctx.save();ctx.font='bold 11px Nunito, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  const tx=b.x,ty=b.y-BALL_R-22,tw=ctx.measureText(label).width+12;
   ctx.fillStyle=isQuaking?'rgba(80,40,10,0.9)':isReady?'rgba(120,70,20,0.85)':'rgba(30,30,30,0.75)';
-  ctx.beginPath(); ctx.roundRect(tx-tw/2,ty-8,tw,16,8); ctx.fill();
-  ctx.fillStyle=(isQuaking||isReady)?'#fde68a':'#d4d4d4';
-  ctx.shadowColor=(isQuaking||isReady)?'#f59e0b':'transparent';
-  ctx.shadowBlur=(isQuaking||isReady)?8:0;
-  ctx.fillText(label,tx,ty); ctx.restore();
+  ctx.beginPath();ctx.roundRect(tx-tw/2,ty-8,tw,16,8);ctx.fill();
+  ctx.fillStyle=(isQuaking||isReady)?'#fde68a':'#d4d4d4';ctx.shadowColor=(isQuaking||isReady)?'#f59e0b':'transparent';ctx.shadowBlur=(isQuaking||isReady)?8:0;
+  ctx.fillText(label,tx,ty);ctx.restore();
 }
 
-function drawWaterSpear(b) {
-  // Orbit center (same as ice axe / fire sword)
-  const wx = b.x + Math.cos(b.orbitAngle) * WEAPON_ORBIT_R;
-  const wy = b.y + Math.sin(b.orbitAngle) * WEAPON_ORBIT_R;
-  // Spear length: half on each side of the grip point (center-grip)
-  const L = WATER_SPEAR_LEN() * 0.38; // half-length from orbit center
-  ctx.save(); ctx.translate(wx, wy); ctx.rotate(b.orbitAngle + Math.PI/4);
+function drawWaterSpear(b){
+  const wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R;const wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;const L=WATER_SPEAR_LEN()*0.38;
+  ctx.save();ctx.translate(wx,wy);ctx.rotate(b.orbitAngle+Math.PI/4);
+  ctx.beginPath();ctx.moveTo(-L,0);ctx.lineTo(L*0.7,0);ctx.strokeStyle='rgba(2,132,199,0.35)';ctx.lineWidth=9;ctx.lineCap='round';ctx.shadowColor='#0284c7';ctx.shadowBlur=18;ctx.stroke();
+  const sg=ctx.createLinearGradient(-L,0,L*0.7,0);sg.addColorStop(0,'#93c5fd');sg.addColorStop(0.45,'#e0f2fe');sg.addColorStop(1,'#7dd3fc');
+  ctx.beginPath();ctx.moveTo(-L,0);ctx.lineTo(L*0.7,0);ctx.strokeStyle=sg;ctx.lineWidth=3;ctx.shadowColor='#38bdf8';ctx.shadowBlur=8;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(L*0.7,0);ctx.lineTo(L,-7);ctx.lineTo(L*1.25,0);ctx.lineTo(L,7);ctx.closePath();
+  const hg=ctx.createLinearGradient(L*0.7,0,L*1.25,0);hg.addColorStop(0,'#38bdf8');hg.addColorStop(1,'#ffffff');ctx.fillStyle=hg;ctx.shadowColor='#ffffff';ctx.shadowBlur=20;ctx.fill();ctx.strokeStyle='#bae6fd';ctx.lineWidth=1;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-L,0);ctx.lineTo(-L*1.08,-3);ctx.lineTo(-L*1.08,3);ctx.closePath();ctx.fillStyle='#7dd3fc';ctx.shadowColor='#0284c7';ctx.shadowBlur=6;ctx.fill();
+  ctx.beginPath();ctx.rect(-5,-4,10,8);ctx.fillStyle='rgba(14,165,233,0.7)';ctx.shadowBlur=0;ctx.fill();ctx.restore();
+}
 
-  // ── Shaft ──
-  // Glow layer
-  ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L * 0.7, 0);
-  ctx.strokeStyle = 'rgba(2,132,199,0.35)';
-  ctx.lineWidth = 9; ctx.lineCap = 'round';
-  ctx.shadowColor = '#0284c7'; ctx.shadowBlur = 18; ctx.stroke();
-  // Core shaft
-  const sg = ctx.createLinearGradient(-L, 0, L * 0.7, 0);
-  sg.addColorStop(0, '#93c5fd');
-  sg.addColorStop(0.45, '#e0f2fe');
-  sg.addColorStop(1, '#7dd3fc');
-  ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L * 0.7, 0);
-  ctx.strokeStyle = sg; ctx.lineWidth = 3;
-  ctx.shadowColor = '#38bdf8'; ctx.shadowBlur = 8; ctx.stroke();
+function drawLance(p){
+  const L=WATER_SPEAR_LEN()*0.38;ctx.save();
+  for(let ti=p.trail.length-1;ti>=0;ti--){
+    const t=p.trail[ti];const alpha=(1-ti/WATER_LANCE_TRAIL_LEN)*0.45;const scale=1-ti/WATER_LANCE_TRAIL_LEN*0.45;const lL=L*scale;
+    ctx.save();ctx.globalAlpha=alpha;ctx.translate(t.x,t.y);ctx.rotate(t.angle);
+    ctx.beginPath();ctx.moveTo(-lL,0);ctx.lineTo(lL*0.7,0);ctx.strokeStyle='#7dd3fc';ctx.lineWidth=2.5*scale;ctx.lineCap='round';ctx.shadowColor='#38bdf8';ctx.shadowBlur=8;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(lL*0.7,0);ctx.lineTo(lL,-4*scale);ctx.lineTo(lL*1.2,0);ctx.lineTo(lL,4*scale);ctx.closePath();ctx.fillStyle='rgba(125,211,252,0.7)';ctx.fill();ctx.restore();
+  }
+  ctx.translate(p.x,p.y);ctx.rotate(p.angle);ctx.globalAlpha=p.stuck?Math.max(0.2,p.stuckFrames/90):1;
+  ctx.beginPath();ctx.moveTo(-L,0);ctx.lineTo(L*0.7,0);ctx.strokeStyle='rgba(2,132,199,0.4)';ctx.lineWidth=9;ctx.lineCap='round';ctx.shadowColor='#0284c7';ctx.shadowBlur=20;ctx.stroke();
+  const sg=ctx.createLinearGradient(-L,0,L*0.7,0);sg.addColorStop(0,'#93c5fd');sg.addColorStop(0.5,'#e0f2fe');sg.addColorStop(1,'#7dd3fc');
+  ctx.beginPath();ctx.moveTo(-L,0);ctx.lineTo(L*0.7,0);ctx.strokeStyle=sg;ctx.lineWidth=3;ctx.shadowColor='#38bdf8';ctx.shadowBlur=8;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(L*0.7,0);ctx.lineTo(L,-8);ctx.lineTo(L*1.28,0);ctx.lineTo(L,8);ctx.closePath();
+  const hg=ctx.createLinearGradient(L*0.7,0,L*1.28,0);hg.addColorStop(0,'#38bdf8');hg.addColorStop(1,'#ffffff');ctx.fillStyle=hg;ctx.shadowColor='#ffffff';ctx.shadowBlur=22;ctx.fill();ctx.strokeStyle='#bae6fd';ctx.lineWidth=1;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-L,0);ctx.lineTo(-L*1.1,-3);ctx.lineTo(-L*1.1,3);ctx.closePath();ctx.fillStyle='#7dd3fc';ctx.shadowColor='#0284c7';ctx.shadowBlur=6;ctx.fill();
+  ctx.beginPath();ctx.rect(-5,-4,10,8);ctx.fillStyle='rgba(14,165,233,0.6)';ctx.shadowBlur=0;ctx.fill();ctx.restore();
+}
 
-  // ── Spearhead (tip) ──
-  ctx.beginPath();
-  ctx.moveTo(L * 0.7, 0);
-  ctx.lineTo(L, -7);
-  ctx.lineTo(L * 1.25, 0);
-  ctx.lineTo(L, 7);
-  ctx.closePath();
-  const hg = ctx.createLinearGradient(L * 0.7, 0, L * 1.25, 0);
-  hg.addColorStop(0, '#38bdf8'); hg.addColorStop(1, '#ffffff');
-  ctx.fillStyle = hg; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 20; ctx.fill();
-  ctx.strokeStyle = '#bae6fd'; ctx.lineWidth = 1; ctx.stroke();
+function drawWrench(b){
+  const S=b.weaponSize,wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R,wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
+  ctx.save();ctx.translate(wx,wy);ctx.rotate(b.orbitAngle+Math.PI/4);
+  ctx.beginPath();ctx.moveTo(0,S*0.8);ctx.lineTo(0,-S*0.4);ctx.strokeStyle='#78350f';ctx.lineWidth=5;ctx.lineCap='round';ctx.shadowColor='#fdba74';ctx.shadowBlur=10;ctx.stroke();
+  const wg=ctx.createLinearGradient(-S*0.35,-S*0.9,S*0.35,-S*0.4);wg.addColorStop(0,'#fed7aa');wg.addColorStop(1,'#f97316');
+  ctx.fillStyle=wg;ctx.shadowColor='#fdba74';ctx.shadowBlur=16;
+  ctx.beginPath();ctx.arc(0,-S*0.65,S*0.32,Math.PI,0);ctx.lineTo(S*0.32,-S*0.4);ctx.lineTo(-S*0.32,-S*0.4);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.arc(0,-S*0.65,S*0.16,Math.PI,0);ctx.lineTo(S*0.16,-S*0.55);ctx.lineTo(-S*0.16,-S*0.55);ctx.closePath();ctx.fillStyle='#1e293b';ctx.shadowBlur=0;ctx.fill();ctx.restore();
+}
 
-  // ── Butt cap ──
-  ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(-L * 1.08, -3); ctx.lineTo(-L * 1.08, 3); ctx.closePath();
-  ctx.fillStyle = '#7dd3fc'; ctx.shadowColor = '#0284c7'; ctx.shadowBlur = 6; ctx.fill();
+function drawVortex(v){
+  const prog=1-v.frames/WATER_VORTEX_FRAMES;const fadeIn=prog<0.06?prog/0.06:1;const fadeOut=v.frames<18?v.frames/18:1;const alpha=Math.min(fadeIn,fadeOut);const r=WATER_VORTEX_RADIUS;
+  ctx.save();ctx.globalAlpha=alpha;
+  const sphere=ctx.createRadialGradient(v.x-r*0.28,v.y-r*0.28,r*0.05,v.x,v.y,r*1.1);sphere.addColorStop(0,'rgba(186,230,253,0.72)');sphere.addColorStop(0.35,'rgba(14,165,233,0.55)');sphere.addColorStop(0.7,'rgba(2,132,199,0.38)');sphere.addColorStop(1,'rgba(1,65,105,0)');
+  ctx.beginPath();ctx.arc(v.x,v.y,r,0,Math.PI*2);ctx.fillStyle=sphere;ctx.fill();
+  for(let ring=0;ring<5;ring++){const tilt=ring*Math.PI/5,rot=v.angle*(1.2+ring*0.35)+tilt,rx=r*(0.55+ring*0.1),ry=r*(0.22+ring*0.04);ctx.save();ctx.translate(v.x,v.y);ctx.rotate(rot);ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.strokeStyle=`rgba(56,189,248,${0.75-ring*0.1})`;ctx.lineWidth=2.5-ring*0.3;ctx.shadowColor='#0284c7';ctx.shadowBlur=10;ctx.stroke();ctx.restore();}
+  const spec=ctx.createRadialGradient(v.x-r*0.3,v.y-r*0.3,0,v.x-r*0.3,v.y-r*0.3,r*0.5);spec.addColorStop(0,'rgba(255,255,255,0.45)');spec.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.beginPath();ctx.arc(v.x,v.y,r,0,Math.PI*2);ctx.fillStyle=spec;ctx.fill();
+  ctx.beginPath();ctx.arc(v.x,v.y,r,0,Math.PI*2);ctx.strokeStyle='rgba(56,189,248,0.9)';ctx.lineWidth=2.5;ctx.shadowColor='#38bdf8';ctx.shadowBlur=16;ctx.stroke();
+  ctx.globalAlpha=1;ctx.restore();
+}
 
-  // ── Center grip band ──
-  ctx.beginPath(); ctx.rect(-5, -4, 10, 8);
-  ctx.fillStyle = 'rgba(14,165,233,0.7)'; ctx.shadowBlur = 0; ctx.fill();
+function drawCannon(c){
+  ctx.save();ctx.translate(c.x,c.y);ctx.beginPath();ctx.arc(0,0,12,0,Math.PI*2);ctx.fillStyle='#475569';ctx.shadowColor='#fdba74';ctx.shadowBlur=10;ctx.fill();ctx.strokeStyle='#fdba74';ctx.lineWidth=2;ctx.stroke();
+  ctx.rotate(c.angle);ctx.beginPath();ctx.roundRect(0,-4,22,8,3);ctx.fillStyle='#334155';ctx.shadowColor='#fdba74';ctx.shadowBlur=6;ctx.fill();ctx.strokeStyle='#f97316';ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
+  const barW=28,barH=3,prog=c.frames/MECH_CANNON_LIFE,bx=c.x-barW/2,by=c.y+16;
+  ctx.save();ctx.fillStyle='rgba(0,0,0,0.35)';ctx.beginPath();ctx.roundRect(bx,by,barW,barH,2);ctx.fill();
+  const r=Math.round(249-prog*50),g=Math.round(115+prog*50);ctx.fillStyle=`rgb(${r},${g},68)`;ctx.shadowColor='#fdba74';ctx.shadowBlur=4;ctx.beginPath();ctx.roundRect(bx,by,barW*prog,barH,2);ctx.fill();ctx.restore();
+}
 
+function drawCannonball(p){
+  ctx.save();ctx.beginPath();ctx.arc(p.x,p.y,7,0,Math.PI*2);ctx.fillStyle='#f97316';ctx.shadowColor='#fdba74';ctx.shadowBlur=14;ctx.fill();ctx.beginPath();ctx.arc(p.x-2,p.y-2,2.5,0,Math.PI*2);ctx.fillStyle='#fed7aa';ctx.shadowBlur=0;ctx.fill();ctx.restore();
+}
+
+function drawPoisonCloud(c){
+  const prog=1-c.frames/POISON_CLOUD_FRAMES;const fadeIn=prog<0.08?prog/0.08:1;const fadeOut=c.frames<20?c.frames/20:1;const alpha=Math.min(fadeIn,fadeOut)*0.85;const r=POISON_CLOUD_RADIUS;
+  ctx.save();ctx.globalAlpha=alpha;
+  const blobs=[{ox:0,oy:0,rr:r},{ox:r*0.5,oy:-r*0.35,rr:r*0.72},{ox:-r*0.5,oy:-r*0.3,rr:r*0.68},{ox:r*0.3,oy:r*0.5,rr:r*0.65},{ox:-r*0.4,oy:r*0.45,rr:r*0.6}];
+  for(const bl of blobs){const bx=c.x+Math.cos(c.angle*0.3)*bl.ox-Math.sin(c.angle*0.3)*bl.oy;const by=c.y+Math.sin(c.angle*0.3)*bl.ox+Math.cos(c.angle*0.3)*bl.oy;const g=ctx.createRadialGradient(bx,by,0,bx,by,bl.rr);g.addColorStop(0,'rgba(101,163,13,0.55)');g.addColorStop(0.55,'rgba(132,204,22,0.32)');g.addColorStop(1,'rgba(163,230,53,0)');ctx.beginPath();ctx.arc(bx,by,bl.rr,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();}
+  ctx.beginPath();ctx.arc(c.x,c.y,r,0,Math.PI*2);ctx.strokeStyle='rgba(132,204,22,0.7)';ctx.lineWidth=2.5;ctx.shadowColor='#84cc16';ctx.shadowBlur=14;ctx.stroke();
+  ctx.globalAlpha=alpha*0.55;ctx.font=`${r*0.8}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='rgba(77,124,15,0.9)';ctx.fillText('☠',c.x,c.y+2);
+  ctx.globalAlpha=1;ctx.restore();
+}
+
+function drawPlantRoot(r){
+  ctx.save();ctx.beginPath();ctx.arc(r.x,r.y,PLANT_ROOT_RADIUS,0,Math.PI*2);ctx.fillStyle='#15803d';ctx.shadowColor='#4ade80';ctx.shadowBlur=10;ctx.fill();ctx.strokeStyle='#86efac';ctx.lineWidth=1.5;ctx.stroke();
+  for(let i=0;i<5;i++){const a=i*Math.PI*2/5;ctx.beginPath();ctx.moveTo(r.x,r.y);ctx.lineTo(r.x+Math.cos(a)*PLANT_ROOT_RADIUS*1.6,r.y+Math.sin(a)*PLANT_ROOT_RADIUS*1.6);ctx.strokeStyle='rgba(74,222,128,0.6)';ctx.lineWidth=1.5;ctx.lineCap='round';ctx.stroke();}
   ctx.restore();
 }
 
-function drawLance(p) {
-  const L = WATER_SPEAR_LEN() * 0.38;
-  ctx.save();
+function drawBlackhole(h){
+  const prog=1-h.frames/BH_HOLE_FRAMES;const alpha=prog<0.08?prog/0.08:h.frames<12?h.frames/12:1;const r=BALL_R*2;
+  ctx.save();ctx.globalAlpha=alpha;
+  const core=ctx.createRadialGradient(h.x,h.y,0,h.x,h.y,r);core.addColorStop(0,'rgba(0,0,0,0.95)');core.addColorStop(0.5,'rgba(88,28,135,0.7)');core.addColorStop(1,'rgba(88,28,135,0)');
+  ctx.beginPath();ctx.arc(h.x,h.y,r,0,Math.PI*2);ctx.fillStyle=core;ctx.fill();
+  ctx.beginPath();ctx.arc(h.x,h.y,r,0,Math.PI*2);ctx.strokeStyle='rgba(168,85,247,0.85)';ctx.lineWidth=3;ctx.shadowColor='#a855f7';ctx.shadowBlur=18;ctx.stroke();
+  ctx.beginPath();ctx.arc(h.x,h.y,r*0.5,0,Math.PI*2);ctx.strokeStyle='rgba(216,180,254,0.7)';ctx.lineWidth=2;ctx.stroke();
+  ctx.globalAlpha=1;ctx.restore();
+}
 
-  // Afterimage trail
-  for (let ti=p.trail.length-1;ti>=0;ti--) {
-    const t=p.trail[ti];
-    const alpha=(1-ti/WATER_LANCE_TRAIL_LEN)*0.45;
-    const scale=1-ti/WATER_LANCE_TRAIL_LEN*0.45;
-    const lL=L*scale;
-    ctx.save(); ctx.globalAlpha=alpha;
-    ctx.translate(t.x,t.y); ctx.rotate(t.angle);
-    ctx.beginPath(); ctx.moveTo(-lL,0); ctx.lineTo(lL*0.7,0);
-    ctx.strokeStyle='#7dd3fc'; ctx.lineWidth=2.5*scale;
-    ctx.lineCap='round'; ctx.shadowColor='#38bdf8'; ctx.shadowBlur=8; ctx.stroke();
-    // Afterimage tip
-    ctx.beginPath(); ctx.moveTo(lL*0.7,0); ctx.lineTo(lL,-4*scale); ctx.lineTo(lL*1.2,0); ctx.lineTo(lL,4*scale); ctx.closePath();
-    ctx.fillStyle='rgba(125,211,252,0.7)'; ctx.fill();
+function drawBlackholePhase(b){
+  if(b.weaponType!=='blackhole') return;
+  const t=Date.now();
+  if(b.bhPhaseFrames>0){
+    const pulse=0.45+Math.sin(t/80)*0.15;
+    ctx.save();ctx.globalAlpha=pulse;const g=ctx.createRadialGradient(b.x,b.y,BALL_R,b.x,b.y,BALL_R+28);g.addColorStop(0,'rgba(168,85,247,0.7)');g.addColorStop(1,'rgba(168,85,247,0)');ctx.beginPath();ctx.arc(b.x,b.y,BALL_R+28,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();ctx.restore();
+    ctx.save();ctx.globalAlpha=0.85;ctx.translate(b.x,b.y);ctx.rotate(t/300);ctx.beginPath();ctx.arc(0,0,BALL_R+16,0,Math.PI*2);ctx.strokeStyle='#c084fc';ctx.lineWidth=2.5;ctx.setLineDash([6,4]);ctx.shadowColor='#a855f7';ctx.shadowBlur=16;ctx.stroke();ctx.restore();
+    ctx.save();ctx.globalAlpha=0.38;ctx.beginPath();ctx.arc(b.x,b.y,BALL_R,0,Math.PI*2);ctx.fillStyle='#6b21a8';ctx.fill();ctx.restore();
+  } else if(b.bhHoleFrames>0){
+    const rippleCount=3;
+    for(let ri=0;ri<rippleCount;ri++){const phase=((t/120+ri/rippleCount)%1);const r=BALL_R+8+phase*30;const alpha=(1-phase)*0.6;ctx.save();ctx.globalAlpha=alpha;ctx.beginPath();ctx.arc(b.x,b.y,r,0,Math.PI*2);ctx.strokeStyle='#a855f7';ctx.lineWidth=2;ctx.shadowColor='#7c3aed';ctx.shadowBlur=10;ctx.stroke();ctx.restore();}
+    ctx.save();ctx.globalAlpha=0.5+Math.sin(t/60)*0.15;ctx.beginPath();ctx.arc(b.x,b.y,BALL_R+6,0,Math.PI*2);ctx.strokeStyle='#7c3aed';ctx.lineWidth=4;ctx.shadowColor='#a855f7';ctx.shadowBlur=24;ctx.stroke();ctx.restore();
+  }
+}
+
+function drawKunai(b){
+  const S=b.weaponSize,baseAlpha=b.isClone?0.55:1;
+  for(const sign of [1,-1]){
+    const wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R*sign,wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R*sign;
+    ctx.save();ctx.globalAlpha=baseAlpha;ctx.translate(wx,wy);ctx.rotate(b.orbitAngle+Math.PI/4);
+    ctx.beginPath();ctx.moveTo(0,-S*1.1);ctx.lineTo(S*0.14,0);ctx.lineTo(0,S*0.1);ctx.lineTo(-S*0.14,0);ctx.closePath();
+    const kg=ctx.createLinearGradient(0,-S*1.1,0,S*0.1);kg.addColorStop(0,'#e2e8f0');kg.addColorStop(0.4,'#94a3b8');kg.addColorStop(1,'#475569');
+    ctx.fillStyle=kg;ctx.shadowColor='#94a3b8';ctx.shadowBlur=14;ctx.fill();ctx.strokeStyle='#cbd5e1';ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.arc(0,S*0.35,S*0.22,0,Math.PI*2);ctx.strokeStyle='#64748b';ctx.lineWidth=3;ctx.shadowColor='#94a3b8';ctx.shadowBlur=6;ctx.stroke();
     ctx.restore();
   }
-
-  // Main lance
-  ctx.translate(p.x,p.y); ctx.rotate(p.angle);
-  const stuckAlpha = p.stuck ? Math.max(0.2, p.stuckFrames/90) : 1;
-  ctx.globalAlpha = stuckAlpha;
-
-  // Shaft glow
-  ctx.beginPath(); ctx.moveTo(-L,0); ctx.lineTo(L*0.7,0);
-  ctx.strokeStyle='rgba(2,132,199,0.4)';
-  ctx.lineWidth=9; ctx.lineCap='round';
-  ctx.shadowColor='#0284c7'; ctx.shadowBlur=20; ctx.stroke();
-
-  // Shaft core
-  const sg=ctx.createLinearGradient(-L,0,L*0.7,0);
-  sg.addColorStop(0,'#93c5fd'); sg.addColorStop(0.5,'#e0f2fe'); sg.addColorStop(1,'#7dd3fc');
-  ctx.beginPath(); ctx.moveTo(-L,0); ctx.lineTo(L*0.7,0);
-  ctx.strokeStyle=sg; ctx.lineWidth=3;
-  ctx.shadowColor='#38bdf8'; ctx.shadowBlur=8; ctx.stroke();
-
-  // Spearhead
-  ctx.beginPath();
-  ctx.moveTo(L*0.7,0); ctx.lineTo(L,-8); ctx.lineTo(L*1.28,0); ctx.lineTo(L,8); ctx.closePath();
-  const hg=ctx.createLinearGradient(L*0.7,0,L*1.28,0);
-  hg.addColorStop(0,'#38bdf8'); hg.addColorStop(1,'#ffffff');
-  ctx.fillStyle=hg; ctx.shadowColor='#ffffff'; ctx.shadowBlur=22; ctx.fill();
-  ctx.strokeStyle='#bae6fd'; ctx.lineWidth=1; ctx.stroke();
-
-  // Butt spike
-  ctx.beginPath(); ctx.moveTo(-L,0); ctx.lineTo(-L*1.1,-3); ctx.lineTo(-L*1.1,3); ctx.closePath();
-  ctx.fillStyle='#7dd3fc'; ctx.shadowColor='#0284c7'; ctx.shadowBlur=6; ctx.fill();
-
-  // Center grip
-  ctx.beginPath(); ctx.rect(-5,-4,10,8);
-  ctx.fillStyle='rgba(14,165,233,0.6)'; ctx.shadowBlur=0; ctx.fill();
-
-  ctx.restore();
 }
 
-function drawWrench(b) {
+// ── NEW DRAW FUNCTIONS ──
+
+// Katana (같은 위치/구조, ICE Axe처럼 orbit 중심에 손잡이)
+function drawKatana(b){
   const S=b.weaponSize;
   const wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R;
   const wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
   ctx.save(); ctx.translate(wx,wy); ctx.rotate(b.orbitAngle+Math.PI/4);
-  // Handle
-  ctx.beginPath(); ctx.moveTo(0,S*0.8); ctx.lineTo(0,-S*0.4);
-  ctx.strokeStyle='#78350f'; ctx.lineWidth=5; ctx.lineCap='round';
-  ctx.shadowColor='#fdba74'; ctx.shadowBlur=10; ctx.stroke();
-  // Wrench head (open-end shape)
-  const wg=ctx.createLinearGradient(-S*0.35,-S*0.9,S*0.35,-S*0.4);
-  wg.addColorStop(0,'#fed7aa'); wg.addColorStop(1,'#f97316');
-  ctx.fillStyle=wg; ctx.shadowColor='#fdba74'; ctx.shadowBlur=16;
-  // Outer U shape
+
+  // Dash trail hint on katana
+  if(b.isDashing){ ctx.globalAlpha=0.6; }
+
+  // Tsuka (handle)
+  ctx.beginPath(); ctx.moveTo(0, S*0.15); ctx.lineTo(0, S*0.75);
+  ctx.strokeStyle='#881337'; ctx.lineWidth=6; ctx.lineCap='round';
+  ctx.shadowColor='#be123c'; ctx.shadowBlur=8; ctx.stroke();
+  // Tsuba (guard)
+  ctx.beginPath(); ctx.moveTo(-S*0.22, S*0.13); ctx.lineTo(S*0.22, S*0.13);
+  ctx.strokeStyle='#9f1239'; ctx.lineWidth=5; ctx.lineCap='round'; ctx.stroke();
+  // Blade
+  const bladeGrad=ctx.createLinearGradient(0,S*0.12,-S*0.08,-S*1.3);
+  bladeGrad.addColorStop(0,'#94a3b8'); bladeGrad.addColorStop(0.3,'#e2e8f0'); bladeGrad.addColorStop(0.7,'#f8fafc'); bladeGrad.addColorStop(1,'#f1f5f9');
   ctx.beginPath();
-  ctx.arc(0,-S*0.65,S*0.32,Math.PI,0);
-  ctx.lineTo(S*0.32,-S*0.4);
-  ctx.lineTo(-S*0.32,-S*0.4);
-  ctx.closePath(); ctx.fill();
-  // Inner notch cutout
-  ctx.beginPath(); ctx.arc(0,-S*0.65,S*0.16,Math.PI,0);
-  ctx.lineTo(S*0.16,-S*0.55); ctx.lineTo(-S*0.16,-S*0.55); ctx.closePath();
-  ctx.fillStyle='#1e293b'; ctx.shadowBlur=0; ctx.fill();
+  ctx.moveTo(0, S*0.12);
+  ctx.quadraticCurveTo(S*0.14, -S*0.5, S*0.05, -S*1.1);
+  ctx.lineTo(-S*0.08, -S*1.28);
+  ctx.lineTo(-S*0.16, -S*1.1);
+  ctx.quadraticCurveTo(-S*0.12, -S*0.5, -S*0.1, S*0.12);
+  ctx.closePath();
+  ctx.fillStyle=bladeGrad; ctx.shadowColor='#fb7185'; ctx.shadowBlur=18; ctx.fill();
+  // Hamon line
+  ctx.beginPath();
+  ctx.moveTo(-S*0.04, S*0.12);
+  ctx.quadraticCurveTo(S*0.04, -S*0.5, -S*0.02, -S*1.15);
+  ctx.strokeStyle='rgba(248,250,252,0.9)'; ctx.lineWidth=1; ctx.shadowBlur=6; ctx.stroke();
   ctx.restore();
 }
 
-function drawVortex(v) {
-  const prog=1-v.frames/WATER_VORTEX_FRAMES;
-  const fadeIn=prog<0.06?prog/0.06:1;
-  const fadeOut=v.frames<18?v.frames/18:1;
-  const alpha=Math.min(fadeIn,fadeOut);
-  const r=WATER_VORTEX_RADIUS;
-  ctx.save(); ctx.globalAlpha=alpha;
-
-  // ── Sphere base: radial gradient giving 3D volume ──
-  const sphere=ctx.createRadialGradient(v.x-r*0.28,v.y-r*0.28,r*0.05, v.x,v.y,r*1.1);
-  sphere.addColorStop(0,'rgba(186,230,253,0.72)');
-  sphere.addColorStop(0.35,'rgba(14,165,233,0.55)');
-  sphere.addColorStop(0.7,'rgba(2,132,199,0.38)');
-  sphere.addColorStop(1,'rgba(1,65,105,0)');
-  ctx.beginPath(); ctx.arc(v.x,v.y,r,0,Math.PI*2);
-  ctx.fillStyle=sphere; ctx.fill();
-
-  // ── Spinning arcs (look like water swirling around sphere) ──
-  for (let ring=0;ring<5;ring++) {
-    const tilt = ring*Math.PI/5;
-    const rot  = v.angle*(1.2+ring*0.35) + tilt;
-    const rx   = r*(0.55+ring*0.1);
-    const ry   = r*(0.22+ring*0.04);
-    ctx.save(); ctx.translate(v.x,v.y); ctx.rotate(rot);
+// Dash trail effect + windup visual
+function drawDashTrail(b){
+  if(b.dashWindup){
+    // Windup: pulsing red ring + charging particles
+    const prog=1-b.dashWindupFrames/30;
+    const t=Date.now();
+    ctx.save();
+    // Charging ring — grows as windup charges
+    ctx.beginPath();ctx.arc(b.x,b.y,BALL_R+6+prog*14,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(251,113,133,${0.5+prog*0.4})`;
+    ctx.lineWidth=2+prog*3;ctx.setLineDash([5,4]);
+    ctx.shadowColor='#fb7185';ctx.shadowBlur=16+prog*10;ctx.stroke();
+    // Direction arrow — pointing dash direction
+    const ax=b.x+b.dashDirX*(BALL_R+22+prog*12);
+    const ay=b.y+b.dashDirY*(BALL_R+22+prog*12);
+    ctx.globalAlpha=0.4+prog*0.5;
+    ctx.beginPath();ctx.moveTo(ax,ay);
+    const perp=Math.atan2(b.dashDirY,b.dashDirX);
+    ctx.lineTo(ax-b.dashDirX*14+Math.cos(perp+Math.PI/2)*6, ay-b.dashDirY*14+Math.sin(perp+Math.PI/2)*6);
+    ctx.lineTo(ax-b.dashDirX*14-Math.cos(perp+Math.PI/2)*6, ay-b.dashDirY*14-Math.sin(perp+Math.PI/2)*6);
+    ctx.closePath();ctx.fillStyle='#fb7185';ctx.shadowColor='#be123c';ctx.shadowBlur=12;ctx.fill();
+    ctx.restore();
+    return;
+  }
+  if(!b.isDashing) return;
+  // Dash: afterimage trail
+  ctx.save();
+  for(let i=1;i<=5;i++){
+    const tx=b.x-b.dashVx*(i*0.06),ty=b.y-b.dashVy*(i*0.06);
+    ctx.globalAlpha=(0.45-i*0.07);
+    ctx.beginPath();ctx.arc(tx,ty,BALL_R*(1-i*0.06),0,Math.PI*2);
+    const tg=ctx.createRadialGradient(tx-4,ty-4,2,tx,ty,BALL_R*(1-i*0.06));
+    tg.addColorStop(0,'#fff1f2');tg.addColorStop(1,'#fb7185');
+    ctx.fillStyle=tg;ctx.shadowColor='#be123c';ctx.shadowBlur=14;ctx.fill();
+  }
+  ctx.restore();
+  // Slash motion lines alongside dash direction
+  ctx.save();ctx.globalAlpha=0.7;
+  for(let i=0;i<4;i++){
+    const offset=(i-1.5)*10;
+    const perpX=-b.dashDirY*offset, perpY=b.dashDirX*offset;
+    const lx=b.x+perpX, ly=b.y+perpY;
     ctx.beginPath();
-    ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);
-    ctx.strokeStyle=`rgba(56,189,248,${0.75-ring*0.1})`;
-    ctx.lineWidth=2.5-ring*0.3;
-    ctx.shadowColor='#0284c7'; ctx.shadowBlur=10;
-    ctx.stroke(); ctx.restore();
-  }
-
-  // ── Bright highlight (top-left specular) ──
-  const spec=ctx.createRadialGradient(v.x-r*0.3,v.y-r*0.3,0, v.x-r*0.3,v.y-r*0.3,r*0.5);
-  spec.addColorStop(0,'rgba(255,255,255,0.45)');
-  spec.addColorStop(1,'rgba(255,255,255,0)');
-  ctx.beginPath(); ctx.arc(v.x,v.y,r,0,Math.PI*2);
-  ctx.fillStyle=spec; ctx.fill();
-
-  // ── Rim glow ──
-  ctx.beginPath(); ctx.arc(v.x,v.y,r,0,Math.PI*2);
-  ctx.strokeStyle='rgba(56,189,248,0.9)';
-  ctx.lineWidth=2.5; ctx.shadowColor='#38bdf8'; ctx.shadowBlur=16; ctx.stroke();
-
-  ctx.globalAlpha=1; ctx.restore();
-}
-
-function drawCannon(c) {
-  ctx.save(); ctx.translate(c.x,c.y);
-  // Base
-  ctx.beginPath(); ctx.arc(0,0,12,0,Math.PI*2);
-  ctx.fillStyle='#475569'; ctx.shadowColor='#fdba74'; ctx.shadowBlur=10; ctx.fill();
-  ctx.strokeStyle='#fdba74'; ctx.lineWidth=2; ctx.stroke();
-  // Barrel pointing at angle
-  ctx.rotate(c.angle);
-  ctx.beginPath(); ctx.roundRect(0,-4,22,8,3);
-  ctx.fillStyle='#334155'; ctx.shadowColor='#fdba74'; ctx.shadowBlur=6; ctx.fill();
-  ctx.strokeStyle='#f97316'; ctx.lineWidth=1.5; ctx.stroke();
-  ctx.restore();
-
-  // Lifetime bar — thin strip below cannon, no rotation
-  const barW = 28, barH = 3;
-  const prog = c.frames / MECH_CANNON_LIFE;
-  const bx = c.x - barW/2, by = c.y + 16;
-  ctx.save();
-  ctx.fillStyle = 'rgba(0,0,0,0.35)';
-  ctx.beginPath(); ctx.roundRect(bx, by, barW, barH, 2); ctx.fill();
-  // Color shifts red as time runs out
-  const r = Math.round(249 - prog*50), g = Math.round(115 + prog*50);
-  ctx.fillStyle = `rgb(${r},${g},68)`;
-  ctx.shadowColor = '#fdba74'; ctx.shadowBlur = 4;
-  ctx.beginPath(); ctx.roundRect(bx, by, barW*prog, barH, 2); ctx.fill();
-  ctx.restore();
-}
-
-function drawCannonball(p) {
-  ctx.save();
-  ctx.beginPath(); ctx.arc(p.x,p.y,7,0,Math.PI*2);
-  ctx.fillStyle='#f97316'; ctx.shadowColor='#fdba74'; ctx.shadowBlur=14; ctx.fill();
-  ctx.beginPath(); ctx.arc(p.x-2,p.y-2,2.5,0,Math.PI*2);
-  ctx.fillStyle='#fed7aa'; ctx.shadowBlur=0; ctx.fill();
-  ctx.restore();
-}
-
-function drawPoisonCloud(c) {
-  const prog = 1 - c.frames/POISON_CLOUD_FRAMES;
-  const fadeIn  = prog < 0.08 ? prog/0.08 : 1;
-  const fadeOut = c.frames < 20 ? c.frames/20 : 1;
-  const alpha   = Math.min(fadeIn, fadeOut) * 0.85;
-  const r = POISON_CLOUD_RADIUS;
-  ctx.save(); ctx.globalAlpha = alpha;
-
-  // Blob cloud: multiple overlapping circles for organic look
-  const blobs = [
-    {ox:0,     oy:0,     rr:r},
-    {ox:r*0.5, oy:-r*0.35, rr:r*0.72},
-    {ox:-r*0.5,oy:-r*0.3,  rr:r*0.68},
-    {ox:r*0.3, oy:r*0.5,   rr:r*0.65},
-    {ox:-r*0.4,oy:r*0.45,  rr:r*0.6},
-  ];
-  for (const bl of blobs) {
-    const bx = c.x + Math.cos(c.angle*0.3)*bl.ox - Math.sin(c.angle*0.3)*bl.oy;
-    const by = c.y + Math.sin(c.angle*0.3)*bl.ox + Math.cos(c.angle*0.3)*bl.oy;
-    const g = ctx.createRadialGradient(bx,by,0,bx,by,bl.rr);
-    g.addColorStop(0,'rgba(101,163,13,0.55)');
-    g.addColorStop(0.55,'rgba(132,204,22,0.32)');
-    g.addColorStop(1,'rgba(163,230,53,0)');
-    ctx.beginPath(); ctx.arc(bx,by,bl.rr,0,Math.PI*2);
-    ctx.fillStyle=g; ctx.fill();
-  }
-  // Swirling rim
-  ctx.beginPath(); ctx.arc(c.x,c.y,r,0,Math.PI*2);
-  ctx.strokeStyle='rgba(132,204,22,0.7)';
-  ctx.lineWidth=2.5; ctx.shadowColor='#84cc16'; ctx.shadowBlur=14; ctx.stroke();
-  // Skull icon hint
-  ctx.globalAlpha=alpha*0.55;
-  ctx.font=`${r*0.8}px serif`;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillStyle='rgba(77,124,15,0.9)';
-  ctx.fillText('☠', c.x, c.y+2);
-
-  ctx.globalAlpha=1; ctx.restore();
-}
-
-function drawPlantRoot(r) {
-  ctx.save();
-  ctx.beginPath(); ctx.arc(r.x, r.y, PLANT_ROOT_RADIUS, 0, Math.PI*2);
-  ctx.fillStyle='#15803d'; ctx.shadowColor='#4ade80'; ctx.shadowBlur=10; ctx.fill();
-  ctx.strokeStyle='#86efac'; ctx.lineWidth=1.5; ctx.stroke();
-  // Root tendrils
-  for (let i=0;i<5;i++) {
-    const a=i*Math.PI*2/5;
-    ctx.beginPath(); ctx.moveTo(r.x,r.y);
-    ctx.lineTo(r.x+Math.cos(a)*PLANT_ROOT_RADIUS*1.6, r.y+Math.sin(a)*PLANT_ROOT_RADIUS*1.6);
-    ctx.strokeStyle='rgba(74,222,128,0.6)'; ctx.lineWidth=1.5; ctx.lineCap='round'; ctx.stroke();
+    ctx.moveTo(lx-b.dashDirX*38, ly-b.dashDirY*38);
+    ctx.lineTo(lx+b.dashDirX*12, ly+b.dashDirY*12);
+    ctx.strokeStyle=`rgba(251,113,133,${0.6-i*0.1})`;
+    ctx.lineWidth=2.5-i*0.4;ctx.lineCap='round';
+    ctx.shadowColor='#fb7185';ctx.shadowBlur=8;ctx.stroke();
   }
   ctx.restore();
 }
 
-function drawBlackhole(h) {
-  const prog = 1-h.frames/BH_HOLE_FRAMES;
-  const alpha = prog<0.08?prog/0.08 : h.frames<12?h.frames/12 : 1;
-  const r = BALL_R*2;
-  ctx.save(); ctx.globalAlpha=alpha;
-  // Dark core
-  const core=ctx.createRadialGradient(h.x,h.y,0,h.x,h.y,r);
-  core.addColorStop(0,'rgba(0,0,0,0.95)');
-  core.addColorStop(0.5,'rgba(88,28,135,0.7)');
-  core.addColorStop(1,'rgba(88,28,135,0)');
-  ctx.beginPath(); ctx.arc(h.x,h.y,r,0,Math.PI*2); ctx.fillStyle=core; ctx.fill();
-  // Spinning ring
-  ctx.beginPath(); ctx.arc(h.x,h.y,r,0,Math.PI*2);
-  ctx.strokeStyle='rgba(168,85,247,0.85)'; ctx.lineWidth=3;
-  ctx.shadowColor='#a855f7'; ctx.shadowBlur=18; ctx.stroke();
-  // Inner ring
-  ctx.beginPath(); ctx.arc(h.x,h.y,r*0.5,0,Math.PI*2);
-  ctx.strokeStyle='rgba(216,180,254,0.7)'; ctx.lineWidth=2; ctx.stroke();
-  ctx.globalAlpha=1; ctx.restore();
+// Greatsword — thicker blade, same orbit position as ice axe
+function drawGreatsword(b){
+  const S=b.weaponSize;
+  const wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R;
+  const wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
+  const isRage=b.berserkState==='rage';
+  ctx.save(); ctx.translate(wx,wy); ctx.rotate(b.orbitAngle+Math.PI/4);
+
+  // Handle
+  ctx.beginPath(); ctx.moveTo(0, S*0.15); ctx.lineTo(0, S*0.9);
+  ctx.strokeStyle=isRage?'#7f1d1d':'#78350f'; ctx.lineWidth=8; ctx.lineCap='round';
+  ctx.shadowColor=isRage?'#ef4444':'#fbbf24'; ctx.shadowBlur=isRage?14:6; ctx.stroke();
+  // Pommel
+  ctx.beginPath(); ctx.arc(0, S*0.88, 6, 0, Math.PI*2);
+  ctx.fillStyle=isRage?'#ef4444':'#b45309'; ctx.shadowBlur=isRage?12:4; ctx.fill();
+  // Guard
+  ctx.beginPath(); ctx.moveTo(-S*0.35, S*0.13); ctx.lineTo(S*0.35, S*0.13);
+  ctx.strokeStyle=isRage?'#dc2626':'#92400e'; ctx.lineWidth=7; ctx.lineCap='round'; ctx.shadowBlur=4; ctx.stroke();
+  // Blade — wide, double-edged
+  const bladeGrad=ctx.createLinearGradient(-S*0.25,S*0.12,S*0.25,-S*1.2);
+  if(isRage){ bladeGrad.addColorStop(0,'#ef4444'); bladeGrad.addColorStop(0.3,'#fca5a5'); bladeGrad.addColorStop(0.7,'#ffffff'); bladeGrad.addColorStop(1,'#fca5a5'); }
+  else       { bladeGrad.addColorStop(0,'#b45309'); bladeGrad.addColorStop(0.3,'#fbbf24'); bladeGrad.addColorStop(0.7,'#fef9c3'); bladeGrad.addColorStop(1,'#fbbf24'); }
+  ctx.beginPath();
+  ctx.moveTo(-S*0.22, S*0.12);  // left base
+  ctx.lineTo(-S*0.06, -S*1.25); // left tip approach
+  ctx.lineTo(0, -S*1.4);        // tip
+  ctx.lineTo(S*0.06, -S*1.25);  // right tip approach
+  ctx.lineTo(S*0.22, S*0.12);   // right base
+  ctx.closePath();
+  ctx.fillStyle=bladeGrad;
+  ctx.shadowColor=isRage?'#ef4444':'#fbbf24'; ctx.shadowBlur=isRage?28:16;
+  ctx.fill();
+  // Center ridge
+  ctx.beginPath(); ctx.moveTo(0,S*0.12); ctx.lineTo(0,-S*1.35);
+  ctx.strokeStyle=isRage?'rgba(255,255,255,0.8)':'rgba(254,249,195,0.9)'; ctx.lineWidth=1.5; ctx.shadowBlur=4; ctx.stroke();
+  ctx.restore();
 }
 
-function drawBlackholePhase(b) {
-  if (b.weaponType!=='blackhole') return;
-  const t = Date.now();
+// Blood wave visual ring
+function drawBloodWave(b){
+  if(b.weaponType!=='blood') return;
+  if(b.bloodWaveActive){
+    const prog=1-b.bloodWaveFrames/90;
+    const r=BLOOD_WAVE_RADIUS*(0.5+prog*0.8);
+    const alpha=(1-prog)*0.9;
+    ctx.save();ctx.globalAlpha=alpha;
+    ctx.beginPath();ctx.arc(b.x,b.y,r,0,Math.PI*2);
+    ctx.strokeStyle='#dc2626';ctx.lineWidth=4+prog*6;
+    ctx.shadowColor='#ef4444';ctx.shadowBlur=20;ctx.stroke();
+    // Inner fill pulse
+    const g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,r);g.addColorStop(0,'rgba(220,38,38,0.25)');g.addColorStop(1,'rgba(220,38,38,0)');
+    ctx.beginPath();ctx.arc(b.x,b.y,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    ctx.globalAlpha=1;ctx.restore();
+  }
+}
 
-  if (b.bhPhaseFrames > 0) {
-    // ── 반투명 상태: 공 자체를 반투명하게 + 보라 오라 ──
-    const pulse = 0.45 + Math.sin(t/80)*0.15;
-    ctx.save(); ctx.globalAlpha=pulse;
-    // 큰 오라 글로우
-    const g=ctx.createRadialGradient(b.x,b.y,BALL_R,b.x,b.y,BALL_R+28);
-    g.addColorStop(0,'rgba(168,85,247,0.7)');
-    g.addColorStop(1,'rgba(168,85,247,0)');
-    ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+28,0,Math.PI*2);
-    ctx.fillStyle=g; ctx.fill();
+// Berserker rage aura
+function drawBerserkAura(b){
+  if(b.weaponType!=='greatsword') return;
+  if(b.berserkState==='rage'){
+    const t=Date.now();
+    const pulse=0.5+Math.sin(t/60)*0.2;
+    ctx.save();ctx.globalAlpha=pulse*0.7;
+    const g=ctx.createRadialGradient(b.x,b.y,BALL_R,b.x,b.y,BALL_R+24);
+    g.addColorStop(0,'rgba(239,68,68,0.7)');g.addColorStop(1,'rgba(239,68,68,0)');
+    ctx.beginPath();ctx.arc(b.x,b.y,BALL_R+24,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
     ctx.restore();
-    // 점선 링 (빠르게 회전하는 느낌)
-    ctx.save(); ctx.globalAlpha=0.85;
-    ctx.translate(b.x,b.y); ctx.rotate(t/300);
-    ctx.beginPath(); ctx.arc(0,0,BALL_R+16,0,Math.PI*2);
-    ctx.strokeStyle='#c084fc'; ctx.lineWidth=2.5;
-    ctx.setLineDash([6,4]); ctx.shadowColor='#a855f7'; ctx.shadowBlur=16; ctx.stroke();
-    ctx.restore();
-    // 공 자체를 반투명으로 (위에 덮어그리기)
-    ctx.save(); ctx.globalAlpha=0.38;
-    ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R,0,Math.PI*2);
-    ctx.fillStyle='#6b21a8'; ctx.fill();
-    ctx.restore();
-
-  } else if (b.bhHoleFrames > 0) {
-    // ── 블랙홀 활성 상태: 공 주변에 끌어당기는 파문 ──
-    const rippleCount = 3;
-    for (let ri=0;ri<rippleCount;ri++) {
-      const phase = ((t/120 + ri/rippleCount) % 1);
-      const r = BALL_R + 8 + phase*30;
-      const alpha = (1-phase)*0.6;
-      ctx.save(); ctx.globalAlpha=alpha;
-      ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2);
-      ctx.strokeStyle='#a855f7'; ctx.lineWidth=2;
-      ctx.shadowColor='#7c3aed'; ctx.shadowBlur=10; ctx.stroke();
-      ctx.restore();
-    }
-    // 중앙 진한 보라 글로우
-    ctx.save(); ctx.globalAlpha=0.5+Math.sin(t/60)*0.15;
-    ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+6,0,Math.PI*2);
-    ctx.strokeStyle='#7c3aed'; ctx.lineWidth=4;
-    ctx.shadowColor='#a855f7'; ctx.shadowBlur=24; ctx.stroke();
+    // Berserk label
+    ctx.save();ctx.font='bold 10px Nunito, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    const label='💢 BERSERK';const tw=ctx.measureText(label).width+12;
+    const tx=b.x,ty=b.y-BALL_R-22;
+    ctx.fillStyle='rgba(127,29,29,0.92)';ctx.beginPath();ctx.roundRect(tx-tw/2,ty-8,tw,16,8);ctx.fill();
+    ctx.fillStyle='#fca5a5';ctx.shadowColor='#ef4444';ctx.shadowBlur=8;ctx.fillText(label,tx,ty);
     ctx.restore();
   }
 }
 
-function drawKunai(b) {
-  const S = b.weaponSize;
-  const baseAlpha = b.isClone ? 0.55 : 1;
-  // 두 쿠나이: 공 중심에서 orbit 방향(+)과 반대 방향(-) 각각 배치 → Φ 모양
-  for (const sign of [1, -1]) {
-    const wx = b.x + Math.cos(b.orbitAngle) * WEAPON_ORBIT_R * sign;
-    const wy = b.y + Math.sin(b.orbitAngle) * WEAPON_ORBIT_R * sign;
-    ctx.save(); ctx.globalAlpha = baseAlpha;
-    ctx.translate(wx, wy); ctx.rotate(b.orbitAngle + Math.PI / 4);
-    ctx.beginPath();
-    ctx.moveTo(0,-S*1.1); ctx.lineTo(S*0.14,0); ctx.lineTo(0,S*0.1); ctx.lineTo(-S*0.14,0); ctx.closePath();
-    const kg = ctx.createLinearGradient(0,-S*1.1,0,S*0.1);
-    kg.addColorStop(0,'#e2e8f0'); kg.addColorStop(0.4,'#94a3b8'); kg.addColorStop(1,'#475569');
-    ctx.fillStyle = kg; ctx.shadowColor = '#94a3b8'; ctx.shadowBlur = 14; ctx.fill();
-    ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1; ctx.stroke();
-    ctx.beginPath(); ctx.arc(0, S*0.35, S*0.22, 0, Math.PI*2);
-    ctx.strokeStyle = '#64748b'; ctx.lineWidth = 3; ctx.shadowColor = '#94a3b8'; ctx.shadowBlur = 6; ctx.stroke();
-    ctx.restore();
-  }
-}
-
-function loop() {
-  if (balls) { update(); draw(); }
+function loop(){
+  if(balls){update();draw();}
   requestAnimationFrame(loop);
 }
 
