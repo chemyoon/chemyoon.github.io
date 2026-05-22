@@ -893,15 +893,13 @@ function weaponHitChecks(attacker, target) {
     }
   }
   if (attacker.weaponType==='kunai' && attacker.kunaiHitCd===0) {
-    const S=attacker.weaponSize;
-    const perpAngle=attacker.orbitAngle+Math.PI/2;
-    const offsets=[-S*0.7, S*0.7];
-    for (const off of offsets) {
-      const kwx=attacker.x+Math.cos(attacker.orbitAngle)*WEAPON_ORBIT_R+Math.cos(perpAngle)*off;
-      const kwy=attacker.y+Math.sin(attacker.orbitAngle)*WEAPON_ORBIT_R+Math.sin(perpAngle)*off;
+    const S = attacker.weaponSize;
+    for (const sign of [1, -1]) {
+      const kwx = attacker.x + Math.cos(attacker.orbitAngle)*WEAPON_ORBIT_R*sign;
+      const kwy = attacker.y + Math.sin(attacker.orbitAngle)*WEAPON_ORBIT_R*sign;
       if (Math.hypot(kwx-target.x, kwy-target.y) < S+BALL_R) {
-        target.hp-=SHADOW_KUNAI_DMG; attacker.kunaiHitCd=SHADOW_KUNAI_HIT_CD;
-        spawnParticles(target.x,target.y,'#94a3b8',8); reduceEarthCd(); break;
+        target.hp -= SHADOW_KUNAI_DMG; attacker.kunaiHitCd = SHADOW_KUNAI_HIT_CD;
+        spawnParticles(target.x, target.y, '#94a3b8', 8); reduceEarthCd(); break;
       }
     }
   }
@@ -1964,27 +1962,22 @@ function drawBlackholePhase(b) {
 }
 
 function drawKunai(b) {
-  const S=b.weaponSize;
+  const S = b.weaponSize;
   const baseAlpha = b.isClone ? 0.55 : 1;
-
-  // Two kunai: one offset left, one offset right perpendicular to orbit direction
-  const offsets = [-S*0.7, S*0.7];
-  for (const off of offsets) {
-    const perpAngle = b.orbitAngle + Math.PI/2;
-    const wx = b.x + Math.cos(b.orbitAngle)*WEAPON_ORBIT_R + Math.cos(perpAngle)*off;
-    const wy = b.y + Math.sin(b.orbitAngle)*WEAPON_ORBIT_R + Math.sin(perpAngle)*off;
-    ctx.save(); ctx.globalAlpha=baseAlpha;
-    ctx.translate(wx,wy); ctx.rotate(b.orbitAngle+Math.PI/4);
-    // Blade
+  // 두 쿠나이: 공 중심에서 orbit 방향(+)과 반대 방향(-) 각각 배치 → Φ 모양
+  for (const sign of [1, -1]) {
+    const wx = b.x + Math.cos(b.orbitAngle) * WEAPON_ORBIT_R * sign;
+    const wy = b.y + Math.sin(b.orbitAngle) * WEAPON_ORBIT_R * sign;
+    ctx.save(); ctx.globalAlpha = baseAlpha;
+    ctx.translate(wx, wy); ctx.rotate(b.orbitAngle + Math.PI / 4);
     ctx.beginPath();
     ctx.moveTo(0,-S*1.1); ctx.lineTo(S*0.14,0); ctx.lineTo(0,S*0.1); ctx.lineTo(-S*0.14,0); ctx.closePath();
-    const kg=ctx.createLinearGradient(0,-S*1.1,0,S*0.1);
+    const kg = ctx.createLinearGradient(0,-S*1.1,0,S*0.1);
     kg.addColorStop(0,'#e2e8f0'); kg.addColorStop(0.4,'#94a3b8'); kg.addColorStop(1,'#475569');
-    ctx.fillStyle=kg; ctx.shadowColor='#94a3b8'; ctx.shadowBlur=14; ctx.fill();
-    ctx.strokeStyle='#cbd5e1'; ctx.lineWidth=1; ctx.stroke();
-    // Ring handle
-    ctx.beginPath(); ctx.arc(0,S*0.35,S*0.22,0,Math.PI*2);
-    ctx.strokeStyle='#64748b'; ctx.lineWidth=3; ctx.shadowColor='#94a3b8'; ctx.shadowBlur=6; ctx.stroke();
+    ctx.fillStyle = kg; ctx.shadowColor = '#94a3b8'; ctx.shadowBlur = 14; ctx.fill();
+    ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, S*0.35, S*0.22, 0, Math.PI*2);
+    ctx.strokeStyle = '#64748b'; ctx.lineWidth = 3; ctx.shadowColor = '#94a3b8'; ctx.shadowBlur = 6; ctx.stroke();
     ctx.restore();
   }
 }
