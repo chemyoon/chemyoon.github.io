@@ -741,16 +741,18 @@ function update() {
       if (b.kunaiHitCd>0) b.kunaiHitCd--;
       if (b.cloneCd>0) b.cloneCd--;
       if (b.cloneCd===0) {
-        b.cloneCd = 99999; // sentinel until clone resolves
-        const ang = Math.random()*Math.PI*2;
-        const rx = BALL_R*3+Math.random()*(W-BALL_R*6);
-        const ry = BALL_R*3+Math.random()*(H-BALL_R*6);
-        const clone = makeBall('shadow', rx, ry, Math.cos(ang)*BASE_SPEED, Math.sin(ang)*BASE_SPEED);
-        clone.isClone = true;
-        clone.cloneOwnerUid = b.uid;
-        clone.cloneFrames = SHADOW_CLONE_LIFE;
-        clone.hp = b.hp; // clone starts with same HP
-        balls.push(clone);
+        b.cloneCd = 99999;
+        for (let ci=0; ci<3; ci++) {
+          const ang = Math.random()*Math.PI*2;
+          const rx = BALL_R*3+Math.random()*(W-BALL_R*6);
+          const ry = BALL_R*3+Math.random()*(H-BALL_R*6);
+          const clone = makeBall('shadow', rx, ry, Math.cos(ang)*BASE_SPEED, Math.sin(ang)*BASE_SPEED);
+          clone.isClone = true;
+          clone.cloneOwnerUid = b.uid;
+          clone.cloneFrames = SHADOW_CLONE_LIFE;
+          clone.hp = b.hp;
+          balls.push(clone);
+        }
         buildStatUI();
       }
     }
@@ -761,14 +763,10 @@ function update() {
       if (b.cloneFrames <= 0) {
         const owner = balls.find(o=>o.uid===b.cloneOwnerUid);
         if (owner) {
-          if (b.hp >= owner.hp) {
-            // Clone wins: owner takes clone's HP
-            owner.hp = b.hp;
-          }
-          // else owner already has more HP, clone just disappears
+          if (b.hp >= owner.hp) owner.hp = b.hp;
           owner.cloneCd = SHADOW_CLONE_CD;
         }
-        b.hp = 0; // mark for removal
+        b.hp = 0; // mark for removal — checkGameOver will call buildStatUI
       }
     }
 
@@ -895,9 +893,16 @@ function weaponHitChecks(attacker, target) {
     }
   }
   if (attacker.weaponType==='kunai' && attacker.kunaiHitCd===0) {
-    if (dist < attacker.weaponSize+BALL_R) {
-      target.hp-=SHADOW_KUNAI_DMG; attacker.kunaiHitCd=SHADOW_KUNAI_HIT_CD;
-      spawnParticles(target.x,target.y,'#94a3b8',8); reduceEarthCd();
+    const S=attacker.weaponSize;
+    const perpAngle=attacker.orbitAngle+Math.PI/2;
+    const offsets=[-S*0.7, S*0.7];
+    for (const off of offsets) {
+      const kwx=attacker.x+Math.cos(attacker.orbitAngle)*WEAPON_ORBIT_R+Math.cos(perpAngle)*off;
+      const kwy=attacker.y+Math.sin(attacker.orbitAngle)*WEAPON_ORBIT_R+Math.sin(perpAngle)*off;
+      if (Math.hypot(kwx-target.x, kwy-target.y) < S+BALL_R) {
+        target.hp-=SHADOW_KUNAI_DMG; attacker.kunaiHitCd=SHADOW_KUNAI_HIT_CD;
+        spawnParticles(target.x,target.y,'#94a3b8',8); reduceEarthCd(); break;
+      }
     }
   }
   // Poison: contact-based (ball–ball distance, not weapon orbit)
@@ -1305,14 +1310,15 @@ function updateParticles() {
 }
 
 function checkGameOver() {
-  // Remove dead balls (hp <= 0)
+  let removed = false;
   for (let i=balls.length-1;i>=0;i--) {
     if (balls[i].hp<=0) {
-      balls[i].hp=0;
       spawnParticles(balls[i].x,balls[i].y,balls[i].glowColor,20);
       balls.splice(i,1);
+      removed = true;
     }
   }
+  if (removed) buildStatUI(); // sync stat boxes immediately
   if (balls.length===1) {
     gameOver=true;
     const winner=balls[0];
@@ -1947,24 +1953,29 @@ function drawBlackholePhase(b) {
 }
 
 function drawKunai(b) {
-  // Clone is slightly transparent
-  if (b.isClone) { ctx.save(); ctx.globalAlpha=0.6; }
   const S=b.weaponSize;
-  const wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R;
-  const wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
-  ctx.save(); ctx.translate(wx,wy); ctx.rotate(b.orbitAngle+Math.PI/4);
-  // Blade
-  ctx.beginPath();
-  ctx.moveTo(0,-S*1.1); ctx.lineTo(S*0.14,0); ctx.lineTo(0,S*0.1); ctx.lineTo(-S*0.14,0); ctx.closePath();
-  const kg=ctx.createLinearGradient(0,-S*1.1,0,S*0.1);
-  kg.addColorStop(0,'#e2e8f0'); kg.addColorStop(0.4,'#94a3b8'); kg.addColorStop(1,'#475569');
-  ctx.fillStyle=kg; ctx.shadowColor='#94a3b8'; ctx.shadowBlur=14; ctx.fill();
-  ctx.strokeStyle='#cbd5e1'; ctx.lineWidth=1; ctx.stroke();
-  // Ring handle
-  ctx.beginPath(); ctx.arc(0,S*0.35,S*0.22,0,Math.PI*2);
-  ctx.strokeStyle='#64748b'; ctx.lineWidth=3; ctx.shadowColor='#94a3b8'; ctx.shadowBlur=6; ctx.stroke();
-  ctx.restore();
-  if (b.isClone) ctx.restore();
+  const baseAlpha = b.isClone ? 0.55 : 1;
+
+  // Two kunai: one offset left, one offset right perpendicular to orbit direction
+  const offsets = [-S*0.7, S*0.7];
+  for (const off of offsets) {
+    const perpAngle = b.orbitAngle + Math.PI/2;
+    const wx = b.x + Math.cos(b.orbitAngle)*WEAPON_ORBIT_R + Math.cos(perpAngle)*off;
+    const wy = b.y + Math.sin(b.orbitAngle)*WEAPON_ORBIT_R + Math.sin(perpAngle)*off;
+    ctx.save(); ctx.globalAlpha=baseAlpha;
+    ctx.translate(wx,wy); ctx.rotate(b.orbitAngle+Math.PI/4);
+    // Blade
+    ctx.beginPath();
+    ctx.moveTo(0,-S*1.1); ctx.lineTo(S*0.14,0); ctx.lineTo(0,S*0.1); ctx.lineTo(-S*0.14,0); ctx.closePath();
+    const kg=ctx.createLinearGradient(0,-S*1.1,0,S*0.1);
+    kg.addColorStop(0,'#e2e8f0'); kg.addColorStop(0.4,'#94a3b8'); kg.addColorStop(1,'#475569');
+    ctx.fillStyle=kg; ctx.shadowColor='#94a3b8'; ctx.shadowBlur=14; ctx.fill();
+    ctx.strokeStyle='#cbd5e1'; ctx.lineWidth=1; ctx.stroke();
+    // Ring handle
+    ctx.beginPath(); ctx.arc(0,S*0.35,S*0.22,0,Math.PI*2);
+    ctx.strokeStyle='#64748b'; ctx.lineWidth=3; ctx.shadowColor='#94a3b8'; ctx.shadowBlur=6; ctx.stroke();
+    ctx.restore();
+  }
 }
 
 function loop() {
