@@ -264,33 +264,45 @@ const BALL_R          = 28;
 const BASE_SPEED      = 9.6;
 const SLOW_FACTOR     = 0.38;
 const WEAPON_ORBIT_R  = 68;
+
+  //Ice sword
 const ICE_DAMAGE      = 8;
 const SLOW_FRAMES     = 117;
-const TORNADO_DAMAGE  = 11;
+
+  // Wind
+const TORNADO_DAMAGE  = 14;
 const TORNADO_CD      = 210;
 const TORNADO_TRAVEL  = 450;
-const TORNADO_RADIUS  = 131;
+const TORNADO_RADIUS  = 180;
 const TORNADO_FRAMES  = 28;
-const PROJ_SPEED      = 5.25;
+const PROJ_SPEED      = 6.25;
+
+  // Fire sword
 const FIRE_DIRECT_DMG   = 6;
-const FIRE_BURN_TOTAL   = 3;
-const FIRE_BURN_FRAMES  = 72;
-const FIRE_SWORD_HIT_CD = 50;
-const QUAKE_DAMAGE    = 25;
-const QUAKE_CD        = 420;
+const FIRE_BURN_TOTAL   = 6;
+const FIRE_BURN_FRAMES  = 36;
+const FIRE_SWORD_HIT_CD = 20;
+
+  //EarthQuake
+const QUAKE_DAMAGE    = 20;
+const QUAKE_CD        = 360;
 const QUAKE_RADIUS    = Math.round(BALL_R * 1.8 * 3 * 3 / 2);
 const QUAKE_FRAMES    = 72;
+
+  // Plant wand
 const PLANT_SEED_DMG   = 6;
 const PLANT_SEED_HEAL  = 2;
 const PLANT_SEED_CD    = 168;
-const PLANT_SEED_SPEED = 5.0;
+const PLANT_SEED_SPEED = 8.0;
+
+  // Thunder hammer
 const THUNDER_DMG         = 4;
-const THUNDER_HIT_CD      = 40;
+const THUNDER_HIT_CD      = 20;
 const THUNDER_KNOCKBACK   = BASE_SPEED * 1.5;
 const THUNDER_KB_RESTORE  = 60;
 const THUNDER_BOLT_CD     = 300;
 const THUNDER_BOLT_COUNT  = 5;
-const THUNDER_BOLT_DMG    = 8;
+const THUNDER_BOLT_DMG    = 6;
 const THUNDER_BOLT_FRAMES = 48;
 const THUNDER_STUN_FRAMES = 24;
 
@@ -309,12 +321,12 @@ const WATER_VORTEX_DMG_INTERVAL = 12; // 0.2s @60fps → 1 dmg
 
 // Mechanic
 const MECH_WRENCH_DMG     = 6;
-const MECH_WRENCH_HIT_CD  = 45;
+const MECH_WRENCH_HIT_CD  = 20;
 const MECH_CANNON_FIRE_CD = 48;    // 0.8s @60fps
-const MECH_CANNON_LIFE    = 420;   // 7s @60fps
+const MECH_CANNON_LIFE    = 480;   // 7s @60fps
 const MECH_CANNON_DMG     = 2;
-const MECH_CANNON_SPEED   = BASE_SPEED * (2/3);
-const MECH_MAX_CANNONS    = 3;
+const MECH_CANNON_SPEED   = BASE_SPEED * (4/3);
+const MECH_MAX_CANNONS    = 5;
 
 // Poison (updated dmg)
 const POISON_CONTACT_FRAMES  = 180;
@@ -332,7 +344,7 @@ const POISON_CONTACT_HIT_CD  = 40;
 // Plant roots
 const PLANT_ROOT_CD          = 300; // 5s @60fps
 const PLANT_ROOT_RADIUS      = BALL_R * 0.5;
-const PLANT_ROOT_BIND_FRAMES = 150; // 2.5s
+const PLANT_ROOT_BIND_FRAMES = 180; // 3.0 s
 const PLANT_ROOT_TICK        = 30;
 const PLANT_ROOT_DMG         = 1;
 const PLANT_ROOT_HEAL        = 5;
@@ -346,8 +358,8 @@ const BH_HOLE_DMG_TICK = 5;    // 5프레임마다 2 데미지
 const BH_HOLE_DMG      = 2;
 
 // Shadow
-const SHADOW_KUNAI_DMG   = 4;
-const SHADOW_KUNAI_HIT_CD = 45;
+const SHADOW_KUNAI_DMG   = 6;
+const SHADOW_KUNAI_HIT_CD = 20;
 const SHADOW_CLONE_CD    = 300;  // 5s between clones
 const SHADOW_CLONE_LIFE  = 300;  // 5s clone duration
 
