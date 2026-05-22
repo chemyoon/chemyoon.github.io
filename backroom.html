@@ -208,6 +208,12 @@ const CHARACTERS = {
     weaponType:'wrench', weaponSize:31, orbitSpeed:0.082,
     statDesc: () => `Wrench DMG: ${MECH_WRENCH_DMG} | Cannon DMG: ${MECH_CANNON_DMG} | CD: 1s`,
   },
+  poison: {
+    id:'poison', name:'POISON', icon:'☠️', desc:'Contact poison\n+ toxic cloud',
+    color:'#a3e635', glowColor:'#bef264', shadowColor:'#4d7c0f',
+    weaponType:'poison', weaponSize:0, orbitSpeed:0,
+    statDesc: () => `Contact: 6dmg/180f | Cloud: 8dmg/240f | CD: ${(POISON_CLOUD_CD/60).toFixed(1)}s`,
+  },
 };
 
 const canvas = document.getElementById('gameCanvas');
@@ -281,11 +287,22 @@ const WATER_VORTEX_DMG_INTERVAL = 12; // 0.2s @60fps → 1 dmg
 // Mechanic
 const MECH_WRENCH_DMG     = 6;
 const MECH_WRENCH_HIT_CD  = 45;
-const MECH_CANNON_FIRE_CD = 90;    // 1.5s @60fps
+const MECH_CANNON_FIRE_CD = 48;    // 0.8s @60fps
 const MECH_CANNON_LIFE    = 420;   // 7s @60fps
 const MECH_CANNON_DMG     = 2;
 const MECH_CANNON_SPEED   = BASE_SPEED * (2/3);
 const MECH_MAX_CANNONS    = 3;
+
+// Poison
+const POISON_CONTACT_FRAMES  = 180;  // contact poison duration
+const POISON_CONTACT_TICK    = 30;   // tick interval
+const POISON_CLOUD_FRAMES    = 180;  // cloud duration
+const POISON_CLOUD_TICK      = 30;   // cloud poison tick interval
+const POISON_CLOUD_DOT_FRAMES= 240;  // cloud poison debuff duration on victim
+const POISON_CLOUD_CD        = 300;  // 5s between clouds (starts after cloud ends)
+const POISON_CLOUD_RADIUS    = BALL_R * 3;
+const POISON_ANTIDOTE_HEAL   = 5;    // heal on antidote trigger
+const POISON_CONTACT_HIT_CD  = 40;   // frames between contact poison applications
 
 let selectedP1 = null, selectedP2 = null;
 
@@ -337,7 +354,7 @@ function restartBattle() {
   initGame(selectedP1, selectedP2);
 }
 
-let balls, projectiles, particles, cannons, vortices, gameOver;
+let balls, projectiles, particles, cannons, vortices, poisonClouds, gameOver;
 
 function spd(b) { return Math.hypot(b.vx, b.vy); }
 function setSpd(b, s) {
@@ -367,11 +384,21 @@ function makeBall(charId, x, y, vx, vy) {
     stunFrames:0, stunVx:0, stunVy:0,
     boltCd:     ch.weaponType==='hammer'   ? THUNDER_BOLT_CD : undefined,
     // Water spear
-    spearHitCd:  ch.weaponType==='spear' ? 0 : undefined,
-    lanceCd:     ch.weaponType==='spear' ? WATER_LANCE_CD : undefined,
-    vortexCd:    ch.weaponType==='spear' ? 0 : undefined,
+    spearHitCd:   ch.weaponType==='spear' ? 0 : undefined,
+    lanceCd:      ch.weaponType==='spear' ? WATER_LANCE_CD : undefined,
+    lanceVolley:  0,   // remaining lances to fire in current volley (0 = idle)
+    lanceVolleyCd: 0,  // interval between each lance in volley
+    vortexCd:     ch.weaponType==='spear' ? 0 : undefined,
     // Mechanic
     wrenchHitCd: 0,
+    // Poison (owner state)
+    poisonContactCd: ch.weaponType==='poison' ? 0 : undefined,
+    poisonCloudCd:   ch.weaponType==='poison' ? POISON_CLOUD_CD : undefined,
+    // Debuff state (any ball can be poisoned)
+    poisonFrames: 0,   // remaining frames of poison debuff
+    poisonTick:   0,   // tick counter
+    poisonSource: null, // 'contact' | 'cloud'
+    poisonOwnerUid: null, // uid of the poison's owner (immune to own poison)
   };
 }
 
@@ -383,7 +410,7 @@ function initGame(c1, c2) {
     makeBall(c1, W*0.28, H*0.3,  Math.cos(a1)*BASE_SPEED, Math.sin(a1)*BASE_SPEED),
     makeBall(c2, W*0.72, H*0.65, Math.cos(a2)*BASE_SPEED, Math.sin(a2)*BASE_SPEED),
   ];
-  projectiles = []; particles = []; cannons = []; vortices = [];
+  projectiles = []; particles = []; cannons = []; vortices = []; poisonClouds = [];
   updateStatUI();
 }
 
@@ -497,24 +524,32 @@ function update() {
         }
       }
 
-      // Lance throw
+      // Lance volley: 3 lances, each aimed at enemy's current position, 0.1s apart
       if (b.lanceCd===0) {
         b.lanceCd = WATER_LANCE_CD;
-        const enemy = balls.find(e=>e!==b);
-        if (enemy) {
-          const ang = Math.atan2(enemy.y-b.y, enemy.x-b.x);
-          projectiles.push({
-            type: 'lance',
-            x: b.x, y: b.y,
-            vx: Math.cos(ang)*WATER_LANCE_SPEED,
-            vy: Math.sin(ang)*WATER_LANCE_SPEED,
-            angle: ang,
-            ownerId: b.uid,
-            trail: [],   // [{x,y,angle,alpha}]
-            hitCd: 0,
-            traveled: 0,
-            done: false,
-          });
+        b.lanceVolley = 3;
+        b.lanceVolleyCd = 0; // fire first one immediately
+      }
+      if (b.lanceVolley > 0) {
+        if (b.lanceVolleyCd > 0) {
+          b.lanceVolleyCd--;
+        } else {
+          const enemy = balls.find(e=>e!==b);
+          if (enemy) {
+            const ang = Math.atan2(enemy.y-b.y, enemy.x-b.x);
+            projectiles.push({
+              type: 'lance',
+              x: b.x, y: b.y,
+              vx: Math.cos(ang)*WATER_LANCE_SPEED,
+              vy: Math.sin(ang)*WATER_LANCE_SPEED,
+              angle: ang,
+              ownerId: b.uid,
+              trail: [],
+              hitCd: 0, traveled: 0, stuck: false, stuckFrames: 0, done: false,
+            });
+          }
+          b.lanceVolley--;
+          b.lanceVolleyCd = 6; // 0.1s @60fps between each
         }
       }
 
@@ -535,6 +570,35 @@ function update() {
       if (b.wrenchHitCd>0) b.wrenchHitCd--;
     }
 
+    // Poison owner: contact hit cd + cloud spawn
+    if (b.weaponType==='poison') {
+      if (b.poisonContactCd>0) b.poisonContactCd--;
+      if (b.poisonCloudCd>0)   b.poisonCloudCd--;
+      // Cloud spawn: only when CD hits 0
+      if (b.poisonCloudCd===0) {
+        b.poisonCloudCd = 99999; // sentinel; reset after cloud expires
+        poisonClouds.push({
+          x: BALL_R*2 + Math.random()*(W-BALL_R*4),
+          y: BALL_R*2 + Math.random()*(H-BALL_R*4),
+          frames: POISON_CLOUD_FRAMES,
+          ownerId: b.uid,
+          angle: 0,
+        });
+      }
+    }
+
+    // Any ball: poison debuff tick — immune only to own poison
+    if (b.poisonFrames > 0 && b.poisonOwnerUid !== b.uid) {
+      b.poisonFrames--;
+      b.poisonTick++;
+      if (b.poisonTick >= POISON_CONTACT_TICK) {
+        b.hp -= 1;
+        b.poisonTick = 0;
+        spawnParticles(b.x, b.y, '#84cc16', 3);
+      }
+      if (b.poisonFrames === 0) { b.poisonSource = null; b.poisonOwnerUid = null; }
+    }
+
   }  // end for balls
 
   const dx=b1.x-b0.x, dy=b1.y-b0.y, d=Math.hypot(dx,dy);
@@ -553,7 +617,7 @@ function update() {
   }
 
   weaponHitChecks(b0,b1); weaponHitChecks(b1,b0);
-  updateVortices(); updateCannons();
+  updateVortices(); updateCannons(); updatePoisonClouds();
   updateProjectiles(); updateParticles(); checkGameOver(); updateStatUI();
 }
 
@@ -603,21 +667,72 @@ function weaponHitChecks(attacker, target) {
     if (dist < attacker.weaponSize+BALL_R) {
       target.hp-=MECH_WRENCH_DMG; attacker.wrenchHitCd=MECH_WRENCH_HIT_CD;
       spawnParticles(target.x,target.y,'#fdba74',8); reduceEarthCd();
-      // Deploy cannon (max MECH_MAX_CANNONS)
       if (cannons.filter(c=>c.ownerId===attacker.uid).length < MECH_MAX_CANNONS) {
         cannons.push({
           x: BALL_R*2+Math.random()*(W-BALL_R*4),
           y: BALL_R*2+Math.random()*(H-BALL_R*4),
-          ownerId: attacker.uid,
-          targetUid: target.uid,
-          fireCd: MECH_CANNON_FIRE_CD,
-          frames: MECH_CANNON_LIFE,   // lifetime
-          angle: 0,
+          ownerId: attacker.uid, targetUid: target.uid,
+          fireCd: MECH_CANNON_FIRE_CD, frames: MECH_CANNON_LIFE, angle: 0,
         });
       }
     }
   }
-}  // ← 원본에서 이 } 위치가 잘못돼 있었음
+  // Poison: contact-based (ball–ball distance, not weapon orbit)
+  if (attacker.weaponType==='poison' && attacker.poisonContactCd===0) {
+    const ballDist = Math.hypot(attacker.x-target.x, attacker.y-target.y);
+    if (ballDist < BALL_R*2+4) {
+      attacker.poisonContactCd = POISON_CONTACT_HIT_CD;
+      if (target.poisonFrames > 0 && target.poisonSource === 'cloud') {
+        // Antidote: already cloud-poisoned, contact cures it
+        target.poisonFrames = 0; target.poisonSource = null;
+        target.poisonTick = 0; target.poisonOwnerUid = null;
+        target.hp = Math.min(target.maxHp, target.hp + POISON_ANTIDOTE_HEAL);
+        spawnParticles(target.x, target.y, '#ffffff', 14);
+      } else if (target.poisonFrames === 0) {
+        // Apply contact poison
+        target.poisonFrames = POISON_CONTACT_FRAMES;
+        target.poisonSource = 'contact';
+        target.poisonOwnerUid = attacker.uid;
+        target.poisonTick = 0;
+        spawnParticles(target.x, target.y, '#84cc16', 8);
+      }
+      // If already contact-poisoned: no double-stack, just ignore
+    }
+  }
+}  // end weaponHitChecks
+
+function updatePoisonClouds() {
+  for (let i=poisonClouds.length-1;i>=0;i--) {
+    const c=poisonClouds[i];
+    c.frames--; c.angle+=0.04;
+    if (c.frames<=0) {
+      // Cloud expired — start CD on owner
+      const owner=balls.find(b=>b.uid===c.ownerId);
+      if (owner) owner.poisonCloudCd=POISON_CLOUD_CD;
+      poisonClouds.splice(i,1); continue;
+    }
+    for (const b of balls) {
+      if (b.uid === c.ownerId) continue; // immune to own cloud
+      if (Math.hypot(b.x-c.x, b.y-c.y) > POISON_CLOUD_RADIUS+BALL_R) continue;
+      // Ball is inside cloud
+      if (b.poisonFrames > 0 && b.poisonSource === 'contact') {
+        // Antidote: contact-poisoned ball touches cloud → cure + heal
+        b.poisonFrames=0; b.poisonSource=null;
+        b.poisonTick=0; b.poisonOwnerUid=null;
+        b.hp=Math.min(b.maxHp, b.hp+POISON_ANTIDOTE_HEAL);
+        spawnParticles(b.x,b.y,'#ffffff',14);
+      } else if (b.poisonFrames===0) {
+        // Apply cloud poison
+        b.poisonFrames=POISON_CLOUD_DOT_FRAMES;
+        b.poisonSource='cloud';
+        b.poisonOwnerUid=c.ownerId;
+        b.poisonTick=0;
+        spawnParticles(b.x,b.y,'#84cc16',8);
+      }
+      // If already cloud-poisoned: no re-apply
+    }
+  }
+}
 
 function updateVortices() {
   for (let i=vortices.length-1;i>=0;i--) {
@@ -633,6 +748,7 @@ function updateVortices() {
     for (const b of balls) {
       const dx=b.x-v.x, dy=b.y-v.y;
       const dist=Math.hypot(dx,dy)||0.001;
+      // Pull affects everyone (including owner — tactical positioning)
       if (dist>0.1) {
         const nx=dx/dist, ny=dy/dist;
         const strength = 0.55 / (1 + dist*0.012);
@@ -642,7 +758,10 @@ function updateVortices() {
         const s=spd(b);
         if (s>BASE_SPEED*2.0) setSpd(b,BASE_SPEED*2.0);
       }
-      if (dist < WATER_VORTEX_RADIUS+BALL_R && v.dmgTimer>=WATER_VORTEX_DMG_INTERVAL) {
+      // Damage: only non-owner balls
+      if (b.uid !== v.ownerId &&
+          dist < WATER_VORTEX_RADIUS+BALL_R &&
+          v.dmgTimer>=WATER_VORTEX_DMG_INTERVAL) {
         b.hp-=1;
         spawnParticles(b.x,b.y,'#0284c7',3);
       }
@@ -948,6 +1067,7 @@ function draw() {
   }
   for (const v of vortices) drawVortex(v);
   for (const c of cannons)   drawCannon(c);
+  for (const c of poisonClouds) drawPoisonCloud(c);
   for (const b of balls) {
     drawQuakeRing(b); drawBall(b);
     if (b.weaponType==='axe')      drawIceAxe(b);
@@ -978,6 +1098,11 @@ function drawBall(b) {
     ctx.save(); ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+10,0,Math.PI*2);
     ctx.strokeStyle='rgba(253,224,71,0.9)'; ctx.lineWidth=4;
     ctx.setLineDash([3,3]); ctx.shadowColor='#fde047'; ctx.shadowBlur=16; ctx.stroke(); ctx.restore();
+  }
+  if (b.poisonFrames>0) {
+    ctx.save(); ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+7,0,Math.PI*2);
+    ctx.strokeStyle='rgba(132,204,22,0.85)'; ctx.lineWidth=3;
+    ctx.setLineDash([4,3]); ctx.shadowColor='#84cc16'; ctx.shadowBlur=14; ctx.stroke(); ctx.restore();
   }
   ctx.save();
   const halo=ctx.createRadialGradient(b.x,b.y,BALL_R*0.6,b.x,b.y,BALL_R+18);
@@ -1376,6 +1501,46 @@ function drawCannonball(p) {
   ctx.beginPath(); ctx.arc(p.x-2,p.y-2,2.5,0,Math.PI*2);
   ctx.fillStyle='#fed7aa'; ctx.shadowBlur=0; ctx.fill();
   ctx.restore();
+}
+
+function drawPoisonCloud(c) {
+  const prog = 1 - c.frames/POISON_CLOUD_FRAMES;
+  const fadeIn  = prog < 0.08 ? prog/0.08 : 1;
+  const fadeOut = c.frames < 20 ? c.frames/20 : 1;
+  const alpha   = Math.min(fadeIn, fadeOut) * 0.85;
+  const r = POISON_CLOUD_RADIUS;
+  ctx.save(); ctx.globalAlpha = alpha;
+
+  // Blob cloud: multiple overlapping circles for organic look
+  const blobs = [
+    {ox:0,     oy:0,     rr:r},
+    {ox:r*0.5, oy:-r*0.35, rr:r*0.72},
+    {ox:-r*0.5,oy:-r*0.3,  rr:r*0.68},
+    {ox:r*0.3, oy:r*0.5,   rr:r*0.65},
+    {ox:-r*0.4,oy:r*0.45,  rr:r*0.6},
+  ];
+  for (const bl of blobs) {
+    const bx = c.x + Math.cos(c.angle*0.3)*bl.ox - Math.sin(c.angle*0.3)*bl.oy;
+    const by = c.y + Math.sin(c.angle*0.3)*bl.ox + Math.cos(c.angle*0.3)*bl.oy;
+    const g = ctx.createRadialGradient(bx,by,0,bx,by,bl.rr);
+    g.addColorStop(0,'rgba(101,163,13,0.55)');
+    g.addColorStop(0.55,'rgba(132,204,22,0.32)');
+    g.addColorStop(1,'rgba(163,230,53,0)');
+    ctx.beginPath(); ctx.arc(bx,by,bl.rr,0,Math.PI*2);
+    ctx.fillStyle=g; ctx.fill();
+  }
+  // Swirling rim
+  ctx.beginPath(); ctx.arc(c.x,c.y,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(132,204,22,0.7)';
+  ctx.lineWidth=2.5; ctx.shadowColor='#84cc16'; ctx.shadowBlur=14; ctx.stroke();
+  // Skull icon hint
+  ctx.globalAlpha=alpha*0.55;
+  ctx.font=`${r*0.8}px serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='rgba(77,124,15,0.9)';
+  ctx.fillText('☠', c.x, c.y+2);
+
+  ctx.globalAlpha=1; ctx.restore();
 }
 
 function loop() {
