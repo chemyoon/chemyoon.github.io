@@ -7,35 +7,44 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%;
+  }
   body {
     background: #0f172a;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     min-height: 100vh;
     font-family: 'Fredoka One', cursive;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 12px;
   }
+
+  /* ── Select Screen ── */
   #select-screen {
-    display: flex; flex-direction: column; align-items: center; gap: 32px;
-    width: 100%;
+    display: flex; flex-direction: column; align-items: center;
+    gap: clamp(12px, 2.5vh, 32px);
+    width: 100%; max-width: 100vw;
   }
   #select-screen h1 {
-    font-size: 2.4rem; color: #fff; letter-spacing: 3px;
+    font-size: clamp(1.2rem, 4vw, 2.4rem); color: #fff; letter-spacing: 3px;
     text-shadow: 0 0 30px rgba(255,255,255,0.3);
+    text-align: center;
   }
-  .select-row { display: flex; gap: 40px; align-items: flex-start; }
-  .player-select { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .select-row { display: flex; gap: clamp(10px, 2vw, 40px); align-items: flex-start; flex-wrap: wrap; justify-content: center; }
+  .player-select { display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .player-label {
-    font-size: 1.1rem; color: #94a3b8;
+    font-size: clamp(0.75rem, 1.5vw, 1.1rem); color: #94a3b8;
     font-family: 'Nunito', sans-serif; font-weight: 700;
     letter-spacing: 1px; text-transform: uppercase;
   }
-  .char-cards { display: flex; gap: 14px; }
+  .char-cards { display: flex; gap: clamp(6px, 1vw, 14px); flex-wrap: wrap; justify-content: center; }
   .char-card {
-    width: 120px; cursor: pointer;
+    width: clamp(72px, 9vw, 120px); cursor: pointer;
     background: #1e293b; border: 3px solid #334155;
-    border-radius: 16px; padding: 16px 10px 12px;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    border-radius: 16px; padding: clamp(8px, 1.2vw, 16px) clamp(5px, 0.8vw, 10px) clamp(6px, 1vw, 12px);
+    display: flex; flex-direction: column; align-items: center; gap: clamp(4px, 0.6vw, 8px);
     transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
     user-select: none;
   }
@@ -43,39 +52,49 @@
   .char-card.selected-p1 { border-color: #60a5fa; box-shadow: 0 0 20px #3b82f666; }
   .char-card.selected-p2 { border-color: #f87171; box-shadow: 0 0 20px #ef444466; }
   .char-card.selected-p1.selected-p2 { border-color: #a78bfa; box-shadow: 0 0 20px #8b5cf666; }
-  .char-icon { font-size: 2.6rem; line-height: 1; }
-  .char-name { font-size: 1rem; color: #e2e8f0; }
-  .char-desc { font-size: 0.68rem; color: #64748b; font-family: 'Nunito', sans-serif; text-align: center; line-height: 1.4; }
+  .char-icon { font-size: clamp(1.4rem, 3vw, 2.6rem); line-height: 1; }
+  .char-name { font-size: clamp(0.65rem, 1.2vw, 1rem); color: #e2e8f0; }
+  .char-desc { font-size: clamp(0.52rem, 0.9vw, 0.68rem); color: #64748b; font-family: 'Nunito', sans-serif; text-align: center; line-height: 1.4; }
   .vs-divider {
     display: flex; flex-direction: column; align-items: center;
-    justify-content: center; gap: 6px; padding-top: 48px;
+    justify-content: center; gap: 6px; padding-top: clamp(20px, 4vh, 48px);
   }
-  .vs-divider span { font-size: 1.6rem; color: #475569; }
+  .vs-divider span { font-size: clamp(1rem, 2vw, 1.6rem); color: #475569; }
   #start-btn {
     background: linear-gradient(135deg, #3b82f6, #8b5cf6);
     color: #fff; border: none; border-radius: 12px;
-    padding: 14px 48px; font-family: 'Fredoka One', cursive;
-    font-size: 1.3rem; cursor: pointer;
+    padding: clamp(10px, 1.5vh, 14px) clamp(24px, 4vw, 48px);
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(0.95rem, 2vw, 1.3rem); cursor: pointer;
     box-shadow: 0 4px 24px rgba(139,92,246,0.4);
     transition: opacity 0.2s, transform 0.15s;
   }
   #start-btn:hover { opacity: 0.9; transform: scale(1.03); }
   #start-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-  .select-hint { font-size: 0.8rem; color: #475569; font-family: 'Nunito', sans-serif; }
-  #battle-screen { display: none; flex-direction: column; align-items: center; gap: 0; }
+  .select-hint { font-size: clamp(0.65rem, 1.2vw, 0.8rem); color: #475569; font-family: 'Nunito', sans-serif; }
+
+  /* ── Battle Screen ── */
+  #battle-screen { display: none; flex-direction: column; align-items: center; gap: 0; width: 100%; }
   #battle-screen.active { display: flex; }
-  #battle-title { font-size: 1.6rem; color: #fff; margin-bottom: 10px; letter-spacing: 2px; }
+  #battle-title {
+    font-size: clamp(1rem, 2.5vw, 1.6rem); color: #fff;
+    margin-bottom: clamp(6px, 1vh, 10px); letter-spacing: 2px; text-align: center;
+  }
   #arena-wrapper {
     background: #f8fafc; border: 6px solid #334155; border-radius: 12px;
     box-shadow: 0 0 40px rgba(0,0,0,0.6); position: relative; overflow: hidden;
   }
   canvas { display: block; }
-  #stats { display: flex; justify-content: space-between; width: 100%; margin-top: 10px; padding: 0 4px; }
-  .stat-box {
-    background: #0f172a; border-radius: 8px; padding: 8px 16px;
-    font-size: 0.85rem; border: 2px solid #334155;
+  #stats {
+    display: flex; justify-content: space-between;
+    width: 100%; margin-top: clamp(6px, 1vh, 10px); padding: 0 4px;
   }
-  .stat-box span { display: block; font-family: 'Nunito', sans-serif; font-size: 0.72rem; color: #94a3b8; }
+  .stat-box {
+    background: #0f172a; border-radius: 8px;
+    padding: clamp(5px, 1vh, 8px) clamp(8px, 1.5vw, 16px);
+    font-size: clamp(0.65rem, 1.2vw, 0.85rem); border: 2px solid #334155;
+  }
+  .stat-box span { display: block; font-family: 'Nunito', sans-serif; font-size: clamp(0.55rem, 1vw, 0.72rem); color: #94a3b8; }
   #p1-stat { text-align: left; }
   #p2-stat { text-align: right; }
   .battle-btns { display: flex; gap: 12px; margin-top: 12px; }
@@ -177,12 +196,40 @@ const CHARACTERS = {
     weaponType:'hammer', weaponSize:46, orbitSpeed:0.075,
     statDesc: () => `Hammer DMG: ${THUNDER_DMG} | Lightning: ${THUNDER_BOLT_DMG} | CD: ${(THUNDER_BOLT_CD/60).toFixed(1)}s`,
   },
+  water: {
+    id:'water', name:'WATER', icon:'💧', desc:'Spear (center-grip)\n+ throws water lance',
+    color:'#38bdf8', glowColor:'#7dd3fc', shadowColor:'#0284c7',
+    weaponType:'spear', weaponSize:0, orbitSpeed:0.07,
+    statDesc: () => `Spear DMG: ${WATER_SPEAR_DMG} | Lance DMG: ${WATER_LANCE_DMG} | CD: ${(WATER_LANCE_CD/60).toFixed(1)}s`,
+  },
+  mechanic: {
+    id:'mechanic', name:'MECHANIC', icon:'🔧', desc:'Wrench + deploys\nauto-targeting cannon',
+    color:'#f97316', glowColor:'#fdba74', shadowColor:'#c2410c',
+    weaponType:'wrench', weaponSize:31, orbitSpeed:0.082,
+    statDesc: () => `Wrench DMG: ${MECH_WRENCH_DMG} | Cannon DMG: ${MECH_CANNON_DMG} | CD: 1s`,
+  },
 };
 
 const canvas = document.getElementById('gameCanvas');
 const ctx    = canvas.getContext('2d');
-const W = 650, H = 650;
-canvas.width = W; canvas.height = H;
+let W = 650, H = 650;
+
+function resizeCanvas() {
+  const maxSize = Math.min(
+    window.innerWidth  - 32,
+    window.innerHeight - 220
+  );
+  const size = Math.max(320, Math.min(650, maxSize));
+  W = size; H = size;
+  canvas.width  = W;
+  canvas.height = H;
+  const aw = document.getElementById('arena-wrapper');
+  if (aw) { aw.style.width = W + 'px'; aw.style.height = H + 'px'; }
+  const st = document.getElementById('stats');
+  if (st) st.style.width = W + 'px';
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 
 const BALL_R          = 28;
 const BASE_SPEED      = 9.6;
@@ -217,6 +264,28 @@ const THUNDER_BOLT_COUNT  = 5;
 const THUNDER_BOLT_DMG    = 8;
 const THUNDER_BOLT_FRAMES = 48;
 const THUNDER_STUN_FRAMES = 24;
+
+// Water spear
+const WATER_SPEAR_DMG        = 5;
+const WATER_SPEAR_HIT_CD     = 40;
+const WATER_SPEAR_LEN        = () => W * 0.25;   // same as old whip length
+const WATER_LANCE_CD         = 300;  // 5s @60fps
+const WATER_LANCE_SPEED      = BASE_SPEED * 1.4;
+const WATER_LANCE_DMG        = 3;    // thrown lance + afterimage
+const WATER_LANCE_TRAIL_LEN  = 8;    // number of afterimage segments
+const WATER_VORTEX_CD        = 120;  // 2s cooldown (starts AFTER vortex ends)
+const WATER_VORTEX_FRAMES    = 150;  // 2.5s duration
+const WATER_VORTEX_RADIUS    = BALL_R * 1.8;
+const WATER_VORTEX_DMG_INTERVAL = 12; // 0.2s @60fps → 1 dmg
+
+// Mechanic
+const MECH_WRENCH_DMG     = 6;
+const MECH_WRENCH_HIT_CD  = 45;
+const MECH_CANNON_FIRE_CD = 90;    // 1.5s @60fps
+const MECH_CANNON_LIFE    = 420;   // 7s @60fps
+const MECH_CANNON_DMG     = 2;
+const MECH_CANNON_SPEED   = BASE_SPEED * (2/3);
+const MECH_MAX_CANNONS    = 3;
 
 let selectedP1 = null, selectedP2 = null;
 
@@ -259,6 +328,7 @@ function startBattle() {
   document.getElementById('battle-screen').classList.add('active');
   document.getElementById('battle-title').textContent =
     `${CHARACTERS[selectedP1].icon} ${CHARACTERS[selectedP1].name} vs ${CHARACTERS[selectedP2].name} ${CHARACTERS[selectedP2].icon}`;
+  resizeCanvas();
   initGame(selectedP1, selectedP2);
 }
 
@@ -267,7 +337,7 @@ function restartBattle() {
   initGame(selectedP1, selectedP2);
 }
 
-let balls, projectiles, particles, gameOver;
+let balls, projectiles, particles, cannons, vortices, gameOver;
 
 function spd(b) { return Math.hypot(b.vx, b.vy); }
 function setSpd(b, s) {
@@ -276,10 +346,11 @@ function setSpd(b, s) {
   b.vx = b.vx/cur*s; b.vy = b.vy/cur*s;
 }
 
+let _ballUid = 0;
 function makeBall(charId, x, y, vx, vy) {
   const ch = CHARACTERS[charId];
   return {
-    id:charId, name:ch.name, icon:ch.icon, x, y, vx, vy,
+    id:charId, uid: _ballUid++, name:ch.name, icon:ch.icon, x, y, vx, vy,
     hp:100, maxHp:100,
     color:ch.color, glowColor:ch.glowColor, shadowColor:ch.shadowColor,
     orbitAngle:0, orbitSpeed:ch.orbitSpeed,
@@ -295,6 +366,12 @@ function makeBall(charId, x, y, vx, vy) {
     kbFrames:0, kbTargetSpd:0,
     stunFrames:0, stunVx:0, stunVy:0,
     boltCd:     ch.weaponType==='hammer'   ? THUNDER_BOLT_CD : undefined,
+    // Water spear
+    spearHitCd:  ch.weaponType==='spear' ? 0 : undefined,
+    lanceCd:     ch.weaponType==='spear' ? WATER_LANCE_CD : undefined,
+    vortexCd:    ch.weaponType==='spear' ? 0 : undefined,
+    // Mechanic
+    wrenchHitCd: 0,
   };
 }
 
@@ -306,7 +383,7 @@ function initGame(c1, c2) {
     makeBall(c1, W*0.28, H*0.3,  Math.cos(a1)*BASE_SPEED, Math.sin(a1)*BASE_SPEED),
     makeBall(c2, W*0.72, H*0.65, Math.cos(a2)*BASE_SPEED, Math.sin(a2)*BASE_SPEED),
   ];
-  projectiles = []; particles = [];
+  projectiles = []; particles = []; cannons = []; vortices = [];
   updateStatUI();
 }
 
@@ -390,7 +467,75 @@ function update() {
       }
     }
     if (b.weaponType==='none' && b.quakeFrames===1) b.quakeCd=QUAKE_CD;
-  }
+
+    // Water: spear orbit + lance throw + vortex
+    if (b.weaponType==='spear') {
+      if (b.spearHitCd>0) b.spearHitCd--;
+      if (b.lanceCd>0)    b.lanceCd--;
+      if (b.vortexCd>0)   b.vortexCd--;
+
+      // Spear orbit hit check (center-grip: both tip and butt deal damage)
+      // Spear orbit hit check — orbit center is grip, both ends deal damage
+      if (b.spearHitCd===0) {
+        const wx  = b.x + Math.cos(b.orbitAngle) * WEAPON_ORBIT_R;
+        const wy  = b.y + Math.sin(b.orbitAngle) * WEAPON_ORBIT_R;
+        const L   = WATER_SPEAR_LEN() * 0.38;
+        const ang = b.orbitAngle + Math.PI/4;
+        const tipX  = wx + Math.cos(ang) * L * 1.25;
+        const tipY  = wy + Math.sin(ang) * L * 1.25;
+        const buttX = wx - Math.cos(ang) * L;
+        const buttY = wy - Math.sin(ang) * L;
+        const enemy = balls.find(e=>e!==b);
+        if (enemy) {
+          const dTip  = Math.hypot(tipX -enemy.x, tipY -enemy.y);
+          const dButt = Math.hypot(buttX-enemy.x, buttY-enemy.y);
+          if (dTip<BALL_R+10 || dButt<BALL_R+10) {
+            enemy.hp -= WATER_SPEAR_DMG;
+            b.spearHitCd = WATER_SPEAR_HIT_CD;
+            spawnParticles(dTip<dButt?tipX:buttX, dTip<dButt?tipY:buttY, '#38bdf8', 8);
+          }
+        }
+      }
+
+      // Lance throw
+      if (b.lanceCd===0) {
+        b.lanceCd = WATER_LANCE_CD;
+        const enemy = balls.find(e=>e!==b);
+        if (enemy) {
+          const ang = Math.atan2(enemy.y-b.y, enemy.x-b.x);
+          projectiles.push({
+            type: 'lance',
+            x: b.x, y: b.y,
+            vx: Math.cos(ang)*WATER_LANCE_SPEED,
+            vy: Math.sin(ang)*WATER_LANCE_SPEED,
+            angle: ang,
+            ownerId: b.uid,
+            trail: [],   // [{x,y,angle,alpha}]
+            hitCd: 0,
+            traveled: 0,
+            done: false,
+          });
+        }
+      }
+
+      // Vortex spawn — cd starts only after vortex expires (see updateVortices)
+      if (b.vortexCd===0) {
+        b.vortexCd = 99999; // sentinel: blocked until vortex ends
+        vortices.push({
+          x: BALL_R*2+Math.random()*(W-BALL_R*4),
+          y: BALL_R*2+Math.random()*(H-BALL_R*4),
+          frames: WATER_VORTEX_FRAMES,
+          dmgTimer: 0, ownerId: b.uid, angle: 0,
+        });
+      }
+    }
+
+    // Mechanic: wrench cd
+    if (b.weaponType==='wrench') {
+      if (b.wrenchHitCd>0) b.wrenchHitCd--;
+    }
+
+  }  // end for balls
 
   const dx=b1.x-b0.x, dy=b1.y-b0.y, d=Math.hypot(dx,dy);
   if (d<BALL_R*2 && d>0.001) {
@@ -408,6 +553,7 @@ function update() {
   }
 
   weaponHitChecks(b0,b1); weaponHitChecks(b1,b0);
+  updateVortices(); updateCannons();
   updateProjectiles(); updateParticles(); checkGameOver(); updateStatUI();
 }
 
@@ -453,13 +599,88 @@ function weaponHitChecks(attacker, target) {
       spawnParticles(target.x,target.y,'#fcd34d',6); reduceEarthCd();
     }
   }
+  if (attacker.weaponType==='wrench' && attacker.wrenchHitCd===0) {
+    if (dist < attacker.weaponSize+BALL_R) {
+      target.hp-=MECH_WRENCH_DMG; attacker.wrenchHitCd=MECH_WRENCH_HIT_CD;
+      spawnParticles(target.x,target.y,'#fdba74',8); reduceEarthCd();
+      // Deploy cannon (max MECH_MAX_CANNONS)
+      if (cannons.filter(c=>c.ownerId===attacker.uid).length < MECH_MAX_CANNONS) {
+        cannons.push({
+          x: BALL_R*2+Math.random()*(W-BALL_R*4),
+          y: BALL_R*2+Math.random()*(H-BALL_R*4),
+          ownerId: attacker.uid,
+          targetUid: target.uid,
+          fireCd: MECH_CANNON_FIRE_CD,
+          frames: MECH_CANNON_LIFE,   // lifetime
+          angle: 0,
+        });
+      }
+    }
+  }
 }  // ← 원본에서 이 } 위치가 잘못돼 있었음
+
+function updateVortices() {
+  for (let i=vortices.length-1;i>=0;i--) {
+    const v=vortices[i];
+    v.frames--; v.angle+=0.10;
+    if (v.frames<=0) {
+      // Vortex expired — now start the cooldown on the owner
+      const owner=balls.find(b=>b.uid===v.ownerId);
+      if (owner) owner.vortexCd=WATER_VORTEX_CD;
+      vortices.splice(i,1); continue;
+    }
+    v.dmgTimer++;
+    for (const b of balls) {
+      const dx=b.x-v.x, dy=b.y-v.y;
+      const dist=Math.hypot(dx,dy)||0.001;
+      if (dist>0.1) {
+        const nx=dx/dist, ny=dy/dist;
+        const strength = 0.55 / (1 + dist*0.012);
+        const tangX=-ny, tangY=nx;
+        b.vx += (-nx*strength + tangX*strength*0.75);
+        b.vy += (-ny*strength + tangY*strength*0.75);
+        const s=spd(b);
+        if (s>BASE_SPEED*2.0) setSpd(b,BASE_SPEED*2.0);
+      }
+      if (dist < WATER_VORTEX_RADIUS+BALL_R && v.dmgTimer>=WATER_VORTEX_DMG_INTERVAL) {
+        b.hp-=1;
+        spawnParticles(b.x,b.y,'#0284c7',3);
+      }
+    }
+    if (v.dmgTimer>=WATER_VORTEX_DMG_INTERVAL) v.dmgTimer=0;
+  }
+}
+
+function updateCannons() {
+  for (let i=cannons.length-1;i>=0;i--) {
+    const c=cannons[i];
+    const owner=balls.find(b=>b.uid===c.ownerId);
+    if (!owner || owner.hp<=0) { cannons.splice(i,1); continue; }
+    c.frames--;
+    if (c.frames<=0) { cannons.splice(i,1); continue; }
+    c.fireCd--;
+    const target=balls.find(b=>b.uid===c.targetUid);
+    if (!target) { cannons.splice(i,1); continue; }
+    c.angle=Math.atan2(target.y-c.y, target.x-c.x);
+    if (c.fireCd<=0) {
+      c.fireCd=MECH_CANNON_FIRE_CD;
+      projectiles.push({
+        type:'cannonball',
+        x:c.x, y:c.y,
+        vx:Math.cos(c.angle)*MECH_CANNON_SPEED,
+        vy:Math.sin(c.angle)*MECH_CANNON_SPEED,
+        targetUid:c.targetUid,
+        traveled:0, done:false,
+      });
+    }
+  }
+}
 
 function launchBolts(owner) {
   for (let i=0;i<THUNDER_BOLT_COUNT;i++) {
     projectiles.push({
       type:'bolt', x:BALL_R+Math.random()*(W-BALL_R*2),
-      frames:THUNDER_BOLT_FRAMES, ownerId:owner.id,
+      frames:THUNDER_BOLT_FRAMES, ownerId:owner.uid,
       hitBalls:new Set(), done:false,
     });
   }
@@ -474,7 +695,7 @@ function launchSeeds(owner) {
       x:owner.x+Math.cos(angle)*WEAPON_ORBIT_R,
       y:owner.y+Math.sin(angle)*WEAPON_ORBIT_R,
       vx:Math.cos(angle)*PLANT_SEED_SPEED, vy:Math.sin(angle)*PLANT_SEED_SPEED,
-      ownerId:owner.id, isHeal:i===healIdx, hitCd:0, traveled:0, done:false,
+      ownerId:owner.uid, isHeal:i===healIdx, hitCd:0, traveled:0, done:false,
     });
   }
 }
@@ -488,7 +709,7 @@ function launchShuriken(owner) {
     y:owner.y+Math.sin(angle)*WEAPON_ORBIT_R,
     vx:Math.cos(angle)*PROJ_SPEED, vy:Math.sin(angle)*PROJ_SPEED,
     size:owner.weaponSize, spinAngle:0, traveled:0,
-    ownerId:owner.id, phase:'flying',
+    ownerId:owner.uid, phase:'flying',
     tornadoFrames:0, tx:0, ty:0,
     damageDone:false, flyingHitCd:0, done:false,
   });
@@ -498,13 +719,92 @@ function updateProjectiles() {
   for (const p of projectiles) {
     if (p.done) continue;
 
+    if (p.type==='lance') {
+      // If stuck in wall, just tick and expire
+      if (p.stuck) {
+        p.stuckFrames--;
+        if (p.stuckFrames<=0) p.done=true;
+        // Still check for hits while stuck
+        const target=balls.find(b=>b.uid!==p.ownerId);
+        if (target && p.hitCd===0 && Math.hypot(p.x-target.x,p.y-target.y)<BALL_R+14) {
+          target.hp -= WATER_LANCE_DMG;
+          spawnParticles(p.x,p.y,'#38bdf8',6);
+          p.hitCd=20;
+        }
+        if (p.hitCd>0) p.hitCd--;
+        continue;
+      }
+
+      // Record trail
+      p.trail.unshift({x:p.x, y:p.y, angle:p.angle});
+      if (p.trail.length > WATER_LANCE_TRAIL_LEN) p.trail.pop();
+
+      p.x += p.vx; p.y += p.vy;
+      p.traveled += Math.hypot(p.vx, p.vy);
+
+      // Wall — stick, not bounce
+      let hitWall = false;
+      if (p.x<8)   { p.x=8;     hitWall=true; }
+      if (p.x>W-8) { p.x=W-8;   hitWall=true; }
+      if (p.y<8)   { p.y=8;     hitWall=true; }
+      if (p.y>H-8) { p.y=H-8;   hitWall=true; }
+      if (hitWall) {
+        p.stuck=true; p.stuckFrames=90; // stick for 1.5s then disappear
+        p.vx=0; p.vy=0;
+        spawnParticles(p.x,p.y,'#38bdf8',6);
+        continue;
+      }
+      if (p.traveled > Math.hypot(W,H)*1.1) { p.done=true; continue; }
+
+      if (p.hitCd>0) { p.hitCd--; continue; }
+
+      const target=balls.find(b=>b.uid!==p.ownerId);
+      if (!target) continue;
+
+      // Lance head hit
+      if (Math.hypot(p.x-target.x,p.y-target.y)<BALL_R+12) {
+        target.hp -= WATER_LANCE_DMG;
+        spawnParticles(p.x,p.y,'#38bdf8',12);
+        p.hitCd=20;
+      }
+      // Afterimage hit
+      for (let ti=0;ti<p.trail.length;ti++) {
+        const t=p.trail[ti];
+        if ((1-ti/p.trail.length)<0.2) continue;
+        if (Math.hypot(t.x-target.x,t.y-target.y)<BALL_R+8) {
+          target.hp -= WATER_LANCE_DMG * 0.5;
+          spawnParticles(t.x,t.y,'#7dd3fc',4);
+          p.hitCd=20; break;
+        }
+      }
+      continue;
+    }
+
+    if (p.type==='cannonball') {
+      p.x+=p.vx; p.y+=p.vy;
+      p.traveled+=Math.hypot(p.vx,p.vy);
+      // Wall bounce
+      if (p.x<8)   { p.x=8;     p.vx= Math.abs(p.vx); }
+      if (p.x>W-8) { p.x=W-8;   p.vx=-Math.abs(p.vx); }
+      if (p.y<8)   { p.y=8;     p.vy= Math.abs(p.vy); }
+      if (p.y>H-8) { p.y=H-8;   p.vy=-Math.abs(p.vy); }
+      if (p.traveled>Math.hypot(W,H)*1.2) { p.done=true; continue; }
+      const target=balls.find(b=>b.uid===p.targetUid);
+      if (target && Math.hypot(p.x-target.x,p.y-target.y)<BALL_R+7) {
+        target.hp-=MECH_CANNON_DMG;
+        spawnParticles(target.x,target.y,'#fdba74',6);
+        p.done=true;
+      }
+      continue;
+    }
+
     if (p.type==='bolt') {
       p.frames--;
       if (p.frames<=0) { p.done=true; continue; }
       for (const b of balls) {
-        if (p.hitBalls.has(b.id)) continue;
+        if (p.hitBalls.has(b.uid)) continue;
         if (Math.abs(b.x-p.x)<BALL_R+10) {
-          p.hitBalls.add(b.id); b.hp-=THUNDER_BOLT_DMG;
+          p.hitBalls.add(b.uid); b.hp-=THUNDER_BOLT_DMG;
           b.stunVx=b.vx; b.stunVy=b.vy;
           b.vx=0; b.vy=0; b.stunFrames=THUNDER_STUN_FRAMES; b.kbFrames=0;
           spawnParticles(b.x,b.y,'#fde68a',12);
@@ -524,14 +824,15 @@ function updateProjectiles() {
       if (p.traveled>Math.hypot(W,H)*0.9) { p.done=true; continue; }
       if (p.hitCd===0) {
         if (p.isHeal) {
-          const owner=balls.find(b=>b.id===p.ownerId);
-          if (owner && Math.hypot(p.x-owner.x,p.y-owner.y)<BALL_R+6) {
-            owner.hp=Math.min(owner.maxHp,owner.hp+PLANT_SEED_HEAL);
-            spawnParticles(owner.x,owner.y,'#4ade80',6); p.done=true;
+          for (const b of balls) {
+            if (Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+11) {
+              b.hp=Math.min(b.maxHp,b.hp+PLANT_SEED_HEAL);
+              spawnParticles(b.x,b.y,'#facc15',6); p.done=true; break;
+            }
           }
         } else {
-          const target=balls.find(b=>b.id!==p.ownerId);
-          if (target && Math.hypot(p.x-target.x,p.y-target.y)<BALL_R+6) {
+          const target=balls.find(b=>b.uid!==p.ownerId);
+          if (target && Math.hypot(p.x-target.x,p.y-target.y)<BALL_R+11) {
             target.hp-=PLANT_SEED_DMG;
             spawnParticles(target.x,target.y,'#4ade80',6); p.done=true;
           }
@@ -551,7 +852,7 @@ function updateProjectiles() {
       if (p.y<8)   { p.y=8;     p.vy= Math.abs(p.vy); }
       if (p.y>H-8) { p.y=H-8;   p.vy=-Math.abs(p.vy); }
       if (p.flyingHitCd===0) {
-        const target=balls.find(b=>b.id!==p.ownerId);
+        const target=balls.find(b=>b.uid!==p.ownerId);
         if (target && Math.hypot(p.x-target.x,p.y-target.y)<BALL_R+p.size*0.5) {
           target.hp-=7; p.flyingHitCd=30;
           spawnParticles(target.x,target.y,'#fcd34d',6);
@@ -565,14 +866,14 @@ function updateProjectiles() {
     } else if (p.phase==='exploding') {
       if (!p.damageDone) {
         p.damageDone=true;
-        const target=balls.find(b=>b.id!==p.ownerId);
+        const target=balls.find(b=>b.uid!==p.ownerId);
         if (target && Math.hypot(p.tx-target.x,p.ty-target.y)<TORNADO_RADIUS+BALL_R) {
           target.hp-=TORNADO_DAMAGE;
           if (target.weaponType==='none' && target.quakeCd>0)
             target.quakeCd=Math.max(0,target.quakeCd-90);
           spawnParticles(target.x,target.y,'#fcd34d',14);
         }
-        const owner=balls.find(b=>b.id===p.ownerId);
+        const owner=balls.find(b=>b.uid===p.ownerId);
         if (owner) {
           owner.x=Math.max(BALL_R,Math.min(W-BALL_R,p.tx));
           owner.y=Math.max(BALL_R,Math.min(H-BALL_R,p.ty));
@@ -582,7 +883,7 @@ function updateProjectiles() {
       p.tornadoFrames--;
       if (p.tornadoFrames<=0) {
         p.done=true;
-        const owner=balls.find(b=>b.id===p.ownerId);
+        const owner=balls.find(b=>b.uid===p.ownerId);
         if (owner) owner.shurikenOut=false;
       }
     }
@@ -640,9 +941,13 @@ function draw() {
   for (const p of projectiles) {
     if (p.type==='bolt')       drawBolt(p);
     if (p.type==='seed')       drawSeed(p);
+    if (p.type==='lance')      drawLance(p);
+    if (p.type==='cannonball') drawCannonball(p);
     if (p.phase==='exploding') drawTornado(p);
     if (p.phase==='flying')    drawFlyingShuriken(p);
   }
+  for (const v of vortices) drawVortex(v);
+  for (const c of cannons)   drawCannon(c);
   for (const b of balls) {
     drawQuakeRing(b); drawBall(b);
     if (b.weaponType==='axe')      drawIceAxe(b);
@@ -650,6 +955,8 @@ function draw() {
     if (b.weaponType==='sword')    drawFireSword(b);
     if (b.weaponType==='branch')   drawBranch(b);
     if (b.weaponType==='hammer')   drawHammer(b);
+    if (b.weaponType==='spear')    drawWaterSpear(b);
+    if (b.weaponType==='wrench')   drawWrench(b);
     drawEarthCooldown(b); drawHpBar(b);
   }
 }
@@ -786,11 +1093,11 @@ function drawBranch(b) {
 }
 
 function drawSeed(p) {
-  ctx.save(); ctx.beginPath(); ctx.arc(p.x,p.y,6,0,Math.PI*2);
-  ctx.fillStyle=p.isHeal?'#f0fdf4':'#15803d';
-  ctx.shadowColor=p.isHeal?'#86efac':'#4ade80'; ctx.shadowBlur=12; ctx.fill();
-  ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2);
-  ctx.fillStyle=p.isHeal?'#4ade80':'#bbf7d0'; ctx.fill(); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.arc(p.x,p.y,11,0,Math.PI*2);
+  ctx.fillStyle=p.isHeal?'#facc15':'#15803d';
+  ctx.shadowColor=p.isHeal?'#fde68a':'#4ade80'; ctx.shadowBlur=18; ctx.fill();
+  ctx.beginPath(); ctx.arc(p.x,p.y,5,0,Math.PI*2);
+  ctx.fillStyle=p.isHeal?'#fff7c0':'#bbf7d0'; ctx.fill(); ctx.restore();
 }
 
 function drawHammer(b) {
@@ -855,6 +1162,220 @@ function drawEarthCooldown(b) {
   ctx.shadowColor=(isQuaking||isReady)?'#f59e0b':'transparent';
   ctx.shadowBlur=(isQuaking||isReady)?8:0;
   ctx.fillText(label,tx,ty); ctx.restore();
+}
+
+function drawWaterSpear(b) {
+  // Orbit center (same as ice axe / fire sword)
+  const wx = b.x + Math.cos(b.orbitAngle) * WEAPON_ORBIT_R;
+  const wy = b.y + Math.sin(b.orbitAngle) * WEAPON_ORBIT_R;
+  // Spear length: half on each side of the grip point (center-grip)
+  const L = WATER_SPEAR_LEN() * 0.38; // half-length from orbit center
+  ctx.save(); ctx.translate(wx, wy); ctx.rotate(b.orbitAngle + Math.PI/4);
+
+  // ── Shaft ──
+  // Glow layer
+  ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L * 0.7, 0);
+  ctx.strokeStyle = 'rgba(2,132,199,0.35)';
+  ctx.lineWidth = 9; ctx.lineCap = 'round';
+  ctx.shadowColor = '#0284c7'; ctx.shadowBlur = 18; ctx.stroke();
+  // Core shaft
+  const sg = ctx.createLinearGradient(-L, 0, L * 0.7, 0);
+  sg.addColorStop(0, '#93c5fd');
+  sg.addColorStop(0.45, '#e0f2fe');
+  sg.addColorStop(1, '#7dd3fc');
+  ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L * 0.7, 0);
+  ctx.strokeStyle = sg; ctx.lineWidth = 3;
+  ctx.shadowColor = '#38bdf8'; ctx.shadowBlur = 8; ctx.stroke();
+
+  // ── Spearhead (tip) ──
+  ctx.beginPath();
+  ctx.moveTo(L * 0.7, 0);
+  ctx.lineTo(L, -7);
+  ctx.lineTo(L * 1.25, 0);
+  ctx.lineTo(L, 7);
+  ctx.closePath();
+  const hg = ctx.createLinearGradient(L * 0.7, 0, L * 1.25, 0);
+  hg.addColorStop(0, '#38bdf8'); hg.addColorStop(1, '#ffffff');
+  ctx.fillStyle = hg; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 20; ctx.fill();
+  ctx.strokeStyle = '#bae6fd'; ctx.lineWidth = 1; ctx.stroke();
+
+  // ── Butt cap ──
+  ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(-L * 1.08, -3); ctx.lineTo(-L * 1.08, 3); ctx.closePath();
+  ctx.fillStyle = '#7dd3fc'; ctx.shadowColor = '#0284c7'; ctx.shadowBlur = 6; ctx.fill();
+
+  // ── Center grip band ──
+  ctx.beginPath(); ctx.rect(-5, -4, 10, 8);
+  ctx.fillStyle = 'rgba(14,165,233,0.7)'; ctx.shadowBlur = 0; ctx.fill();
+
+  ctx.restore();
+}
+
+function drawLance(p) {
+  const L = WATER_SPEAR_LEN() * 0.38;
+  ctx.save();
+
+  // Afterimage trail
+  for (let ti=p.trail.length-1;ti>=0;ti--) {
+    const t=p.trail[ti];
+    const alpha=(1-ti/WATER_LANCE_TRAIL_LEN)*0.45;
+    const scale=1-ti/WATER_LANCE_TRAIL_LEN*0.45;
+    const lL=L*scale;
+    ctx.save(); ctx.globalAlpha=alpha;
+    ctx.translate(t.x,t.y); ctx.rotate(t.angle);
+    ctx.beginPath(); ctx.moveTo(-lL,0); ctx.lineTo(lL*0.7,0);
+    ctx.strokeStyle='#7dd3fc'; ctx.lineWidth=2.5*scale;
+    ctx.lineCap='round'; ctx.shadowColor='#38bdf8'; ctx.shadowBlur=8; ctx.stroke();
+    // Afterimage tip
+    ctx.beginPath(); ctx.moveTo(lL*0.7,0); ctx.lineTo(lL,-4*scale); ctx.lineTo(lL*1.2,0); ctx.lineTo(lL,4*scale); ctx.closePath();
+    ctx.fillStyle='rgba(125,211,252,0.7)'; ctx.fill();
+    ctx.restore();
+  }
+
+  // Main lance
+  ctx.translate(p.x,p.y); ctx.rotate(p.angle);
+  const stuckAlpha = p.stuck ? Math.max(0.2, p.stuckFrames/90) : 1;
+  ctx.globalAlpha = stuckAlpha;
+
+  // Shaft glow
+  ctx.beginPath(); ctx.moveTo(-L,0); ctx.lineTo(L*0.7,0);
+  ctx.strokeStyle='rgba(2,132,199,0.4)';
+  ctx.lineWidth=9; ctx.lineCap='round';
+  ctx.shadowColor='#0284c7'; ctx.shadowBlur=20; ctx.stroke();
+
+  // Shaft core
+  const sg=ctx.createLinearGradient(-L,0,L*0.7,0);
+  sg.addColorStop(0,'#93c5fd'); sg.addColorStop(0.5,'#e0f2fe'); sg.addColorStop(1,'#7dd3fc');
+  ctx.beginPath(); ctx.moveTo(-L,0); ctx.lineTo(L*0.7,0);
+  ctx.strokeStyle=sg; ctx.lineWidth=3;
+  ctx.shadowColor='#38bdf8'; ctx.shadowBlur=8; ctx.stroke();
+
+  // Spearhead
+  ctx.beginPath();
+  ctx.moveTo(L*0.7,0); ctx.lineTo(L,-8); ctx.lineTo(L*1.28,0); ctx.lineTo(L,8); ctx.closePath();
+  const hg=ctx.createLinearGradient(L*0.7,0,L*1.28,0);
+  hg.addColorStop(0,'#38bdf8'); hg.addColorStop(1,'#ffffff');
+  ctx.fillStyle=hg; ctx.shadowColor='#ffffff'; ctx.shadowBlur=22; ctx.fill();
+  ctx.strokeStyle='#bae6fd'; ctx.lineWidth=1; ctx.stroke();
+
+  // Butt spike
+  ctx.beginPath(); ctx.moveTo(-L,0); ctx.lineTo(-L*1.1,-3); ctx.lineTo(-L*1.1,3); ctx.closePath();
+  ctx.fillStyle='#7dd3fc'; ctx.shadowColor='#0284c7'; ctx.shadowBlur=6; ctx.fill();
+
+  // Center grip
+  ctx.beginPath(); ctx.rect(-5,-4,10,8);
+  ctx.fillStyle='rgba(14,165,233,0.6)'; ctx.shadowBlur=0; ctx.fill();
+
+  ctx.restore();
+}
+
+function drawWrench(b) {
+  const S=b.weaponSize;
+  const wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R;
+  const wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
+  ctx.save(); ctx.translate(wx,wy); ctx.rotate(b.orbitAngle+Math.PI/4);
+  // Handle
+  ctx.beginPath(); ctx.moveTo(0,S*0.8); ctx.lineTo(0,-S*0.4);
+  ctx.strokeStyle='#78350f'; ctx.lineWidth=5; ctx.lineCap='round';
+  ctx.shadowColor='#fdba74'; ctx.shadowBlur=10; ctx.stroke();
+  // Wrench head (open-end shape)
+  const wg=ctx.createLinearGradient(-S*0.35,-S*0.9,S*0.35,-S*0.4);
+  wg.addColorStop(0,'#fed7aa'); wg.addColorStop(1,'#f97316');
+  ctx.fillStyle=wg; ctx.shadowColor='#fdba74'; ctx.shadowBlur=16;
+  // Outer U shape
+  ctx.beginPath();
+  ctx.arc(0,-S*0.65,S*0.32,Math.PI,0);
+  ctx.lineTo(S*0.32,-S*0.4);
+  ctx.lineTo(-S*0.32,-S*0.4);
+  ctx.closePath(); ctx.fill();
+  // Inner notch cutout
+  ctx.beginPath(); ctx.arc(0,-S*0.65,S*0.16,Math.PI,0);
+  ctx.lineTo(S*0.16,-S*0.55); ctx.lineTo(-S*0.16,-S*0.55); ctx.closePath();
+  ctx.fillStyle='#1e293b'; ctx.shadowBlur=0; ctx.fill();
+  ctx.restore();
+}
+
+function drawVortex(v) {
+  const prog=1-v.frames/WATER_VORTEX_FRAMES;
+  const fadeIn=prog<0.06?prog/0.06:1;
+  const fadeOut=v.frames<18?v.frames/18:1;
+  const alpha=Math.min(fadeIn,fadeOut);
+  const r=WATER_VORTEX_RADIUS;
+  ctx.save(); ctx.globalAlpha=alpha;
+
+  // ── Sphere base: radial gradient giving 3D volume ──
+  const sphere=ctx.createRadialGradient(v.x-r*0.28,v.y-r*0.28,r*0.05, v.x,v.y,r*1.1);
+  sphere.addColorStop(0,'rgba(186,230,253,0.72)');
+  sphere.addColorStop(0.35,'rgba(14,165,233,0.55)');
+  sphere.addColorStop(0.7,'rgba(2,132,199,0.38)');
+  sphere.addColorStop(1,'rgba(1,65,105,0)');
+  ctx.beginPath(); ctx.arc(v.x,v.y,r,0,Math.PI*2);
+  ctx.fillStyle=sphere; ctx.fill();
+
+  // ── Spinning arcs (look like water swirling around sphere) ──
+  for (let ring=0;ring<5;ring++) {
+    const tilt = ring*Math.PI/5;
+    const rot  = v.angle*(1.2+ring*0.35) + tilt;
+    const rx   = r*(0.55+ring*0.1);
+    const ry   = r*(0.22+ring*0.04);
+    ctx.save(); ctx.translate(v.x,v.y); ctx.rotate(rot);
+    ctx.beginPath();
+    ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(56,189,248,${0.75-ring*0.1})`;
+    ctx.lineWidth=2.5-ring*0.3;
+    ctx.shadowColor='#0284c7'; ctx.shadowBlur=10;
+    ctx.stroke(); ctx.restore();
+  }
+
+  // ── Bright highlight (top-left specular) ──
+  const spec=ctx.createRadialGradient(v.x-r*0.3,v.y-r*0.3,0, v.x-r*0.3,v.y-r*0.3,r*0.5);
+  spec.addColorStop(0,'rgba(255,255,255,0.45)');
+  spec.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.beginPath(); ctx.arc(v.x,v.y,r,0,Math.PI*2);
+  ctx.fillStyle=spec; ctx.fill();
+
+  // ── Rim glow ──
+  ctx.beginPath(); ctx.arc(v.x,v.y,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(56,189,248,0.9)';
+  ctx.lineWidth=2.5; ctx.shadowColor='#38bdf8'; ctx.shadowBlur=16; ctx.stroke();
+
+  ctx.globalAlpha=1; ctx.restore();
+}
+
+function drawCannon(c) {
+  ctx.save(); ctx.translate(c.x,c.y);
+  // Base
+  ctx.beginPath(); ctx.arc(0,0,12,0,Math.PI*2);
+  ctx.fillStyle='#475569'; ctx.shadowColor='#fdba74'; ctx.shadowBlur=10; ctx.fill();
+  ctx.strokeStyle='#fdba74'; ctx.lineWidth=2; ctx.stroke();
+  // Barrel pointing at angle
+  ctx.rotate(c.angle);
+  ctx.beginPath(); ctx.roundRect(0,-4,22,8,3);
+  ctx.fillStyle='#334155'; ctx.shadowColor='#fdba74'; ctx.shadowBlur=6; ctx.fill();
+  ctx.strokeStyle='#f97316'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.restore();
+
+  // Lifetime bar — thin strip below cannon, no rotation
+  const barW = 28, barH = 3;
+  const prog = c.frames / MECH_CANNON_LIFE;
+  const bx = c.x - barW/2, by = c.y + 16;
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath(); ctx.roundRect(bx, by, barW, barH, 2); ctx.fill();
+  // Color shifts red as time runs out
+  const r = Math.round(249 - prog*50), g = Math.round(115 + prog*50);
+  ctx.fillStyle = `rgb(${r},${g},68)`;
+  ctx.shadowColor = '#fdba74'; ctx.shadowBlur = 4;
+  ctx.beginPath(); ctx.roundRect(bx, by, barW*prog, barH, 2); ctx.fill();
+  ctx.restore();
+}
+
+function drawCannonball(p) {
+  ctx.save();
+  ctx.beginPath(); ctx.arc(p.x,p.y,7,0,Math.PI*2);
+  ctx.fillStyle='#f97316'; ctx.shadowColor='#fdba74'; ctx.shadowBlur=14; ctx.fill();
+  ctx.beginPath(); ctx.arc(p.x-2,p.y-2,2.5,0,Math.PI*2);
+  ctx.fillStyle='#fed7aa'; ctx.shadowBlur=0; ctx.fill();
+  ctx.restore();
 }
 
 function loop() {
