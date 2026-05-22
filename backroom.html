@@ -296,7 +296,7 @@ const THUNDER_STUN_FRAMES = 24;
 
 // Water spear
 const WATER_SPEAR_DMG        = 5;
-const WATER_SPEAR_HIT_CD     = 40;
+const WATER_SPEAR_HIT_CD     = 20;  // reduced: faster hit registration
 const WATER_SPEAR_LEN        = () => W * 0.25;   // same as old whip length
 const WATER_LANCE_CD         = 300;  // 5s @60fps
 const WATER_LANCE_SPEED      = BASE_SPEED * 1.4;
@@ -617,8 +617,7 @@ function update() {
       if (b.spearHitCd>0) b.spearHitCd--;
       if (b.lanceCd>0)    b.lanceCd--;
       if (b.vortexCd>0)   b.vortexCd--;
-      // Spear orbit hit check (center-grip: both tip and butt deal damage)
-      // Spear orbit hit check — orbit center is grip, both ends deal damage
+      // Spear orbit hit check — both tip and butt, all enemies
       if (b.spearHitCd===0) {
         const wx  = b.x + Math.cos(b.orbitAngle) * WEAPON_ORBIT_R;
         const wy  = b.y + Math.sin(b.orbitAngle) * WEAPON_ORBIT_R;
@@ -628,14 +627,15 @@ function update() {
         const tipY  = wy + Math.sin(ang) * L * 1.25;
         const buttX = wx - Math.cos(ang) * L;
         const buttY = wy - Math.sin(ang) * L;
-        const enemy = balls.find(e=>e!==b);
-        if (enemy) {
+        for (const enemy of balls) {
+          if (enemy === b) continue;
           const dTip  = Math.hypot(tipX -enemy.x, tipY -enemy.y);
           const dButt = Math.hypot(buttX-enemy.x, buttY-enemy.y);
           if (dTip<BALL_R+10 || dButt<BALL_R+10) {
             enemy.hp -= WATER_SPEAR_DMG;
             b.spearHitCd = WATER_SPEAR_HIT_CD;
             spawnParticles(dTip<dButt?tipX:buttX, dTip<dButt?tipY:buttY, '#38bdf8', 8);
+            break;
           }
         }
       }
@@ -761,12 +761,12 @@ function update() {
       if (b.kunaiHitCd>0) b.kunaiHitCd--;
       b.cloneFrames--;
       if (b.cloneFrames <= 0) {
-        const owner = balls.find(o=>o.uid===b.cloneOwnerUid);
+        const owner = balls.find(o=>o.uid===b.cloneOwnerUid && !o.isClone);
         if (owner) {
-          if (b.hp >= owner.hp) owner.hp = b.hp;
+          if (b.hp >= owner.hp) owner.hp = b.hp; // higher HP survives
           owner.cloneCd = SHADOW_CLONE_CD;
         }
-        b.hp = 0; // mark for removal — checkGameOver will call buildStatUI
+        b.hp = 0; // mark for removal
       }
     }
 
@@ -833,7 +833,7 @@ function update() {
   updateProjectiles(); updateParticles(); checkGameOver(); updateStatUI();
 }
 
-// ── 버그 수정 1: shuriken if 조건 복원, 함수 닫는 } 위치 수정 ──
+// ── weaponHitChecks ──
 function weaponHitChecks(attacker, target) {
   const wx   = attacker.x + Math.cos(attacker.orbitAngle)*WEAPON_ORBIT_R;
   const wy   = attacker.y + Math.sin(attacker.orbitAngle)*WEAPON_ORBIT_R;
@@ -871,7 +871,6 @@ function weaponHitChecks(attacker, target) {
       spawnParticles(target.x,target.y,'#c4b5fd',10); reduceEarthCd();
     }
   }
-  // ← 이 if 블록이 원본에서 통째로 날아가 있었음
   if (attacker.weaponType==='shuriken' && !attacker.shurikenOut && attacker.shurikenHitCd===0) {
     if (dist < attacker.weaponSize+BALL_R) {
       target.hp-=4; attacker.shurikenHitCd=50;
@@ -911,10 +910,9 @@ function weaponHitChecks(attacker, target) {
     if (ballDist < BALL_R*2+4) {
       attacker.poisonContactCd = POISON_CONTACT_HIT_CD;
       if (target.poisonFrames > 0 && target.poisonSource === 'cloud') {
-        // Antidote: already cloud-poisoned, contact cures it
         target.poisonFrames = 0; target.poisonSource = null;
         target.poisonTick = 0; target.poisonOwnerUid = null;
-        target.hp = Math.min(target.maxHp, target.hp + POISON_ANTIDOTE_HEAL);
+        target.hp += POISON_ANTIDOTE_HEAL; // no cap
         spawnParticles(target.x, target.y, '#ffffff', 14);
       } else if (target.poisonFrames === 0) {
         // Apply contact poison
@@ -944,10 +942,9 @@ function updatePoisonClouds() {
       if (Math.hypot(b.x-c.x, b.y-c.y) > POISON_CLOUD_RADIUS+BALL_R) continue;
       // Ball is inside cloud
       if (b.poisonFrames > 0 && b.poisonSource === 'contact') {
-        // Antidote: contact-poisoned ball touches cloud → cure + heal
         b.poisonFrames=0; b.poisonSource=null;
         b.poisonTick=0; b.poisonOwnerUid=null;
-        b.hp=Math.min(b.maxHp, b.hp+POISON_ANTIDOTE_HEAL);
+        b.hp += POISON_ANTIDOTE_HEAL; // no cap
         spawnParticles(b.x,b.y,'#ffffff',14);
       } else if (b.poisonFrames===0) {
         // Apply cloud poison
@@ -1106,7 +1103,6 @@ function launchSeeds(owner) {
   }
 }
 
-// ← 버그 수정 2: function 선언부가 날아가 있었음
 function launchShuriken(owner) {
   const angle=owner.orbitAngle;
   projectiles.push({
@@ -1126,18 +1122,19 @@ function updateProjectiles() {
     if (p.done) continue;
 
     if (p.type==='lance') {
-      // If stuck in wall, just tick and expire
+      // Stuck in wall: tick down, hit nearby enemies
       if (p.stuck) {
         p.stuckFrames--;
-        if (p.stuckFrames<=0) p.done=true;
-        // Still check for hits while stuck
-        const target=balls.find(b=>b.uid!==p.ownerId);
-        if (target && p.hitCd===0 && Math.hypot(p.x-target.x,p.y-target.y)<BALL_R+14) {
-          target.hp -= WATER_LANCE_DMG;
-          spawnParticles(p.x,p.y,'#38bdf8',6);
-          p.hitCd=20;
+        if (p.stuckFrames<=0) { p.done=true; continue; }
+        if (p.hitCd>0) { p.hitCd--; continue; }
+        for (const b of balls) {
+          if (b.uid===p.ownerId) continue;
+          if (Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+14) {
+            b.hp -= WATER_LANCE_DMG;
+            spawnParticles(p.x,p.y,'#38bdf8',6);
+            p.hitCd=20; break;
+          }
         }
-        if (p.hitCd>0) p.hitCd--;
         continue;
       }
 
@@ -1148,39 +1145,45 @@ function updateProjectiles() {
       p.x += p.vx; p.y += p.vy;
       p.traveled += Math.hypot(p.vx, p.vy);
 
-      // Wall — stick, not bounce
+      // Wall — stick
       let hitWall = false;
       if (p.x<8)   { p.x=8;     hitWall=true; }
       if (p.x>W-8) { p.x=W-8;   hitWall=true; }
       if (p.y<8)   { p.y=8;     hitWall=true; }
       if (p.y>H-8) { p.y=H-8;   hitWall=true; }
       if (hitWall) {
-        p.stuck=true; p.stuckFrames=90; // stick for 1.5s then disappear
+        p.stuck=true; p.stuckFrames=90;
         p.vx=0; p.vy=0;
         spawnParticles(p.x,p.y,'#38bdf8',6);
         continue;
       }
       if (p.traveled > Math.hypot(W,H)*1.1) { p.done=true; continue; }
-
       if (p.hitCd>0) { p.hitCd--; continue; }
 
-      const target=balls.find(b=>b.uid!==p.ownerId);
-      if (!target) continue;
-
-      // Lance head hit
-      if (Math.hypot(p.x-target.x,p.y-target.y)<BALL_R+12) {
-        target.hp -= WATER_LANCE_DMG;
-        spawnParticles(p.x,p.y,'#38bdf8',12);
-        p.hitCd=20;
+      // Lance head hit — check all enemies
+      let lanceHit = false;
+      for (const b of balls) {
+        if (b.uid===p.ownerId) continue;
+        if (Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+12) {
+          b.hp -= WATER_LANCE_DMG;
+          spawnParticles(p.x,p.y,'#38bdf8',12);
+          p.hitCd=20; lanceHit=true; break;
+        }
       }
-      // Afterimage hit
-      for (let ti=0;ti<p.trail.length;ti++) {
-        const t=p.trail[ti];
-        if ((1-ti/p.trail.length)<0.2) continue;
-        if (Math.hypot(t.x-target.x,t.y-target.y)<BALL_R+8) {
-          target.hp -= WATER_LANCE_DMG * 0.5;
-          spawnParticles(t.x,t.y,'#7dd3fc',4);
-          p.hitCd=20; break;
+      // Afterimage hit — only if head didn't already hit
+      if (!lanceHit) {
+        for (let ti=0;ti<p.trail.length;ti++) {
+          if ((1-ti/p.trail.length)<0.2) continue;
+          const t=p.trail[ti];
+          for (const b of balls) {
+            if (b.uid===p.ownerId) continue;
+            if (Math.hypot(t.x-b.x,t.y-b.y)<BALL_R+8) {
+              b.hp -= Math.ceil(WATER_LANCE_DMG * 0.5);
+              spawnParticles(t.x,t.y,'#7dd3fc',4);
+              p.hitCd=20; lanceHit=true; break;
+            }
+          }
+          if (lanceHit) break;
         }
       }
       continue;
@@ -1234,15 +1237,17 @@ function updateProjectiles() {
         if (p.isHeal) {
           for (const b of balls) {
             if (Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+11) {
-              b.hp += PLANT_SEED_HEAL;  // no maxHp cap
+              b.hp += PLANT_SEED_HEAL;
               spawnParticles(b.x,b.y,'#facc15',6); p.done=true; break;
             }
           }
         } else {
-          const target=balls.find(b=>b.uid!==p.ownerId);
-          if (target && Math.hypot(p.x-target.x,p.y-target.y)<BALL_R+11) {
-            target.hp-=PLANT_SEED_DMG;
-            spawnParticles(target.x,target.y,'#4ade80',6); p.done=true;
+          for (const b of balls) {
+            if (b.uid===p.ownerId) continue;
+            if (Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+11) {
+              b.hp-=PLANT_SEED_DMG;
+              spawnParticles(b.x,b.y,'#4ade80',6); p.done=true; break;
+            }
           }
         }
       }
@@ -1260,12 +1265,15 @@ function updateProjectiles() {
       if (p.y<8)   { p.y=8;     p.vy= Math.abs(p.vy); }
       if (p.y>H-8) { p.y=H-8;   p.vy=-Math.abs(p.vy); }
       if (p.flyingHitCd===0) {
-        const target=balls.find(b=>b.uid!==p.ownerId);
-        if (target && Math.hypot(p.x-target.x,p.y-target.y)<BALL_R+p.size*0.5) {
-          target.hp-=7; p.flyingHitCd=30;
-          spawnParticles(target.x,target.y,'#fcd34d',6);
-          if (target.weaponType==='none' && target.quakeCd>0)
-            target.quakeCd=Math.max(0,target.quakeCd-90);
+        for (const b of balls) {
+          if (b.uid===p.ownerId) continue;
+          if (Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+p.size*0.5) {
+            b.hp-=7; p.flyingHitCd=30;
+            spawnParticles(b.x,b.y,'#fcd34d',6);
+            if (b.weaponType==='none' && b.quakeCd>0)
+              b.quakeCd=Math.max(0,b.quakeCd-90);
+            break;
+          }
         }
       }
       if (p.traveled>=TORNADO_TRAVEL) {
@@ -1274,12 +1282,14 @@ function updateProjectiles() {
     } else if (p.phase==='exploding') {
       if (!p.damageDone) {
         p.damageDone=true;
-        const target=balls.find(b=>b.uid!==p.ownerId);
-        if (target && Math.hypot(p.tx-target.x,p.ty-target.y)<TORNADO_RADIUS+BALL_R) {
-          target.hp-=TORNADO_DAMAGE;
-          if (target.weaponType==='none' && target.quakeCd>0)
-            target.quakeCd=Math.max(0,target.quakeCd-90);
-          spawnParticles(target.x,target.y,'#fcd34d',14);
+        for (const b of balls) {
+          if (b.uid===p.ownerId) continue;
+          if (Math.hypot(p.tx-b.x,p.ty-b.y)<TORNADO_RADIUS+BALL_R) {
+            b.hp-=TORNADO_DAMAGE;
+            if (b.weaponType==='none' && b.quakeCd>0)
+              b.quakeCd=Math.max(0,b.quakeCd-90);
+            spawnParticles(b.x,b.y,'#fcd34d',14);
+          }
         }
         const owner=balls.find(b=>b.uid===p.ownerId);
         if (owner) {
