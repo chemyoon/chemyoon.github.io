@@ -829,7 +829,7 @@ function updateVortices() {
       // Pull affects everyone (including owner — tactical positioning)
       if (dist>0.1) {
         const nx=dx/dist, ny=dy/dist;
-        const strength = 0.55 / (1 + dist*0.012);
+        const strength = 0.99 / (1 + dist*0.012);
         const tangX=-ny, tangY=nx;
         b.vx += (-nx*strength + tangX*strength*0.75);
         b.vy += (-ny*strength + tangY*strength*0.75);
