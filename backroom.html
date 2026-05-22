@@ -174,19 +174,19 @@ const CHARACTERS = {
   ice: {
     id:'ice', name:'ICE', icon:'❄️', desc:'Slows enemies\nwith a frost axe',
     color:'#7dd3fc', glowColor:'#bae6fd', shadowColor:'#0ea5e9',
-    weaponType:'axe', weaponSize:52, orbitSpeed:0.09,
+    weaponType:'axe', weaponSize:52, orbitSpeed:0.10,
     statDesc: () => `Axe DMG: ${ICE_DAMAGE} | Slow: ${(SLOW_FRAMES/60).toFixed(1)}s`,
   },
   wind: {
     id:'wind', name:'WIND', icon:'🌪️', desc:'Throws shuriken\n& teleports',
     color:'#d4a843', glowColor:'#fcd34d', shadowColor:'#92400e',
-    weaponType:'shuriken', weaponSize:24, orbitSpeed:0.076,
+    weaponType:'shuriken', weaponSize:24, orbitSpeed:0.10,
     statDesc: () => `Shuriken: 7 | Tornado: ${TORNADO_DAMAGE} | CD: ${(TORNADO_CD/60).toFixed(1)}s`,
   },
   fire: {
     id:'fire', name:'FIRE', icon:'🔥', desc:'Sword + burn\ndot on hit',
     color:'#fb923c', glowColor:'#fdba74', shadowColor:'#c2410c',
-    weaponType:'sword', weaponSize:42, orbitSpeed:0.08,
+    weaponType:'sword', weaponSize:42, orbitSpeed:0.10,
     statDesc: () => `Sword DMG: ${FIRE_DIRECT_DMG} | Burn: ${FIRE_BURN_TOTAL} over ${(FIRE_BURN_FRAMES/60).toFixed(1)}s`,
   },
   earth: {
@@ -198,25 +198,25 @@ const CHARACTERS = {
   plant: {
     id:'plant', name:'PLANT', icon:'🌿', desc:'Branch + seeds:\n3 damage, 1 heal',
     color:'#4ade80', glowColor:'#86efac', shadowColor:'#15803d',
-    weaponType:'branch', weaponSize:44, orbitSpeed:0.07,
+    weaponType:'branch', weaponSize:44, orbitSpeed:0,
     statDesc: () => `Seed DMG: ${PLANT_SEED_DMG} | Heal: ${PLANT_SEED_HEAL} | CD: ${(PLANT_SEED_CD/60).toFixed(1)}s`,
   },
   thunder: {
     id:'thunder', name:'THUNDER', icon:'⚡', desc:'Hammer knockback\n+ lightning strikes',
     color:'#a78bfa', glowColor:'#c4b5fd', shadowColor:'#6d28d9',
-    weaponType:'hammer', weaponSize:46, orbitSpeed:0.075,
+    weaponType:'hammer', weaponSize:46, orbitSpeed:0.10,
     statDesc: () => `Hammer DMG: ${THUNDER_DMG} | Lightning: ${THUNDER_BOLT_DMG} | CD: ${(THUNDER_BOLT_CD/60).toFixed(1)}s`,
   },
   water: {
     id:'water', name:'WATER', icon:'💧', desc:'Spear (center-grip)\n+ throws water lance',
     color:'#38bdf8', glowColor:'#7dd3fc', shadowColor:'#0284c7',
-    weaponType:'spear', weaponSize:0, orbitSpeed:0.07,
+    weaponType:'spear', weaponSize:0, orbitSpeed:0.10,
     statDesc: () => `Spear DMG: ${WATER_SPEAR_DMG} | Lance DMG: ${WATER_LANCE_DMG} | CD: ${(WATER_LANCE_CD/60).toFixed(1)}s`,
   },
   mechanic: {
     id:'mechanic', name:'MECHANIC', icon:'🔧', desc:'Wrench + deploys\nauto-targeting cannon',
     color:'#f97316', glowColor:'#fdba74', shadowColor:'#c2410c',
-    weaponType:'wrench', weaponSize:31, orbitSpeed:0.082,
+    weaponType:'wrench', weaponSize:31, orbitSpeed:0.10,
     statDesc: () => `Wrench DMG: ${MECH_WRENCH_DMG} | Cannon DMG: ${MECH_CANNON_DMG} | CD: 1s`,
   },
   poison: {
@@ -234,7 +234,7 @@ const CHARACTERS = {
   shadow: {
     id:'shadow', name:'SHADOW', icon:'👤', desc:'Orbit kunai DMG4\n+ shadow clone 5s',
     color:'#475569', glowColor:'#94a3b8', shadowColor:'#1e293b',
-    weaponType:'kunai', weaponSize:22, orbitSpeed:0.11,
+    weaponType:'kunai', weaponSize:22, orbitSpeed:0.1,
     statDesc: () => `Kunai DMG: ${SHADOW_KUNAI_DMG} | Clone CD: ${(SHADOW_CLONE_CD/60).toFixed(1)}s | Duration: 5s`,
   },
 };
@@ -275,7 +275,7 @@ const TORNADO_CD      = 210;
 const TORNADO_TRAVEL  = 450;
 const TORNADO_RADIUS  = 180;
 const TORNADO_FRAMES  = 28;
-const PROJ_SPEED      = 6.25;
+const PROJ_SPEED      = 5.25;
 
   // Fire sword
 const FIRE_DIRECT_DMG   = 6;
@@ -316,7 +316,7 @@ const WATER_LANCE_DMG        = 3;    // thrown lance + afterimage
 const WATER_LANCE_TRAIL_LEN  = 8;    // number of afterimage segments
 const WATER_VORTEX_CD        = 120;  // 2s cooldown (starts AFTER vortex ends)
 const WATER_VORTEX_FRAMES    = 150;  // 2.5s duration
-const WATER_VORTEX_RADIUS    = BALL_R * 1.8;
+const WATER_VORTEX_RADIUS    = BALL_R * 2.4;
 const WATER_VORTEX_DMG_INTERVAL = 12; // 0.2s @60fps → 1 dmg
 
 // Mechanic
