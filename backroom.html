@@ -223,7 +223,19 @@ const CHARACTERS = {
     id:'poison', name:'POISON', icon:'☠️', desc:'Contact poison\n+ toxic cloud',
     color:'#a3e635', glowColor:'#bef264', shadowColor:'#4d7c0f',
     weaponType:'poison', weaponSize:0, orbitSpeed:0,
-    statDesc: () => `Contact: 6dmg/180f | Cloud: 8dmg/240f | CD: ${(POISON_CLOUD_CD/60).toFixed(1)}s`,
+    statDesc: () => `Contact: 2dmg/30f | Cloud: 3dmg/30f | CD: ${(POISON_CLOUD_CD/60).toFixed(1)}s`,
+  },
+  blackhole: {
+    id:'blackhole', name:'BLACKHOLE', icon:'🌑', desc:'Phase: immune 2s\nthen 4 corner blackholes',
+    color:'#6b21a8', glowColor:'#a855f7', shadowColor:'#3b0764',
+    weaponType:'blackhole', weaponSize:0, orbitSpeed:0,
+    statDesc: () => `Phase CD: 5s | Blackhole: ${(BH_HOLE_FRAMES/60).toFixed(1)}s | Pull: vortex×1.2`,
+  },
+  shadow: {
+    id:'shadow', name:'SHADOW', icon:'👤', desc:'Orbit kunai DMG4\n+ shadow clone 5s',
+    color:'#475569', glowColor:'#94a3b8', shadowColor:'#1e293b',
+    weaponType:'kunai', weaponSize:22, orbitSpeed:0.11,
+    statDesc: () => `Kunai DMG: ${SHADOW_KUNAI_DMG} | Clone CD: ${(SHADOW_CLONE_CD/60).toFixed(1)}s | Duration: 5s`,
   },
 };
 
@@ -304,16 +316,40 @@ const MECH_CANNON_DMG     = 2;
 const MECH_CANNON_SPEED   = BASE_SPEED * (2/3);
 const MECH_MAX_CANNONS    = 3;
 
-// Poison
-const POISON_CONTACT_FRAMES  = 180;  // contact poison duration
-const POISON_CONTACT_TICK    = 30;   // tick interval
-const POISON_CLOUD_FRAMES    = 180;  // cloud duration
-const POISON_CLOUD_TICK      = 30;   // cloud poison tick interval
-const POISON_CLOUD_DOT_FRAMES= 240;  // cloud poison debuff duration on victim
-const POISON_CLOUD_CD        = 300;  // 5s between clouds (starts after cloud ends)
+// Poison (updated dmg)
+const POISON_CONTACT_FRAMES  = 180;
+const POISON_CONTACT_TICK    = 30;
+const POISON_CONTACT_DMG     = 2;   // was 1, now 2 per tick
+const POISON_CLOUD_FRAMES    = 180;
+const POISON_CLOUD_TICK      = 30;
+const POISON_CLOUD_DMG       = 3;   // was 1, now 3 per tick
+const POISON_CLOUD_DOT_FRAMES= 240;
+const POISON_CLOUD_CD        = 300;
 const POISON_CLOUD_RADIUS    = BALL_R * 3;
-const POISON_ANTIDOTE_HEAL   = 5;    // heal on antidote trigger
-const POISON_CONTACT_HIT_CD  = 40;   // frames between contact poison applications
+const POISON_ANTIDOTE_HEAL   = 5;
+const POISON_CONTACT_HIT_CD  = 40;
+
+// Plant roots
+const PLANT_ROOT_CD          = 300; // 5s @60fps
+const PLANT_ROOT_RADIUS      = BALL_R * 0.5;
+const PLANT_ROOT_BIND_FRAMES = 150; // 2.5s
+const PLANT_ROOT_TICK        = 30;
+const PLANT_ROOT_DMG         = 1;
+const PLANT_ROOT_HEAL        = 5;
+
+// Blackhole
+const BH_PHASE_CD      = 300;  // 5s idle before phase
+const BH_PHASE_FRAMES  = 120;  // 2s phased (immune)
+const BH_HOLE_FRAMES   = 180;  // 3s blackhole duration
+const BH_HOLE_PULL     = 0.99 * 1.2; // vortex strength × 1.2 (per blackhole)
+const BH_HOLE_DMG_TICK = 5;    // 5프레임마다 2 데미지
+const BH_HOLE_DMG      = 2;
+
+// Shadow
+const SHADOW_KUNAI_DMG   = 4;
+const SHADOW_KUNAI_HIT_CD = 45;
+const SHADOW_CLONE_CD    = 300;  // 5s between clones
+const SHADOW_CLONE_LIFE  = 300;  // 5s clone duration
 
 // ── Player colours / labels ──
 const PLAYER_COLORS = ['#60a5fa','#f87171','#4ade80','#fbbf24'];
@@ -412,7 +448,7 @@ function restartBattle() {
   initGame(selectedChars.slice(0, playerCount));
 }
 
-let balls, projectiles, particles, cannons, vortices, poisonClouds, gameOver;
+let balls, projectiles, particles, cannons, vortices, poisonClouds, plantRoots, blackholes, gameOver;
 
 function spd(b) { return Math.hypot(b.vx, b.vy); }
 function setSpd(b, s) {
@@ -426,7 +462,7 @@ function makeBall(charId, x, y, vx, vy) {
   const ch = CHARACTERS[charId];
   return {
     id:charId, uid: _ballUid++, name:ch.name, icon:ch.icon, x, y, vx, vy,
-    hp:100, maxHp:100,
+    hp:100, maxHp:999,  // no HP cap — healing can exceed 100
     color:ch.color, glowColor:ch.glowColor, shadowColor:ch.shadowColor,
     orbitAngle:0, orbitSpeed:ch.orbitSpeed,
     weaponType:ch.weaponType, weaponSize:ch.weaponSize,
@@ -444,19 +480,32 @@ function makeBall(charId, x, y, vx, vy) {
     // Water spear
     spearHitCd:   ch.weaponType==='spear' ? 0 : undefined,
     lanceCd:      ch.weaponType==='spear' ? WATER_LANCE_CD : undefined,
-    lanceVolley:  0,   // remaining lances to fire in current volley (0 = idle)
-    lanceVolleyCd: 0,  // interval between each lance in volley
-    vortexCd:     ch.weaponType==='spear' ? 0 : undefined,
-    // Mechanic
+    lanceVolley:  0,
+    lanceVolleyCd: 0,
+    vortexCd:     ch.weaponType==='spear' ? WATER_VORTEX_CD : undefined,
     wrenchHitCd: 0,
     // Poison (owner state)
     poisonContactCd: ch.weaponType==='poison' ? 0 : undefined,
     poisonCloudCd:   ch.weaponType==='poison' ? POISON_CLOUD_CD : undefined,
-    // Debuff state (any ball can be poisoned)
-    poisonFrames: 0,   // remaining frames of poison debuff
-    poisonTick:   0,   // tick counter
-    poisonSource: null, // 'contact' | 'cloud'
-    poisonOwnerUid: null, // uid of the poison's owner (immune to own poison)
+    // Plant roots
+    rootCd: ch.weaponType==='branch' ? PLANT_ROOT_CD : undefined,
+    // Blackhole
+    bhPhaseCd:    ch.weaponType==='blackhole' ? BH_PHASE_CD : undefined,
+    bhPhaseFrames: 0,   // >0 = currently phased
+    bhHoleFrames:  0,   // >0 = blackholes active
+    // Shadow
+    kunaiHitCd:   ch.weaponType==='kunai' ? 0 : undefined,
+    cloneCd:      ch.weaponType==='kunai' ? SHADOW_CLONE_CD : undefined,
+    isClone:      false,
+    cloneOwnerUid: null,
+    // Debuff state
+    poisonFrames: 0,
+    poisonTick:   0,
+    poisonSource: null,
+    poisonOwnerUid: null,
+    // Binding (plant root)
+    bindFrames:   0,
+    bindTick:     0,
   };
 }
 
@@ -474,7 +523,7 @@ function initGame(charIds) {
     const ang = Math.random()*Math.PI*2;
     return makeBall(id, px, py, Math.cos(ang)*BASE_SPEED, Math.sin(ang)*BASE_SPEED);
   });
-  projectiles = []; particles = []; cannons = []; vortices = []; poisonClouds = [];
+  projectiles = []; particles = []; cannons = []; vortices = []; poisonClouds = []; plantRoots = []; blackholes = [];
   buildStatUI();
   updateStatUI();
 }
@@ -524,6 +573,8 @@ function update() {
     }
     if (b.stunFrames===0) {
       b.x+=b.vx; b.y+=b.vy;
+      // Bound balls: halt movement
+      if (b.bindFrames>0) { b.vx=0; b.vy=0; }
       let bounced=false;
       if (b.x-BALL_R<0)  { b.x=BALL_R;     b.vx= Math.abs(b.vx); bounced=true; }
       if (b.x+BALL_R>W)  { b.x=W-BALL_R;   b.vx=-Math.abs(b.vx); bounced=true; }
@@ -566,7 +617,6 @@ function update() {
       if (b.spearHitCd>0) b.spearHitCd--;
       if (b.lanceCd>0)    b.lanceCd--;
       if (b.vortexCd>0)   b.vortexCd--;
-
       // Spear orbit hit check (center-grip: both tip and butt deal damage)
       // Spear orbit hit check — orbit center is grip, both ends deal damage
       if (b.spearHitCd===0) {
@@ -632,9 +682,94 @@ function update() {
       }
     }
 
-    // Mechanic: wrench cd
-    if (b.weaponType==='wrench') {
-      if (b.wrenchHitCd>0) b.wrenchHitCd--;
+    // Binding (plant root)
+    if (b.bindFrames > 0) {
+      b.bindFrames--;
+      b.bindTick++;
+      if (b.bindTick >= PLANT_ROOT_TICK) {
+        b.hp -= PLANT_ROOT_DMG;
+        b.bindTick = 0;
+        spawnParticles(b.x, b.y, '#15803d', 3);
+      }
+      // Bound balls can't move
+      b.vx = 0; b.vy = 0;
+    }
+
+    // Plant: root spawn CD
+    if (b.weaponType==='branch') {
+      if (b.rootCd>0) b.rootCd--;
+      if (b.rootCd===0) {
+        b.rootCd = PLANT_ROOT_CD;
+        plantRoots.push({
+          x: BALL_R*2+Math.random()*(W-BALL_R*4),
+          y: BALL_R*2+Math.random()*(H-BALL_R*4),
+          ownerId: b.uid, done: false,
+        });
+      }
+    }
+
+    // Blackhole: phase cycle
+    if (b.weaponType==='blackhole') {
+      // Skip immunity/phase during phased state
+      if (b.bhPhaseFrames > 0) {
+        b.bhPhaseFrames--;
+        // Immune: skip all debuffs
+        b.burnFrames = 0; b.poisonFrames = 0; b.slowFrames = 0;
+        b.stunFrames = 0; b.bindFrames = 0;
+        if (b.bhPhaseFrames === 0) {
+          // Phase ends → spawn 4 corner blackholes
+          b.bhHoleFrames = BH_HOLE_FRAMES;
+          const corners = [
+            {x:BALL_R*3, y:BALL_R*3},
+            {x:W-BALL_R*3, y:BALL_R*3},
+            {x:BALL_R*3, y:H-BALL_R*3},
+            {x:W-BALL_R*3, y:H-BALL_R*3},
+          ];
+          for (const c of corners) blackholes.push({x:c.x, y:c.y, ownerId:b.uid, frames:BH_HOLE_FRAMES, dmgTimer:0});
+        }
+      } else if (b.bhHoleFrames > 0) {
+        b.bhHoleFrames--;
+        if (b.bhHoleFrames === 0) b.bhPhaseCd = BH_PHASE_CD; // restart cycle
+      } else {
+        if (b.bhPhaseCd > 0) b.bhPhaseCd--;
+        if (b.bhPhaseCd === 0) b.bhPhaseFrames = BH_PHASE_FRAMES; // enter phase
+      }
+    }
+
+    // Shadow: clone CD + clone lifetime management
+    if (b.weaponType==='kunai' && !b.isClone) {
+      if (b.kunaiHitCd>0) b.kunaiHitCd--;
+      if (b.cloneCd>0) b.cloneCd--;
+      if (b.cloneCd===0) {
+        b.cloneCd = 99999; // sentinel until clone resolves
+        const ang = Math.random()*Math.PI*2;
+        const rx = BALL_R*3+Math.random()*(W-BALL_R*6);
+        const ry = BALL_R*3+Math.random()*(H-BALL_R*6);
+        const clone = makeBall('shadow', rx, ry, Math.cos(ang)*BASE_SPEED, Math.sin(ang)*BASE_SPEED);
+        clone.isClone = true;
+        clone.cloneOwnerUid = b.uid;
+        clone.cloneFrames = SHADOW_CLONE_LIFE;
+        clone.hp = b.hp; // clone starts with same HP
+        balls.push(clone);
+        buildStatUI();
+      }
+    }
+    // Clone: count down, then resolve (higher HP survives)
+    if (b.isClone) {
+      if (b.kunaiHitCd>0) b.kunaiHitCd--;
+      b.cloneFrames--;
+      if (b.cloneFrames <= 0) {
+        const owner = balls.find(o=>o.uid===b.cloneOwnerUid);
+        if (owner) {
+          if (b.hp >= owner.hp) {
+            // Clone wins: owner takes clone's HP
+            owner.hp = b.hp;
+          }
+          // else owner already has more HP, clone just disappears
+          owner.cloneCd = SHADOW_CLONE_CD;
+        }
+        b.hp = 0; // mark for removal
+      }
     }
 
     // Poison owner: contact hit cd + cloud spawn
@@ -655,11 +790,12 @@ function update() {
     }
 
     // Any ball: poison debuff tick — immune only to own poison
-    if (b.poisonFrames > 0 && b.poisonOwnerUid !== b.uid) {
+    if (b.poisonFrames > 0 && b.poisonOwnerUid !== b.uid && b.bhPhaseFrames===0) {
       b.poisonFrames--;
       b.poisonTick++;
+      const dmgPerTick = b.poisonSource==='cloud' ? POISON_CLOUD_DMG : POISON_CONTACT_DMG;
       if (b.poisonTick >= POISON_CONTACT_TICK) {
-        b.hp -= 1;
+        b.hp -= dmgPerTick;
         b.poisonTick = 0;
         spawnParticles(b.x, b.y, '#84cc16', 3);
       }
@@ -695,7 +831,7 @@ function update() {
       if (attacker !== target) weaponHitChecks(attacker, target);
     }
   }
-  updateVortices(); updateCannons(); updatePoisonClouds();
+  updateVortices(); updateCannons(); updatePoisonClouds(); updatePlantRoots(); updateBlackholes();
   updateProjectiles(); updateParticles(); checkGameOver(); updateStatUI();
 }
 
@@ -709,6 +845,9 @@ function weaponHitChecks(attacker, target) {
     if (target.weaponType==='none' && target.quakeCd>0)
       target.quakeCd = Math.max(0, target.quakeCd-90);
   }
+
+  // Skip if target is in blackhole phase (immune)
+  if (target.bhPhaseFrames > 0) return;
 
   if (attacker.weaponType==='axe' && attacker.axeHitCd===0) {
     if (dist < attacker.weaponSize+BALL_R) {
@@ -753,6 +892,12 @@ function weaponHitChecks(attacker, target) {
           fireCd: MECH_CANNON_FIRE_CD, frames: MECH_CANNON_LIFE, angle: 0,
         });
       }
+    }
+  }
+  if (attacker.weaponType==='kunai' && attacker.kunaiHitCd===0) {
+    if (dist < attacker.weaponSize+BALL_R) {
+      target.hp-=SHADOW_KUNAI_DMG; attacker.kunaiHitCd=SHADOW_KUNAI_HIT_CD;
+      spawnParticles(target.x,target.y,'#94a3b8',8); reduceEarthCd();
     }
   }
   // Poison: contact-based (ball–ball distance, not weapon orbit)
@@ -812,6 +957,59 @@ function updatePoisonClouds() {
   }
 }
 
+function updatePlantRoots() {
+  for (let i=plantRoots.length-1;i>=0;i--) {
+    const r=plantRoots[i];
+    if (r.done) { plantRoots.splice(i,1); continue; }
+    for (const b of balls) {
+      if (Math.hypot(b.x-r.x, b.y-r.y) > PLANT_ROOT_RADIUS+BALL_R) continue;
+      if (b.uid === r.ownerId) {
+        // Plant owner: heal + consume root
+        b.hp += PLANT_ROOT_HEAL;
+        spawnParticles(r.x,r.y,'#4ade80',10);
+        r.done = true; break;
+      } else {
+        // Enemy: bind if not already bound
+        if (b.bindFrames === 0) {
+          b.bindFrames = PLANT_ROOT_BIND_FRAMES;
+          b.bindTick = 0;
+          spawnParticles(r.x,r.y,'#15803d',10);
+          r.done = true; break;
+        }
+      }
+    }
+  }
+}
+
+function updateBlackholes() {
+  for (let i=blackholes.length-1;i>=0;i--) {
+    const h=blackholes[i];
+    h.frames--; h.dmgTimer++;
+    if (h.frames<=0) { blackholes.splice(i,1); continue; }
+    for (const b of balls) {
+      if (b.uid === h.ownerId) continue; // blackhole owner immune
+      if (b.bhPhaseFrames > 0) continue; // phased balls immune
+      const dx=b.x-h.x, dy=b.y-h.y;
+      const dist=Math.hypot(dx,dy)||0.001;
+      // Strong straight pull — distance-independent below 300px, inverse beyond
+      const strength = dist < 300
+        ? 2.2
+        : 2.2 * (300/dist);
+      b.vx -= (dx/dist)*strength;
+      b.vy -= (dy/dist)*strength;
+      // Allow higher speed cap so pull feels strong
+      const s=spd(b);
+      if (s>BASE_SPEED*3.5) setSpd(b,BASE_SPEED*3.5);
+      // Contact damage (larger radius)
+      if (dist < BALL_R*3.5 && h.dmgTimer>=BH_HOLE_DMG_TICK) {
+        b.hp -= BH_HOLE_DMG;
+        spawnParticles(b.x,b.y,'#a855f7',5);
+      }
+    }
+    if (h.dmgTimer>=BH_HOLE_DMG_TICK) h.dmgTimer=0;
+  }
+}
+
 function updateVortices() {
   for (let i=vortices.length-1;i>=0;i--) {
     const v=vortices[i];
@@ -836,11 +1034,17 @@ function updateVortices() {
         const s=spd(b);
         if (s>BASE_SPEED*2.0) setSpd(b,BASE_SPEED*2.0);
       }
-      // Damage: only non-owner balls
+      // Damage: only non-owner balls, blackhole in phase immune
       if (b.uid !== v.ownerId &&
+          b.bhPhaseFrames === 0 &&
           dist < WATER_VORTEX_RADIUS+BALL_R &&
           v.dmgTimer>=WATER_VORTEX_DMG_INTERVAL) {
         b.hp-=1;
+        // Fire burn + water vortex: vortex damages but cures burn
+        if (b.burnFrames > 0) {
+          b.burnFrames = 0;
+          spawnParticles(b.x,b.y,'#7dd3fc',5);
+        }
         spawnParticles(b.x,b.y,'#0284c7',3);
       }
     }
@@ -1000,6 +1204,8 @@ function updateProjectiles() {
       if (p.frames<=0) { p.done=true; continue; }
       for (const b of balls) {
         if (p.hitBalls.has(b.uid)) continue;
+        if (b.uid === p.ownerId) continue; // owner immune to own bolts
+        if (b.bhPhaseFrames > 0) continue; // blackhole phase immune
         if (Math.abs(b.x-p.x)<BALL_R+10) {
           p.hitBalls.add(b.uid); b.hp-=THUNDER_BOLT_DMG;
           b.stunVx=b.vx; b.stunVy=b.vy;
@@ -1023,7 +1229,7 @@ function updateProjectiles() {
         if (p.isHeal) {
           for (const b of balls) {
             if (Math.hypot(p.x-b.x,p.y-b.y)<BALL_R+11) {
-              b.hp=Math.min(b.maxHp,b.hp+PLANT_SEED_HEAL);
+              b.hp += PLANT_SEED_HEAL;  // no maxHp cap
               spawnParticles(b.x,b.y,'#facc15',6); p.done=true; break;
             }
           }
@@ -1170,6 +1376,8 @@ function draw() {
   for (const v of vortices) drawVortex(v);
   for (const c of cannons)   drawCannon(c);
   for (const c of poisonClouds) drawPoisonCloud(c);
+  for (const r of plantRoots)   drawPlantRoot(r);
+  for (const h of blackholes)   drawBlackhole(h);
   for (const b of balls) {
     drawQuakeRing(b); drawBall(b);
     if (b.weaponType==='axe')      drawIceAxe(b);
@@ -1179,6 +1387,8 @@ function draw() {
     if (b.weaponType==='hammer')   drawHammer(b);
     if (b.weaponType==='spear')    drawWaterSpear(b);
     if (b.weaponType==='wrench')   drawWrench(b);
+    if (b.weaponType==='kunai')    drawKunai(b);
+    drawBlackholePhase(b);
     drawEarthCooldown(b); drawHpBar(b);
   }
 }
@@ -1205,6 +1415,11 @@ function drawBall(b) {
     ctx.save(); ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+7,0,Math.PI*2);
     ctx.strokeStyle='rgba(132,204,22,0.85)'; ctx.lineWidth=3;
     ctx.setLineDash([4,3]); ctx.shadowColor='#84cc16'; ctx.shadowBlur=14; ctx.stroke(); ctx.restore();
+  }
+  if (b.bindFrames>0) {
+    ctx.save(); ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+9,0,Math.PI*2);
+    ctx.strokeStyle='rgba(21,128,61,0.9)'; ctx.lineWidth=4;
+    ctx.setLineDash([5,3]); ctx.shadowColor='#15803d'; ctx.shadowBlur=12; ctx.stroke(); ctx.restore();
   }
   ctx.save();
   const halo=ctx.createRadialGradient(b.x,b.y,BALL_R*0.6,b.x,b.y,BALL_R+18);
@@ -1643,6 +1858,113 @@ function drawPoisonCloud(c) {
   ctx.fillText('☠', c.x, c.y+2);
 
   ctx.globalAlpha=1; ctx.restore();
+}
+
+function drawPlantRoot(r) {
+  ctx.save();
+  ctx.beginPath(); ctx.arc(r.x, r.y, PLANT_ROOT_RADIUS, 0, Math.PI*2);
+  ctx.fillStyle='#15803d'; ctx.shadowColor='#4ade80'; ctx.shadowBlur=10; ctx.fill();
+  ctx.strokeStyle='#86efac'; ctx.lineWidth=1.5; ctx.stroke();
+  // Root tendrils
+  for (let i=0;i<5;i++) {
+    const a=i*Math.PI*2/5;
+    ctx.beginPath(); ctx.moveTo(r.x,r.y);
+    ctx.lineTo(r.x+Math.cos(a)*PLANT_ROOT_RADIUS*1.6, r.y+Math.sin(a)*PLANT_ROOT_RADIUS*1.6);
+    ctx.strokeStyle='rgba(74,222,128,0.6)'; ctx.lineWidth=1.5; ctx.lineCap='round'; ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawBlackhole(h) {
+  const prog = 1-h.frames/BH_HOLE_FRAMES;
+  const alpha = prog<0.08?prog/0.08 : h.frames<12?h.frames/12 : 1;
+  const r = BALL_R*2;
+  ctx.save(); ctx.globalAlpha=alpha;
+  // Dark core
+  const core=ctx.createRadialGradient(h.x,h.y,0,h.x,h.y,r);
+  core.addColorStop(0,'rgba(0,0,0,0.95)');
+  core.addColorStop(0.5,'rgba(88,28,135,0.7)');
+  core.addColorStop(1,'rgba(88,28,135,0)');
+  ctx.beginPath(); ctx.arc(h.x,h.y,r,0,Math.PI*2); ctx.fillStyle=core; ctx.fill();
+  // Spinning ring
+  ctx.beginPath(); ctx.arc(h.x,h.y,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(168,85,247,0.85)'; ctx.lineWidth=3;
+  ctx.shadowColor='#a855f7'; ctx.shadowBlur=18; ctx.stroke();
+  // Inner ring
+  ctx.beginPath(); ctx.arc(h.x,h.y,r*0.5,0,Math.PI*2);
+  ctx.strokeStyle='rgba(216,180,254,0.7)'; ctx.lineWidth=2; ctx.stroke();
+  ctx.globalAlpha=1; ctx.restore();
+}
+
+function drawBlackholePhase(b) {
+  if (b.weaponType!=='blackhole') return;
+  const t = Date.now();
+
+  if (b.bhPhaseFrames > 0) {
+    // ── 반투명 상태: 공 자체를 반투명하게 + 보라 오라 ──
+    const pulse = 0.45 + Math.sin(t/80)*0.15;
+    ctx.save(); ctx.globalAlpha=pulse;
+    // 큰 오라 글로우
+    const g=ctx.createRadialGradient(b.x,b.y,BALL_R,b.x,b.y,BALL_R+28);
+    g.addColorStop(0,'rgba(168,85,247,0.7)');
+    g.addColorStop(1,'rgba(168,85,247,0)');
+    ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+28,0,Math.PI*2);
+    ctx.fillStyle=g; ctx.fill();
+    ctx.restore();
+    // 점선 링 (빠르게 회전하는 느낌)
+    ctx.save(); ctx.globalAlpha=0.85;
+    ctx.translate(b.x,b.y); ctx.rotate(t/300);
+    ctx.beginPath(); ctx.arc(0,0,BALL_R+16,0,Math.PI*2);
+    ctx.strokeStyle='#c084fc'; ctx.lineWidth=2.5;
+    ctx.setLineDash([6,4]); ctx.shadowColor='#a855f7'; ctx.shadowBlur=16; ctx.stroke();
+    ctx.restore();
+    // 공 자체를 반투명으로 (위에 덮어그리기)
+    ctx.save(); ctx.globalAlpha=0.38;
+    ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R,0,Math.PI*2);
+    ctx.fillStyle='#6b21a8'; ctx.fill();
+    ctx.restore();
+
+  } else if (b.bhHoleFrames > 0) {
+    // ── 블랙홀 활성 상태: 공 주변에 끌어당기는 파문 ──
+    const rippleCount = 3;
+    for (let ri=0;ri<rippleCount;ri++) {
+      const phase = ((t/120 + ri/rippleCount) % 1);
+      const r = BALL_R + 8 + phase*30;
+      const alpha = (1-phase)*0.6;
+      ctx.save(); ctx.globalAlpha=alpha;
+      ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2);
+      ctx.strokeStyle='#a855f7'; ctx.lineWidth=2;
+      ctx.shadowColor='#7c3aed'; ctx.shadowBlur=10; ctx.stroke();
+      ctx.restore();
+    }
+    // 중앙 진한 보라 글로우
+    ctx.save(); ctx.globalAlpha=0.5+Math.sin(t/60)*0.15;
+    ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R+6,0,Math.PI*2);
+    ctx.strokeStyle='#7c3aed'; ctx.lineWidth=4;
+    ctx.shadowColor='#a855f7'; ctx.shadowBlur=24; ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function drawKunai(b) {
+  // Clone is slightly transparent
+  if (b.isClone) { ctx.save(); ctx.globalAlpha=0.6; }
+  const S=b.weaponSize;
+  const wx=b.x+Math.cos(b.orbitAngle)*WEAPON_ORBIT_R;
+  const wy=b.y+Math.sin(b.orbitAngle)*WEAPON_ORBIT_R;
+  ctx.save(); ctx.translate(wx,wy); ctx.rotate(b.orbitAngle+Math.PI/4);
+  // Blade
+  ctx.beginPath();
+  ctx.moveTo(0,-S*1.1); ctx.lineTo(S*0.14,0); ctx.lineTo(0,S*0.1); ctx.lineTo(-S*0.14,0); ctx.closePath();
+  const kg=ctx.createLinearGradient(0,-S*1.1,0,S*0.1);
+  kg.addColorStop(0,'#e2e8f0'); kg.addColorStop(0.4,'#94a3b8'); kg.addColorStop(1,'#475569');
+  ctx.fillStyle=kg; ctx.shadowColor='#94a3b8'; ctx.shadowBlur=14; ctx.fill();
+  ctx.strokeStyle='#cbd5e1'; ctx.lineWidth=1; ctx.stroke();
+  // Ring handle
+  ctx.beginPath(); ctx.arc(0,S*0.35,S*0.22,0,Math.PI*2);
+  ctx.strokeStyle='#64748b'; ctx.lineWidth=3; ctx.shadowColor='#94a3b8'; ctx.shadowBlur=6; ctx.stroke();
+  ctx.restore();
+  if (b.isClone) ctx.restore();
 }
 
 function loop() {
