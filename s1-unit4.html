@@ -123,6 +123,64 @@ h3{color:#374151;margin-top:20px;}
   </div>
 </div>
 
+<!-- ③ 상태변화와 열에너지 -->
+<h2>③ 상태변화와 열에너지</h2>
+<div class="card">
+  <p>고체에 열을 가하면 입자 운동이 활발해져 <strong>융해</strong>(고체→액체), <strong>기화</strong>(액체→기체)가 일어납니다. 녹는점·끓는점에서는 흡수(또는 방출)한 열이 모두 상태변화에 쓰여 <strong>온도가 일정</strong>하게 유지됩니다(잠열).</p>
+
+  <style>
+    #heat-sim .sim-btn:disabled{opacity:0.35;cursor:not-allowed;}
+    #heat-sim .heat-num{width:60px;background:#f3f4f6;border:1.5px solid #d1d5db;border-radius:6px;padding:4px 6px;font-size:0.85em;color:#374151;}
+    #heat-sim canvas{display:block;width:100%;height:auto;border-radius:12px;}
+    #heat-readout{font-weight:700;font-size:0.95em;margin:12px 0 2px;}
+  </style>
+
+  <div id="heat-sim">
+    <!-- 시나리오 토글 -->
+    <div class="ctrl-row" style="margin-top:4px;">
+      <button class="sim-btn active" id="heat-sc-heat" style="flex:1;">🔥 가열 시 상태변화 (고체→액체→기체)</button>
+      <button class="sim-btn" id="heat-sc-cool" style="flex:1;">❄️ 냉각 시 상태변화 (액체→고체)</button>
+    </div>
+
+    <!-- 온도-시간 그래프 -->
+    <div class="ctrl-label" style="margin-top:16px;">📈 온도 - 시간 그래프</div>
+    <div class="sim-scene" style="margin-top:6px;">
+      <canvas id="heat-graph" width="880" height="150"></canvas>
+    </div>
+
+    <!-- 입자 모형 + 비커 -->
+    <div class="ctrl-label" style="margin-top:16px;">🧪 입자 모형</div>
+    <div class="sim-scene" style="margin-top:6px;">
+      <canvas id="heat-particle" width="900" height="400"></canvas>
+    </div>
+
+    <!-- 온도계 -->
+    <div id="heat-readout">20.0° · 고체</div>
+    <div class="sim-scene" style="margin-top:2px;">
+      <canvas id="heat-thermo" width="880" height="60"></canvas>
+    </div>
+
+    <!-- 동작 컨트롤 -->
+    <div class="ctrl-row" style="margin-top:16px;">
+      <button class="reset-btn" id="heat-reset">🔄 초기화</button>
+      <button class="sim-btn" id="heat-btn-heat">🔥 가열</button>
+      <button class="sim-btn" id="heat-btn-cool">❄️ 냉각</button>
+      <button class="sim-btn active" id="heat-btn-stop">⏸ 정지</button>
+    </div>
+    <div class="ctrl-row" style="margin-top:8px;">
+      <span class="ctrl-label">속도</span>
+      <input type="range" id="heat-rate" min="5" max="150" value="40" style="width:100px;accent-color:#ef4444;cursor:pointer;">
+      <span class="ctrl-label">비열</span>
+      <input type="range" id="heat-cap" min="2" max="20" value="8" style="width:90px;accent-color:#2563eb;cursor:pointer;">
+      <span class="ctrl-label">녹는점</span>
+      <input type="number" id="heat-mp" value="100" min="-10" max="380" class="heat-num">
+      <span class="ctrl-label">끓는점</span>
+      <input type="number" id="heat-bp" value="300" min="0" max="410" class="heat-num">
+    </div>
+    <p class="desc">🔥 <b>가열</b>: 고체에 열을 가해 녹는점(융해)·끓는점(기화)을 지나 기체까지 변화. 기체는 비커 입구로 빠져나갑니다. &nbsp; ❄️ <b>냉각</b>: 액체에서 시작해 냉각으로 응고. &nbsp; 녹는점·끓는점의 <b>평탄 구간</b>(그래프 노랑·주황)에서는 온도가 일정하며, 흡수·방출한 열이 모두 상태변화에 쓰입니다(잠열). 온도가 오를수록 입자 진동과 간격이 커지고, 액체에서는 수면이 올라갑니다.</p>
+  </div>
+</div>
+
 <!-- 팝업 -->
 <div class="modal-overlay" id="termModal">
   <div class="modal">
@@ -1126,6 +1184,353 @@ function heatColA(t,a){
 
   resize(); init(); loop();
   window.addEventListener('resize', ()=>{ resize(); init(); });
+})();
+</script>
+
+<!-- ③ 상태변화와 열에너지 시뮬레이션 -->
+<script>
+(function(){
+  const CONFIG = {
+    MP:100, BP:300, T_MIN:-20, T_MAX:420, T_START:20, T_LIQUID_START:230,
+    heatCapacity:8, heatRate:40, coolRate:40,
+    latentMelt:280, latentBoil:600, band:12,
+    N:36, gridCols:6, gridSpacing:22, R:9,
+  };
+  const pCanvas=document.getElementById('heat-particle'), pCtx=pCanvas.getContext('2d');
+  const CW=pCanvas.width, CH=pCanvas.height;
+  const tCanvas=document.getElementById('heat-thermo'), tCtx=tCanvas.getContext('2d');
+  const gCanvas=document.getElementById('heat-graph'), gCtx=gCanvas.getContext('2d');
+  const BK={left:350,right:550,bottom:372,top:110,wall:5};
+
+  let T=CONFIG.T_START, mode='IDLE', scenario='HEAT', currentState='SOLID', waterY=BK.bottom;
+  let meltProg=0, boilProg=0;
+
+  const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+  const lerp=(a,b,t)=>a+(b-a)*t;
+  const map=(v,a,b,c,d)=>c+(v-a)/(b-a)*(d-c);
+  const smoothstep=(e0,e1,x)=>{const t=clamp((x-e0)/(e1-e0),0,1);return t*t*(3-2*t);};
+  function lerpColor(c1,c2,t){const h=v=>parseInt(v,16);const r1=h(c1.slice(1,3)),g1=h(c1.slice(3,5)),b1=h(c1.slice(5,7));const r2=h(c2.slice(1,3)),g2=h(c2.slice(3,5)),b2=h(c2.slice(5,7));return `rgb(${Math.round(lerp(r1,r2,t))},${Math.round(lerp(g1,g2,t))},${Math.round(lerp(b1,b2,t))})`;}
+  const COLORS={SOLID:'#4a90e2',LIQUID:'#1abc9c',GAS:'#e74c3c'};
+  const meltFactor=()=>meltProg, vaporFactor=()=>boilProg;
+  function getColor(){const g=vaporFactor();if(g>0)return lerpColor(COLORS.LIQUID,COLORS.GAS,g);return lerpColor(COLORS.SOLID,COLORS.LIQUID,meltFactor());}
+
+  // ===== 입자 초기화 =====
+  const particles=[];
+  function initParticles(startState){
+    particles.length=0;
+    const cols=CONFIG.gridCols, rows=CONFIG.N/cols, sp=CONFIG.gridSpacing;
+    const startX=CW/2-(cols-1)*sp/2;
+    const startY=BK.bottom-18-(rows-1)*sp;
+    for(let i=0;i<CONFIG.N;i++){
+      const col=i%cols,row=Math.floor(i/cols);
+      const bx=startX+col*sp,by=startY+row*sp;
+      let x=bx,y=by;
+      if(startState==='liquid'){
+        x=BK.left+CONFIG.R+Math.random()*(BK.right-BK.left-CONFIG.R*2);
+        y=BK.bottom-CONFIG.R-Math.random()*160;
+      }
+      particles.push({x,y,vx:0,vy:0,baseX:bx,baseY:by,phase:Math.random()*Math.PI*2});
+    }
+    waterY=BK.bottom;
+  }
+
+  function resolveState(){
+    if(boilProg>=1) return 'GAS';
+    if(boilProg>0)  return 'BOILING';
+    if(meltProg>=1) return 'LIQUID';
+    if(meltProg>0)  return 'MELTING';
+    return 'SOLID';
+  }
+  const stateLabel=s=>({SOLID:'고체',MELTING:'융해 중',LIQUID:'액체',BOILING:'기화 중',GAS:'기체'}[s]||s);
+
+  // ===== 온도 업데이트 (잠열 plateau) =====
+  function updatePhysics(dt){
+    let q=0;
+    if(mode==='HEAT') q=CONFIG.heatRate*dt;
+    if(mode==='COOL') q=-CONFIG.coolRate*dt;
+    if(q===0) return;
+    const {MP,BP,heatCapacity:C,latentMelt:Lm,latentBoil:Lb,T_MIN,T_MAX}=CONFIG;
+    if(q>0){
+      if(meltProg<1 && T>=MP){
+        meltProg+=q/Lm;
+        if(meltProg>=1){T=MP+(meltProg-1)*Lm/C; meltProg=1;} else T=MP;
+        return;
+      }
+      if(meltProg>=1 && boilProg<1 && T>=BP){
+        boilProg+=q/Lb;
+        if(boilProg>=1){T=BP+(boilProg-1)*Lb/C; boilProg=1;} else T=BP;
+        return;
+      }
+      let newT=T+q/C;
+      if(meltProg<1 && newT>=MP) newT=MP;
+      if(meltProg>=1 && boilProg<1 && newT>=BP) newT=BP;
+      T=clamp(newT,T_MIN,T_MAX);
+    } else {
+      const Lm2=Lm*2, Lb2=Lb*2;   // 냉각 잠열 = 가열의 2배
+      if(boilProg>0 && T<=BP){
+        boilProg+=q/Lb2;
+        if(boilProg<=0){T=BP+boilProg*Lb2/C; boilProg=0;} else T=BP;
+        return;
+      }
+      if(boilProg<=0 && meltProg>0 && T<=MP){
+        meltProg+=q/Lm2;
+        if(meltProg<=0){T=MP+meltProg*Lm2/C; meltProg=0;} else T=MP;
+        return;
+      }
+      let newT=T+q/C;
+      if(boilProg>0 && newT<=BP) newT=BP;
+      if(boilProg<=0 && meltProg>0 && newT<=MP) newT=MP;
+      T=clamp(newT,T_MIN,T_MAX);
+    }
+  }
+
+  // ===== 벽/비커 구속 =====
+  function applyWalls(p){
+    const R=CONFIG.R;
+    if(p.x<R){p.x=R;p.vx=Math.abs(p.vx)*0.5;}
+    if(p.x>CW-R){p.x=CW-R;p.vx=-Math.abs(p.vx)*0.5;}
+    if(p.y<R){p.y=R;p.vy=Math.abs(p.vy)*0.5;}
+    if(p.y>CH-R){p.y=CH-R;p.vy=-Math.abs(p.vy)*0.5;}
+    if(p.y>BK.top){
+      if(p.y>BK.bottom-R){p.y=BK.bottom-R;p.vy=-Math.abs(p.vy)*0.3;}
+      if(p.x<BK.left+R){p.x=BK.left+R;p.vx=Math.abs(p.vx)*0.3;}
+      if(p.x>BK.right-R){p.x=BK.right-R;p.vx=-Math.abs(p.vx)*0.3;}
+    }
+  }
+
+  // ===== 입자 업데이트 =====
+  function updateParticles(dt){
+    const m=meltFactor(), g=vaporFactor();
+    const springK=(1-m)*95;
+    const gravity=m*(1-g)*190;
+    const thermal=map(clamp(T,CONFIG.T_MIN,CONFIG.T_MAX),CONFIG.T_MIN,CONFIG.T_MAX,4,70);
+    const damp=lerp(lerp(0.80,0.90,m),0.99,g);
+    const maxSpd=lerp(lerp(40,110,m),480,g);
+    const phaseInc=dt*map(clamp(T,CONFIG.T_MIN,CONFIG.T_MAX),CONFIG.T_MIN,CONFIG.T_MAX,3,26);
+    const liqExpand=smoothstep(CONFIG.MP,CONFIG.BP,T);
+    const liquidSep=lerp(CONFIG.gridSpacing*1.15,CONFIG.gridSpacing*1.5,liqExpand);
+    const minSep=lerp(CONFIG.gridSpacing-2,liquidSep,m);
+
+    for(const p of particles){
+      if(springK>0.01){p.vx+=(p.baseX-p.x)*springK*dt; p.vy+=(p.baseY-p.y)*springK*dt;}
+      p.vy+=gravity*dt;
+      p.vx+=(Math.random()*2-1)*thermal*dt*6;
+      p.vy+=(Math.random()*2-1)*thermal*dt*6;
+      if(g<0.3){
+        if(p.x<BK.left  && p.y>BK.top) p.vx+=(BK.left+25-p.x)*2*dt;
+        if(p.x>BK.right && p.y>BK.top) p.vx+=(BK.right-25-p.x)*2*dt;
+      }
+      p.phase+=phaseInc;
+    }
+    for(const p of particles){
+      p.vx*=damp; p.vy*=damp;
+      const sp=Math.hypot(p.vx,p.vy);
+      if(sp>maxSpd){p.vx=p.vx/sp*maxSpd; p.vy=p.vy/sp*maxSpd;}
+      p.x+=p.vx*dt; p.y+=p.vy*dt;
+    }
+    for(let it=0;it<3;it++){
+      for(let i=0;i<particles.length;i++){
+        for(let j=i+1;j<particles.length;j++){
+          const a=particles[i],b=particles[j];
+          let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);
+          if(d<minSep && d>0.0001){
+            const push=(minSep-d)/2, nx=dx/d, ny=dy/d;
+            a.x-=nx*push; a.y-=ny*push; b.x+=nx*push; b.y+=ny*push;
+          } else if(d<=0.0001){a.x-=0.5; b.x+=0.5;}
+        }
+      }
+      for(const p of particles) applyWalls(p);
+    }
+  }
+
+  function updateWater(){
+    const m=meltFactor(), g=vaporFactor();
+    let top=BK.bottom;
+    for(const p of particles){ if(p.x>BK.left && p.x<BK.right && p.y>BK.top) top=Math.min(top,p.y-CONFIG.R); }
+    const liquidness=clamp(m-g,0,1);
+    const target=liquidness>0.05?top:BK.bottom;
+    waterY+=(target-waterY)*0.08;
+  }
+
+  // ===== 비커/물 =====
+  function drawBeaker(){
+    pCtx.save();
+    pCtx.lineWidth=BK.wall; pCtx.strokeStyle='rgba(190,215,255,0.5)'; pCtx.lineCap='round';
+    pCtx.beginPath();
+    pCtx.moveTo(BK.left,BK.top); pCtx.lineTo(BK.left,BK.bottom); pCtx.lineTo(BK.right,BK.bottom); pCtx.lineTo(BK.right,BK.top); pCtx.stroke();
+    pCtx.beginPath();
+    pCtx.moveTo(BK.left,BK.top); pCtx.lineTo(BK.left-10,BK.top-8);
+    pCtx.moveTo(BK.right,BK.top); pCtx.lineTo(BK.right+10,BK.top-8); pCtx.stroke();
+    pCtx.restore();
+  }
+  function drawWater(){
+    const m=meltFactor(), g=vaporFactor();
+    const liquidness=clamp(m-g,0,1);
+    if(liquidness<0.03) return;
+    const lvl=clamp(waterY,BK.top,BK.bottom);
+    pCtx.save();
+    pCtx.beginPath(); pCtx.rect(BK.left,lvl,BK.right-BK.left,BK.bottom-lvl);
+    pCtx.fillStyle=`rgba(26,188,156,${0.20*liquidness})`; pCtx.fill();
+    pCtx.beginPath(); pCtx.moveTo(BK.left,lvl);
+    for(let x=BK.left;x<=BK.right;x+=8){ pCtx.lineTo(x,lvl+Math.sin(x*0.08+performance.now()*0.003)*2); }
+    pCtx.strokeStyle=`rgba(120,230,210,${0.55*liquidness})`; pCtx.lineWidth=2; pCtx.stroke();
+    pCtx.restore();
+  }
+
+  // ===== 입자 렌더 =====
+  function renderParticles(){
+    pCtx.clearRect(0,0,CW,CH);
+    const m=meltFactor(), g=vaporFactor();
+    const color=getColor(), R=CONFIG.R;
+    drawBeaker(); drawWater();
+    const vibAmp=(1-g)*lerp(2.4,0.8,m);
+    const dpos=particles.map(p=>({x:p.x+Math.sin(p.phase)*vibAmp, y:p.y+Math.cos(p.phase*1.3)*vibAmp}));
+    if(m<0.999){
+      const cols=CONFIG.gridCols, rows=CONFIG.N/cols, lim=CONFIG.gridSpacing*1.8;
+      pCtx.strokeStyle=`rgba(120,150,220,${(1-m)*0.45})`; pCtx.lineWidth=1;
+      for(let i=0;i<particles.length;i++){
+        const col=i%cols,row=Math.floor(i/cols);
+        if(col<cols-1){const j=i+1; if(Math.hypot(dpos[i].x-dpos[j].x,dpos[i].y-dpos[j].y)<lim){pCtx.beginPath();pCtx.moveTo(dpos[i].x,dpos[i].y);pCtx.lineTo(dpos[j].x,dpos[j].y);pCtx.stroke();}}
+        if(row<rows-1){const j=i+cols; if(Math.hypot(dpos[i].x-dpos[j].x,dpos[i].y-dpos[j].y)<lim){pCtx.beginPath();pCtx.moveTo(dpos[i].x,dpos[i].y);pCtx.lineTo(dpos[j].x,dpos[j].y);pCtx.stroke();}}
+      }
+    }
+    for(let i=0;i<particles.length;i++){
+      const d=dpos[i];
+      const grad=pCtx.createRadialGradient(d.x-R*0.3,d.y-R*0.3,1,d.x,d.y,R);
+      grad.addColorStop(0,'rgba(255,255,255,0.7)'); grad.addColorStop(0.4,color); grad.addColorStop(1,'rgba(0,0,0,0.45)');
+      pCtx.beginPath(); pCtx.arc(d.x,d.y,R,0,Math.PI*2); pCtx.fillStyle=grad; pCtx.fill();
+    }
+    pCtx.fillStyle='rgba(255,255,255,0.5)'; pCtx.font='bold 14px sans-serif';
+    pCtx.fillText(`T = ${T.toFixed(1)}°  [${stateLabel(currentState)}]`,12,22);
+  }
+
+  // ===== 온도계 =====
+  function renderThermometer(){
+    const W=tCanvas.width, H=tCanvas.height;
+    tCtx.clearRect(0,0,W,H);
+    const padL=46,padR=46,trackY=H/2,trackW=W-padL-padR;
+    const {MP,BP,T_MIN,T_MAX}=CONFIG;
+    tCtx.fillStyle='#2a3550'; tCtx.beginPath(); tCtx.roundRect(padL,trackY-10,trackW,20,10); tCtx.fill();
+    const frac=clamp(map(T,T_MIN,T_MAX,0,1),0,1);
+    const grad=tCtx.createLinearGradient(padL,0,padL+trackW,0);
+    grad.addColorStop(0,COLORS.SOLID);
+    grad.addColorStop(clamp(map(MP,T_MIN,T_MAX,0,1),0,1),lerpColor(COLORS.SOLID,COLORS.LIQUID,0.5));
+    grad.addColorStop(clamp(map(BP,T_MIN,T_MAX,0,1),0,1),lerpColor(COLORS.LIQUID,COLORS.GAS,0.5));
+    grad.addColorStop(1,COLORS.GAS);
+    tCtx.fillStyle=grad; tCtx.beginPath(); tCtx.roundRect(padL,trackY-7,frac*trackW,14,7); tCtx.fill();
+    [{v:MP,c:'#f1c40f',l:'녹는점'},{v:BP,c:'#e67e22',l:'끓는점'}].forEach(({v,c,l})=>{
+      const x=padL+map(v,T_MIN,T_MAX,0,trackW);
+      tCtx.strokeStyle=c; tCtx.lineWidth=1.5; tCtx.setLineDash([3,2]);
+      tCtx.beginPath(); tCtx.moveTo(x,trackY-16); tCtx.lineTo(x,trackY+16); tCtx.stroke(); tCtx.setLineDash([]);
+      tCtx.fillStyle=c; tCtx.font='10px sans-serif'; tCtx.textAlign='center'; tCtx.fillText(`${l} ${v}°`,x,trackY+28);
+    });
+    const curX=padL+frac*trackW;
+    tCtx.fillStyle=getColor(); tCtx.beginPath();
+    tCtx.moveTo(curX,trackY-10); tCtx.lineTo(curX-5,trackY-18); tCtx.lineTo(curX+5,trackY-18); tCtx.fill();
+    tCtx.fillStyle='#8895ad'; tCtx.font='9px sans-serif';
+    tCtx.textAlign='left'; tCtx.fillText(`${T_MIN}°`,4,trackY+4);
+    tCtx.textAlign='right'; tCtx.fillText(`${T_MAX}°`,W-4,trackY+4); tCtx.textAlign='left';
+
+    const ro=document.getElementById('heat-readout');
+    let detail=stateLabel(currentState);
+    if(currentState==='MELTING') detail+=` · 잠열 흡수 ${(meltProg*100).toFixed(0)}% (온도 일정)`;
+    if(currentState==='BOILING') detail+=` · 잠열 흡수 ${(boilProg*100).toFixed(0)}% (온도 일정)`;
+    ro.textContent=`${T.toFixed(1)}° · ${detail}`;
+    ro.style.color=getColor();
+  }
+
+  // ===== 그래프 =====
+  const GRAPH_MAX=700; const graphData=[]; let graphTimer=0;
+  function recordGraph(dt){
+    graphTimer+=dt;
+    if(graphTimer>0.05){graphTimer=0; graphData.push({T,mode,state:currentState}); if(graphData.length>GRAPH_MAX) graphData.shift();}
+  }
+  function renderGraph(){
+    const W=gCanvas.width,H=gCanvas.height; gCtx.clearRect(0,0,W,H);
+    const padL=38,padR=10,padT=10,padB=18, gW=W-padL-padR, gH=H-padT-padB;
+    const {MP,BP,T_MIN,T_MAX}=CONFIG;
+    const colW=gW/GRAPH_MAX+1;
+    graphData.forEach((d,i)=>{
+      if(d.state==='MELTING'||d.state==='BOILING'){
+        gCtx.fillStyle=d.state==='MELTING'?'rgba(241,196,15,0.16)':'rgba(230,126,34,0.16)';
+        gCtx.fillRect(padL+(i/GRAPH_MAX)*gW,padT,colW,gH);
+      }
+    });
+    gCtx.strokeStyle='#26314d'; gCtx.lineWidth=1;
+    [-20,0,100,200,300,400].forEach(tv=>{
+      const y=padT+gH-map(tv,T_MIN,T_MAX,0,gH);
+      gCtx.beginPath(); gCtx.moveTo(padL,y); gCtx.lineTo(padL+gW,y); gCtx.stroke();
+      gCtx.fillStyle='#6b7794'; gCtx.font='9px sans-serif'; gCtx.fillText(tv+'°',2,y+3);
+    });
+    [{v:MP,c:'#f1c40f',l:'녹는점'},{v:BP,c:'#e67e22',l:'끓는점'}].forEach(({v,c,l})=>{
+      const y=padT+gH-map(v,T_MIN,T_MAX,0,gH);
+      gCtx.strokeStyle=c; gCtx.lineWidth=1.2; gCtx.setLineDash([5,3]);
+      gCtx.beginPath(); gCtx.moveTo(padL,y); gCtx.lineTo(padL+gW,y); gCtx.stroke(); gCtx.setLineDash([]);
+      gCtx.fillStyle=c; gCtx.font='bold 9px sans-serif'; gCtx.fillText(l,padL+3,y-2);
+    });
+    if(graphData.length<2) return;
+    for(let i=1;i<graphData.length;i++){
+      const x0=padL+((i-1)/GRAPH_MAX)*gW, x1=padL+(i/GRAPH_MAX)*gW;
+      const y0=padT+gH-map(graphData[i-1].T,T_MIN,T_MAX,0,gH);
+      const y1=padT+gH-map(graphData[i].T,T_MIN,T_MAX,0,gH);
+      const md=graphData[i].mode;
+      gCtx.strokeStyle=md==='HEAT'?'#ef4444':md==='COOL'?'#3b82f6':'#8895ad';
+      gCtx.lineWidth=2; gCtx.beginPath(); gCtx.moveTo(x0,y0); gCtx.lineTo(x1,y1); gCtx.stroke();
+    }
+  }
+
+  // ===== 루프 =====
+  let last=performance.now();
+  function frame(now){
+    const dt=Math.min((now-last)/1000,0.033); last=now;
+    updatePhysics(dt);
+    currentState=resolveState();
+    updateParticles(dt);
+    updateWater();
+    recordGraph(dt);
+    renderParticles(); renderThermometer(); renderGraph();
+    requestAnimationFrame(frame);
+  }
+
+  // ===== UI =====
+  function setMode(mo){
+    if(mo==='HEAT' && document.getElementById('heat-btn-heat').disabled) return;
+    if(mo==='COOL' && document.getElementById('heat-btn-cool').disabled) return;
+    mode=mo;
+    ['heat-btn-heat','heat-btn-cool','heat-btn-stop'].forEach(id=>document.getElementById(id).classList.remove('active'));
+    document.getElementById({HEAT:'heat-btn-heat',COOL:'heat-btn-cool',IDLE:'heat-btn-stop'}[mo]).classList.add('active');
+  }
+  function setScenario(sc){
+    scenario=sc;
+    document.getElementById('heat-sc-heat').classList.toggle('active',sc==='HEAT');
+    document.getElementById('heat-sc-cool').classList.toggle('active',sc==='COOL');
+    graphData.length=0; setMode('IDLE');
+    if(sc==='HEAT'){
+      T=CONFIG.T_START; meltProg=0; boilProg=0; initParticles('solid');
+      document.getElementById('heat-btn-heat').disabled=false;
+      document.getElementById('heat-btn-cool').disabled=true;
+    } else {
+      T=CONFIG.T_LIQUID_START; meltProg=1; boilProg=0; initParticles('liquid');
+      document.getElementById('heat-btn-heat').disabled=true;
+      document.getElementById('heat-btn-cool').disabled=false;
+    }
+  }
+  function bindUI(){
+    document.getElementById('heat-btn-heat').onclick=()=>setMode('HEAT');
+    document.getElementById('heat-btn-cool').onclick=()=>setMode('COOL');
+    document.getElementById('heat-btn-stop').onclick=()=>setMode('IDLE');
+    document.getElementById('heat-reset').onclick=()=>setScenario(scenario);
+    document.getElementById('heat-sc-heat').onclick=()=>setScenario('HEAT');
+    document.getElementById('heat-sc-cool').onclick=()=>setScenario('COOL');
+    const r=document.getElementById('heat-rate'); r.oninput=()=>{CONFIG.heatRate=CONFIG.coolRate=+r.value;};
+    const c=document.getElementById('heat-cap'); c.oninput=()=>{CONFIG.heatCapacity=+c.value;};
+    document.getElementById('heat-mp').oninput=e=>{CONFIG.MP=+e.target.value||100;};
+    document.getElementById('heat-bp').oninput=e=>{CONFIG.BP=+e.target.value||300;};
+  }
+
+  bindUI();
+  setScenario('HEAT');
+  requestAnimationFrame(frame);
 })();
 </script>
 </body>
