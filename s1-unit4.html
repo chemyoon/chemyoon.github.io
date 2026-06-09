@@ -108,18 +108,18 @@ h3{color:#374151;margin-top:20px;}
     <!-- 구분선 -->
     <div style="border-top:1.5px solid rgba(0,0,0,0.07);margin:24px 0;"></div>
 
-    <!-- 브라운 운동 -->
-    <div class="sim-scene" id="brown-scene">
-      <canvas id="brown-canvas"></canvas>
+    <!-- 질량별 확산 거리 -->
+    <div class="sim-scene" id="mass-scene">
+      <canvas id="mass-canvas"></canvas>
     </div>
     <div class="ctrl-row">
-      <button class="reset-btn" id="brown-reset">🔄 초기화</button>
-      <span class="ctrl-label">수온</span>
-      <input type="range" id="brown-temp" min="1" max="10" value="5"
-        style="width:110px;accent-color:#06b6d4;cursor:pointer;">
-      <span id="brown-temp-val" style="font-size:0.85em;font-weight:700;color:#06b6d4;">보통</span>
+      <button class="reset-btn" id="mass-reset">🔄 초기화</button>
+      <button class="sim-btn active" id="mass-h2">🔴 수소 (질량 2)</button>
+      <button class="sim-btn active" id="mass-o2">🟢 산소 (질량 32)</button>
+      <button class="sim-btn active" id="mass-co2">🟡 이산화탄소 (질량 44)</button>
+      <button class="sim-btn" id="mass-go" style="background:#2563eb;border-color:#2563eb;color:white;">▶ 출발</button>
     </div>
-    <p class="desc">스포이트(검은 bulb)를 클릭하면 잉크가 비커 속으로 떨어집니다. 잉크 입자가 물 분자들의 충돌로 불규칙하게 퍼져나가는 브라운 운동을 관찰하세요. 수온이 높을수록 확산이 빨라집니다.</p>
+    <p class="desc">같은 출발선에서 동시에 출발한 입자들이 오른쪽으로 퍼져나갑니다. 질량이 <strong>가벼운 입자일수록 더 빠르고 멀리</strong> 확산합니다 (속력 ∝ 1/√질량). 출발 버튼을 눌러 어떤 입자가 가장 멀리 가는지 비교해 보세요. 질량분석기(TOF)도 이 원리를 이용합니다.</p>
   </div>
 </div>
 
@@ -844,343 +844,151 @@ function heatColA(t,a){
 })();
 
 // ══════════════════════════════════════
-// 잉크 확산 (스포이트 + 비커) 시뮬레이션
+// 질량별 확산 거리 비교 시뮬레이션 (TOF 원리)
 // ══════════════════════════════════════
 (function(){
-  const scene  = document.getElementById('brown-scene');
-  const canvas = document.getElementById('brown-canvas');
+  const scene  = document.getElementById('mass-scene');
+  const canvas = document.getElementById('mass-canvas');
   const ctx    = canvas.getContext('2d');
   let W, H;
-  let tempLevel = 5;
 
-  // 비커 치수 (resize에서 계산)
-  let bkX, bkY, bkW, bkH; // 비커 내부 영역
-  // 스포이트 치수
-  let spX, spY, spW, spH;
-  // 잉크 방울 상태
-  let drop = null; // { x, y, vy, phase:'falling'|'done' }
-  let inkDropped = false; // 한 번이라도 떨어뜨렸는지
+  const GASES = [
+    { id:'h2',  short:'수소',       mass:2,  color:'#f87171' },
+    { id:'o2',  short:'산소',       mass:32, color:'#34d399' },
+    { id:'co2', short:'이산화탄소', mass:44, color:'#fbbf24' },
+  ];
+  const sel = new Set(['h2','o2','co2']);
 
-  // 물 분자
-  let waterMols = [];
-  // 잉크 입자 (퍼져나가는 것들)
-  let inkParts  = [];
+  const N = 16;          // 종류별 입자 수
+  const R = 5;
+  const RUN_MS = 4200;   // 확산 시간
+  const K = 2.4;         // 속도 스케일
 
-  const N_WATER = 80;
-  const R_WATER = 3;
-  const R_INK   = 5;
+  let particles = [];
+  let running = false;
+  let startT = 0;
+  let finished = false;
 
-  // 스포이트 누름 상태
-  let squeezing = false;
-  let squeezeAnim = 0; // 0~1
+  function speedFactor(mass){ return Math.sqrt(2 / mass); } // 1/√m, 수소=1 기준
 
   function resize(){
     W = scene.clientWidth;
-    H = Math.round(W * 0.72); // 더 높게 — 스포이트 공간 확보
+    H = Math.round(W * 0.5);
     canvas.width  = W * dpr; canvas.height = H * dpr;
     canvas.style.width = W+'px'; canvas.style.height = H+'px';
     ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr,dpr);
-
-    // 비커: 가운데, 하단 65%
-    bkW = W * 0.52; bkH = H * 0.52;
-    bkX = (W - bkW) / 2; bkY = H * 0.43;
-
-    // 스포이트: 비커 중앙 위
-    spW = bkW * 0.14; spH = H * 0.32;
-    spX = W / 2; spY = H * 0.04;
   }
 
-  function initWater(){
-    waterMols = [];
-    const tScale = tempLevel / 10;
-    for(let i=0; i<N_WATER; i++){
-      const ang = Math.random()*Math.PI*2;
-      const spd = (0.8 + tScale*2.0) * (0.6+Math.random()*0.8);
-      waterMols.push({
-        x: bkX + R_WATER + Math.random()*(bkW - R_WATER*2),
-        y: bkY + R_WATER + Math.random()*(bkH - R_WATER*2),
-        vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd,
-      });
-    }
+  function active(){ return GASES.filter(g => sel.has(g.id)); }
+  function startX(){ return W * 0.16; }
+  function maxX(){ return W - R - 6; }
+  function laneY(i, total){
+    const top = H * 0.20, bot = H * 0.84;
+    return total === 1 ? (top+bot)/2 : top + (bot-top) * i/(total-1);
   }
 
   function init(){
-    drop = null; inkDropped = false; inkParts = [];
-    squeezing = false; squeezeAnim = 0;
-    initWater();
+    running = false; finished = false; startT = 0;
+    particles = [];
+    const gs = active();
+    gs.forEach((g, i) => {
+      const yc = laneY(i, gs.length);
+      for(let k=0; k<N; k++){
+        particles.push({ g, x:startX(), y:yc + (Math.random()*16-8), yc });
+      }
+    });
   }
 
-  // 잉크 방울 떨어뜨리기
-  function squeeze(){
-    if(squeezing || inkDropped) return;
-    squeezing = true; squeezeAnim = 0;
-    // 방울 생성 (스포이트 끝에서 출발)
-    drop = { x: spX, y: spY + spH, vy: 1.5, phase: 'falling', r: spW*0.55 };
+  function start(){
+    init();
+    if(active().length === 0) return;
+    running = true; startT = performance.now();
   }
 
   function update(){
-    const tScale = tempLevel / 10;
-
-    // 스포이트 누름 애니
-    if(squeezing){
-      squeezeAnim = Math.min(1, squeezeAnim + 0.06);
-      if(squeezeAnim >= 1) squeezing = false;
-    }
-
-    // 방울 낙하
-    if(drop && drop.phase === 'falling'){
-      drop.vy += 0.3; // 중력
-      drop.y  += drop.vy;
-      // 비커 수면에 닿으면
-      if(drop.y >= bkY + 4){
-        drop.phase = 'done';
-        inkDropped = true;
-        // 착지 지점에서 잉크 입자 생성
-        const N_START = 18;
-        for(let i=0; i<N_START; i++){
-          const ang = Math.random()*Math.PI*2;
-          const spd = (0.2 + Math.random()*0.5);
-          inkParts.push({
-            x: drop.x + (Math.random()-0.5)*12,
-            y: bkY + 8 + Math.random()*20,
-            vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd,
-            trail: [],
-          });
-        }
-        drop = null;
-      }
-    }
-
-    // 물 분자 이동 (비커 안)
-    const targetWaterSpd = 0.8 + tScale * 2.2;
-    waterMols.forEach(w => {
-      const spd = Math.hypot(w.vx, w.vy)||0.01;
-      const ts = targetWaterSpd * (0.6+Math.random()*0.8);
-      w.vx = w.vx/spd*ts*0.1 + w.vx*0.9;
-      w.vy = w.vy/spd*ts*0.1 + w.vy*0.9;
-      w.x += w.vx; w.y += w.vy;
-      // 비커 벽 반사
-      if(w.x < bkX+R_WATER)      { w.x=bkX+R_WATER;      w.vx= Math.abs(w.vx); }
-      if(w.x > bkX+bkW-R_WATER)  { w.x=bkX+bkW-R_WATER;  w.vx=-Math.abs(w.vx); }
-      if(w.y < bkY+R_WATER)      { w.y=bkY+R_WATER;      w.vy= Math.abs(w.vy); }
-      if(w.y > bkY+bkH-R_WATER)  { w.y=bkY+bkH-R_WATER;  w.vy=-Math.abs(w.vy); }
-    });
-
-    // 잉크 입자: 브라운 운동 (물 분자 충돌 시뮬 — 매 프레임 랜덤 충격)
-    const brownStr = 0.18 + tScale * 0.38; // 온도에 따른 충격 세기
-    inkParts.forEach(ink => {
-      // 매 프레임 주변 물 분자로부터 랜덤 충격 누적
-      // (실제 충돌 대신 확률적 충격 모델 — 더 자연스러운 브라운 운동)
-      const kicks = 3 + Math.round(tScale * 4); // 충돌 횟수
-      for(let k=0; k<kicks; k++){
-        const ang = Math.random() * Math.PI * 2;
-        const mag = brownStr * (0.4 + Math.random() * 0.8);
-        ink.vx += Math.cos(ang) * mag;
-        ink.vy += Math.sin(ang) * mag;
-      }
-      // 점성 감속
-      ink.vx *= 0.82; ink.vy *= 0.82;
-      ink.x += ink.vx; ink.y += ink.vy;
-
-      // 비커 벽 반사
-      if(ink.x < bkX+R_INK)     { ink.x=bkX+R_INK;     ink.vx= Math.abs(ink.vx)*0.5; }
-      if(ink.x > bkX+bkW-R_INK) { ink.x=bkX+bkW-R_INK; ink.vx=-Math.abs(ink.vx)*0.5; }
-      if(ink.y < bkY+R_INK)     { ink.y=bkY+R_INK;     ink.vy= Math.abs(ink.vy)*0.5; }
-      if(ink.y > bkY+bkH-R_INK) { ink.y=bkY+bkH-R_INK; ink.vy=-Math.abs(ink.vy)*0.5; }
-
-      // 궤적
-      ink.trail.push({x:ink.x, y:ink.y});
-      if(ink.trail.length>100) ink.trail.shift();
+    if(!running) return;
+    const el = performance.now() - startT;
+    if(el >= RUN_MS){ running = false; finished = true; return; }
+    particles.forEach(p => {
+      const sp = speedFactor(p.g.mass) * K;
+      p.x += sp * (0.6 + Math.random()*0.8);
+      p.y += (Math.random()*2-1) * sp * 0.45;
+      if(p.x > maxX()) p.x = maxX();
+      if(p.y < p.yc-26) p.y = p.yc-26;
+      if(p.y > p.yc+26) p.y = p.yc+26;
     });
   }
 
   function draw(){
     ctx.clearRect(0,0,W,H);
-    ctx.fillStyle='#f0f4f8'; ctx.fillRect(0,0,W,H); // 밝은 배경
+    const sx = startX(), mx = maxX();
 
-    const tScale = tempLevel/10;
-
-    // ── 비커 ──
-    const wallT = Math.max(4, bkW*0.028); // 유리 두께
-
-    // 비커 내부 물 (연한 하늘색)
-    ctx.fillStyle='rgba(186,230,253,0.55)';
-    ctx.fillRect(bkX, bkY, bkW, bkH);
-
-    // 물 분자 (비커 안)
-    waterMols.forEach(w=>{
-      ctx.beginPath(); ctx.arc(w.x,w.y,R_WATER,0,Math.PI*2);
-      ctx.fillStyle=`rgba(56,189,248,${0.3+tScale*0.3})`; ctx.fill();
-    });
-
-    // 잉크 궤적
-    inkParts.forEach(ink=>{
-      if(ink.trail.length<2) return;
-      ctx.beginPath();
-      ink.trail.forEach((pt,i)=>{
-        const a = (i/ink.trail.length)*0.45;
-        if(i===0){ ctx.moveTo(pt.x,pt.y); return; }
-        ctx.strokeStyle=`rgba(30,27,180,${a})`;
-        ctx.lineWidth=1.2;
-        ctx.lineTo(pt.x,pt.y);
-      });
-      ctx.stroke();
-    });
-
-    // 잉크 입자
-    inkParts.forEach(ink=>{
-      const grd=ctx.createRadialGradient(ink.x,ink.y,0,ink.x,ink.y,R_INK*2);
-      grd.addColorStop(0,'rgba(30,27,180,0.7)');
-      grd.addColorStop(1,'rgba(30,27,180,0)');
-      ctx.beginPath(); ctx.arc(ink.x,ink.y,R_INK*2,0,Math.PI*2);
-      ctx.fillStyle=grd; ctx.fill();
-      ctx.beginPath(); ctx.arc(ink.x,ink.y,R_INK,0,Math.PI*2);
-      ctx.fillStyle='rgba(30,27,180,0.92)'; ctx.fill();
-    });
-
-    // 비커 유리 외벽 (테두리)
-    // 양쪽 옆면 + 바닥
-    ctx.strokeStyle='rgba(100,140,180,0.85)';
-    ctx.lineWidth=wallT;
-    ctx.lineCap='round';
-    ctx.beginPath();
-    ctx.moveTo(bkX, bkY);
-    ctx.lineTo(bkX, bkY+bkH);
-    ctx.lineTo(bkX+bkW, bkY+bkH);
-    ctx.lineTo(bkX+bkW, bkY);
-    ctx.stroke();
-    ctx.lineCap='butt';
-
-    // 비커 유리 반사광 (왼쪽 면)
-    ctx.strokeStyle='rgba(255,255,255,0.45)';
-    ctx.lineWidth=wallT*0.4;
-    ctx.beginPath();
-    ctx.moveTo(bkX+wallT*0.4, bkY+bkH*0.08);
-    ctx.lineTo(bkX+wallT*0.4, bkY+bkH*0.6);
-    ctx.stroke();
-
-    // 비커 눈금 (오른쪽 안쪽)
-    ctx.strokeStyle='rgba(100,140,180,0.35)';
-    ctx.lineWidth=1;
-    for(let g=1; g<=3; g++){
-      const gy = bkY + bkH*0.2*g;
-      ctx.beginPath();
-      ctx.moveTo(bkX+bkW-wallT*2.5, gy);
-      ctx.lineTo(bkX+bkW-wallT*0.8, gy);
-      ctx.stroke();
+    // 눈금자
+    ctx.strokeStyle = 'rgba(148,163,184,0.18)';
+    ctx.fillStyle = '#64748b';
+    ctx.font = `${Math.round(W*0.016)}px sans-serif`;
+    ctx.textAlign = 'center'; ctx.lineWidth = 1;
+    for(let d=0; d<=10; d++){
+      const x = sx + (mx-sx)*d/10;
+      ctx.beginPath(); ctx.moveTo(x, H*0.10); ctx.lineTo(x, H-H*0.14); ctx.stroke();
+      ctx.fillText(d*10+'cm', x, H-4);
     }
 
-    // 수면선
-    ctx.strokeStyle='rgba(56,189,248,0.5)';
-    ctx.lineWidth=1.5;
-    ctx.setLineDash([5,3]);
-    ctx.beginPath();
-    ctx.moveTo(bkX+wallT, bkY+4);
-    ctx.lineTo(bkX+bkW-wallT, bkY+4);
-    ctx.stroke();
-    ctx.setLineDash([]);
+    // 출발선
+    ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(sx, H*0.10); ctx.lineTo(sx, H-H*0.14); ctx.stroke();
+    ctx.fillStyle = '#60a5fa'; ctx.textAlign = 'center';
+    ctx.fillText('출발', sx, H*0.08);
+    ctx.lineWidth = 1;
 
-    // ── 스포이트 ──
-    const needleL = spH * 0.22; // 바늘 길이
-    const bulbH   = spH * 0.42; // 고무 bulb 높이
-    const tubeH   = spH - bulbH - needleL;
-    const tubeW   = spW * 0.38;
-    const squeeze  = squeezeAnim * 0.22; // 눌렸을 때 찌그러짐
+    const gs = active();
 
-    // 바늘 (가느다란 관)
-    const needleTop = spY + bulbH + tubeH;
-    ctx.strokeStyle='rgba(150,180,200,0.9)';
-    ctx.lineWidth=tubeW*0.55;
-    ctx.lineCap='round';
-    ctx.beginPath();
-    ctx.moveTo(spX, needleTop);
-    ctx.lineTo(spX, needleTop+needleL);
-    ctx.stroke();
-    ctx.lineCap='butt';
+    // 레인 라벨 + 결과
+    gs.forEach((g, i) => {
+      const yc = laneY(i, gs.length);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = g.color;
+      ctx.font = `bold ${Math.round(W*0.018)}px sans-serif`;
+      ctx.fillText(`${g.short} (질량 ${g.mass})`, 6, yc - 18);
+      if(finished){
+        const ps = particles.filter(p => p.g === g);
+        const avg = ps.reduce((s,p)=>s+(p.x - sx), 0) / ps.length;
+        const cm = (avg / (mx - sx)) * 100;
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = `bold ${Math.round(W*0.02)}px sans-serif`;
+        ctx.textAlign = 'right';
+        ctx.fillText(`평균 ${cm.toFixed(0)}cm`, mx, yc - 18);
+      }
+    });
 
-    // 유리관 (tube)
-    const tubeTop = spY + bulbH;
-    ctx.fillStyle='rgba(186,230,253,0.55)';
-    ctx.strokeStyle='rgba(100,160,200,0.7)';
-    ctx.lineWidth=1.2;
-    ctx.beginPath();
-    ctx.roundRect(spX-tubeW/2, tubeTop, tubeW, tubeH, 2);
-    ctx.fill(); ctx.stroke();
+    // 입자
+    particles.forEach(p => {
+      ctx.fillStyle = p.g.color;
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath(); ctx.arc(p.x, p.y, R, 0, Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
 
-    // 잉크 남은 양 (관 안)
-    if(!inkDropped){
-      ctx.fillStyle='rgba(30,27,180,0.75)';
-      ctx.beginPath();
-      ctx.roundRect(spX-tubeW/2+1.5, tubeTop+tubeH*0.15, tubeW-3, tubeH*0.7, 2);
-      ctx.fill();
-    }
-
-    // 고무 bulb (계란형, 눌리면 찌그러짐)
-    const bulbCX = spX;
-    const bulbCY = spY + bulbH*0.5;
-    const bulbRX = spW*(0.5 - squeeze);
-    const bulbRY = bulbH*(0.5 - squeeze*0.3);
-    ctx.fillStyle='rgba(60,60,60,0.88)';
-    ctx.beginPath();
-    ctx.ellipse(bulbCX, bulbCY, bulbRX, bulbRY, 0, 0, Math.PI*2);
-    ctx.fill();
-    // bulb 하이라이트
-    ctx.fillStyle='rgba(255,255,255,0.12)';
-    ctx.beginPath();
-    ctx.ellipse(bulbCX-bulbRX*0.2, bulbCY-bulbRY*0.25, bulbRX*0.35, bulbRY*0.25, -0.4, 0, Math.PI*2);
-    ctx.fill();
-
-    // ── 낙하 방울 ──
-    if(drop && drop.phase==='falling'){
-      const grd=ctx.createRadialGradient(drop.x,drop.y,0,drop.x,drop.y,drop.r*1.5);
-      grd.addColorStop(0,'rgba(30,27,180,0.9)');
-      grd.addColorStop(1,'rgba(30,27,180,0)');
-      ctx.beginPath(); ctx.arc(drop.x,drop.y,drop.r*1.5,0,Math.PI*2);
-      ctx.fillStyle=grd; ctx.fill();
-      ctx.beginPath(); ctx.arc(drop.x,drop.y,drop.r,0,Math.PI*2);
-      ctx.fillStyle='rgba(30,27,180,0.92)'; ctx.fill();
-    }
-
-    // ── 안내 문구 ──
-    const labels=['','매우 낮음','낮음','낮음','보통','보통','보통','높음','높음','매우 높음','매우 높음'];
-    ctx.font=`bold ${Math.round(W*0.016)}px sans-serif`;
-    ctx.textAlign='left'; ctx.fillStyle='rgba(30,58,138,0.75)';
-    ctx.fillText(`수온: ${labels[tempLevel]}`, bkX+8, bkY+bkH+20);
-
-    if(!inkDropped){
-      ctx.textAlign='center';
-      ctx.fillStyle='rgba(30,58,138,0.5)';
-      ctx.font=`${Math.round(W*0.015)}px sans-serif`;
-      ctx.fillText('▲ 스포이트를 눌러 잉크를 떨어뜨리세요', W/2, bkY-12);
+    // 안내 문구
+    if(!running && !finished){
+      ctx.fillStyle = '#94a3b8'; ctx.textAlign = 'center';
+      ctx.font = `${Math.round(W*0.02)}px sans-serif`;
+      ctx.fillText('▶ 출발 버튼을 눌러 보세요', W/2, H*0.95);
     }
   }
 
   function loop(){ update(); draw(); requestAnimationFrame(loop); }
 
-  // 스포이트 클릭 (canvas 클릭으로 bulb 누름)
-  canvas.addEventListener('click', e=>{
-    const rect=canvas.getBoundingClientRect();
-    const mx=(e.clientX-rect.left)*(W/rect.width);
-    const my=(e.clientY-rect.top)*(H/rect.height);
-    const bulbRX=spW*0.5, bulbRY=spH*0.42*0.5;
-    const bulbCX=spX, bulbCY=spY+spH*0.42*0.5;
-    const inBulb=((mx-bulbCX)/bulbRX)**2+((my-bulbCY)/bulbRY)**2 < 1;
-    if(inBulb && !inkDropped){ squeeze(); }
-  });
-
-  document.getElementById('brown-temp').addEventListener('input', e=>{
-    tempLevel=parseInt(e.target.value);
-    const labels=['','매우 낮음','낮음','낮음','보통','보통','보통','높음','높음','매우 높음','매우 높음'];
-    document.getElementById('brown-temp-val').textContent=labels[tempLevel];
-    const tScale=tempLevel/10;
-    const ts=0.8+tScale*2.2;
-    waterMols.forEach(w=>{
-      const spd=Math.hypot(w.vx,w.vy)||1;
-      w.vx=w.vx/spd*ts; w.vy=w.vy/spd*ts;
-    });
-  });
-
-  document.getElementById('brown-reset').addEventListener('click', ()=>{ resize(); init(); });
+  function toggleGas(id, btn){
+    if(sel.has(id)){ if(sel.size > 1){ sel.delete(id); btn.classList.remove('active'); } }
+    else { sel.add(id); btn.classList.add('active'); }
+    init();
+  }
+  document.getElementById('mass-h2').addEventListener('click',  e => toggleGas('h2',  e.currentTarget));
+  document.getElementById('mass-o2').addEventListener('click',  e => toggleGas('o2',  e.currentTarget));
+  document.getElementById('mass-co2').addEventListener('click', e => toggleGas('co2', e.currentTarget));
+  document.getElementById('mass-go').addEventListener('click', start);
+  document.getElementById('mass-reset').addEventListener('click', init);
 
   resize(); init(); loop();
   window.addEventListener('resize', ()=>{ resize(); init(); });
